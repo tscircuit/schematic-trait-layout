@@ -21,17 +21,20 @@
 
 // Compact bit‑mask we use to record which "edges" of a cell are occupied by
 // a trace so we can later decide whether the glyph is "-", "|", or "+".
-const enum Edge {
-  Left = 1,
-  Right = 2,
-  Up = 4,
-  Down = 8,
+type Edge = "left" | "right" | "up" | "down"
+
+const EDGE_MASKS: Record<Edge, number> = {
+  left: 1,
+  right: 2,
+  up: 4,
+  down: 8,
 }
 
 // Convert a set of edges into the correct ASCII glyph.
 function glyph(mask: number): string {
-  const horiz = (mask & Edge.Left) !== 0 || (mask & Edge.Right) !== 0
-  const vert = (mask & Edge.Up) !== 0 || (mask & Edge.Down) !== 0
+  const horiz =
+    (mask & EDGE_MASKS.left) !== 0 || (mask & EDGE_MASKS.right) !== 0
+  const vert = (mask & EDGE_MASKS.up) !== 0 || (mask & EDGE_MASKS.down) !== 0
 
   if (horiz && vert) return "+"
   if (horiz) return "-"
@@ -46,7 +49,8 @@ class Grid {
 
   addEdge(x: number, y: number, edge: Edge): void {
     const key = `${x},${y}`
-    this.traces.set(key, (this.traces.get(key) ?? 0) | edge)
+    const maskValue = EDGE_MASKS[edge]
+    this.traces.set(key, (this.traces.get(key) ?? 0) | maskValue)
   }
 
   putOverlay(x: number, y: number, ch: string): void {
@@ -335,20 +339,20 @@ class ChipBuilder {
       if (dx !== 0) {
         // horizontal
         if (dx > 0) {
-          this.grid.addEdge(x, y, Edge.Right)
-          this.grid.addEdge(nx, ny, Edge.Left)
+          this.grid.addEdge(x, y, "right")
+          this.grid.addEdge(nx, ny, "left")
         } else {
-          this.grid.addEdge(x, y, Edge.Left)
-          this.grid.addEdge(nx, ny, Edge.Right)
+          this.grid.addEdge(x, y, "left")
+          this.grid.addEdge(nx, ny, "right")
         }
       } else if (dy !== 0) {
         // vertical
         if (dy > 0) {
-          this.grid.addEdge(x, y, Edge.Down)
-          this.grid.addEdge(nx, ny, Edge.Up)
+          this.grid.addEdge(x, y, "down")
+          this.grid.addEdge(nx, ny, "up")
         } else {
-          this.grid.addEdge(x, y, Edge.Up)
-          this.grid.addEdge(nx, ny, Edge.Down)
+          this.grid.addEdge(x, y, "up")
+          this.grid.addEdge(nx, ny, "down")
         }
       }
       x = nx
