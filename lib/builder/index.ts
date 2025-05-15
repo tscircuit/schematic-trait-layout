@@ -131,54 +131,90 @@ class PinBuilder {
   }
 }
 
+const SIDES_CCW = ["left", "bottom", "right", "top"] as const
+
 class ChipBuilder {
   readonly grid = new Grid()
-  private pinCounter = 1
-  private pinMap: Record<number, PinBuilder> = {}
+  pinMap: Record<
+    `${"left" | "right" | "top" | "bottom"}${number}`,
+    PinBuilder
+  > = {}
+  pinCounts: Record<"left" | "right" | "top" | "bottom", number>
 
-  constructor(
-    private bodyWidth = 4,
-    private leftPins = 0,
-    private rightPins = 0,
-  ) {
-    // will be re‑sized once pins are known via leftpins()/rightpins()
+  bodyWidth = 0
+  bodyHeight = 0
+  bodySizeComputed = false
+
+  constructor() {
+    this.pinCounts = {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    }
+  }
+
+  get totalPins(): number {
+    return Object.values(this.pinCounts).reduce((a, b) => a + b, 0)
   }
 
   /** Declare *n* left‑hand pins (top‑to‑bottom). */
   leftpins(n: number): this {
-    this.leftPins = n
+    this.pinCounts.left = n
     this.allocatePins("left", n)
     return this
   }
 
   /** Declare *n* right‑hand pins (top‑to‑bottom). */
   rightpins(n: number): this {
-    this.rightPins = n
+    this.pinCounts.right = n
     this.allocatePins("right", n)
     return this
   }
 
-  private allocatePins(side: "left" | "right", n: number): void {
-    const ySpan = (Math.max(this.leftPins, this.rightPins) - 1) * 2 + 3 // total height incl. borders
-    const topY = 0
-    const bottomY = ySpan - 1
-    const step = n === 1 ? 0 : (ySpan - 2) / (n - 1) // vertical spacing between pins
+  /** Declare *n* top‑hand pins (left‑to‑right). */
+  toppins(n: number): this {
+    this.pinCounts.top = n
+    this.allocatePins("top", n)
+    return this
+  }
 
-    const xLeft = 0
-    const xRight = this.bodyWidth + 1
+  /** Declare *n* bottom‑hand pins (left‑to‑right). */
+  bottompins(n: number): this {
+    this.pinCounts.bottom = n
+    this.allocatePins("bottom", n)
+    return this
+  }
 
+  private allocatePins(
+    side: "left" | "right" | "top" | "bottom",
+    n: number,
+  ): void {
     for (let i = 0; i < n; i++) {
-      const y = 1 + Math.round(i * step)
-      const x = side === "left" ? xLeft : xRight
-      const pin = new PinBuilder(this, x, y)
-      this.pinMap[this.pinCounter] = pin
+      const pin = new PinBuilder(this, 0, 0)
+      this.pinMap[`${side}${i + 1}`] = pin
     }
 
     // draw/refresh the chip outline after we know final dimensions
     this.drawBody()
   }
 
+  computeBodySize(): void {
+    this.bodyWidth = Math.max(
+      ...Object.values(this.pinCounts).map((n) => n * 2 + 3),
+    )
+    this.bodyHeight = Math.max(
+      ...Object.values(this.pinCounts).map((n) => n * 2 + 3),
+    )
+
+    // TODO set the position of each pin now that we know the body size
+
+    this.bodySizeComputed = true
+  }
   pin(n: number) {
+    if (!this.bodySizeComputed) {
+      this.computeBodySize()
+    }
     return this.pinMap[n]!
   }
 
