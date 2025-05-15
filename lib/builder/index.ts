@@ -99,8 +99,8 @@ class Grid {
 class PinBuilder {
   constructor(
     private chip: ChipBuilder,
-    private x: number,
-    private y: number,
+    public x: number, // Made public for ChipBuilder to set initial position
+    public y: number, // Made public for ChipBuilder to set initial position
   ) {}
 
   /** Draw an orthogonal segment, absolute step counts (may be negative). */
@@ -191,45 +191,133 @@ class ChipBuilder {
     n: number,
   ): void {
     for (let i = 0; i < n; i++) {
-      const pin = new PinBuilder(this, 0, 0)
+      const pin = new PinBuilder(this, 0, 0) // Initial x,y will be updated in computeBodySize
       this.pinMap[`${side}${i + 1}`] = pin
     }
 
-    // draw/refresh the chip outline after we know final dimensions
-    this.drawBody()
+    // Body is drawn once in computeBodySize after all dimensions are final.
   }
 
   computeBodySize(): void {
-    this.bodyWidth = Math.max(
-      ...Object.values(this.pinCounts).map((n) => n * 2 + 3),
+    if (this.bodySizeComputed) {
+      return // Already computed
+    }
+
+    // Width is determined by the max number of pins on top/bottom sides
+    const maxPinsHorizontal = Math.max(
+      this.pinCounts.top,
+      this.pinCounts.bottom,
+      0,
     )
-    this.bodyHeight = Math.max(
-      ...Object.values(this.pinCounts).map((n) => n * 2 + 3),
+    // Height is determined by the max number of pins on left/right sides
+    const maxPinsVertical = Math.max(
+      this.pinCounts.left,
+      this.pinCounts.right,
+      0,
     )
 
-    // TODO set the position of each pin now that we know the body size
+    // Calculate body dimensions.
+    // N pins require N*2+1 units of space (e.g., N=1 pin -> 3 units; N=2 pins -> 5 units).
+    // If N=0 pins on an axis, dimension is 1 (a single line/point for that axis).
+    this.bodyWidth = maxPinsHorizontal === 0 ? 1 : maxPinsHorizontal * 2 + 1
+    this.bodyHeight = maxPinsVertical === 0 ? 1 : maxPinsVertical * 2 + 1
+
+    // Set the position of each pin now that we know the body size
+    for (const side of SIDES_CCW) {
+      const count = this.pinCounts[side as keyof typeof this.pinCounts]
+      for (let i = 0; i < count; i++) {
+        // i is 0-indexed
+        const pinKey = `${side}${i + 1}` as keyof typeof this.pinMap
+        const pin = this.pinMap[pinKey]
+        if (pin) {
+          switch (side) {
+            case "left":
+              pin.x = 0
+              pin.y = 1 + i * 2
+              break
+            case "right":
+              pin.x = this.bodyWidth - 1
+              pin.y = 1 + i * 2
+              break
+            case "top":
+              pin.x = 1 + i * 2
+              pin.y = 0
+              break
+            case "bottom":
+              pin.x = 1 + i * 2
+              pin.y = this.bodyHeight - 1
+              break
+          }
+        }
+      }
+    }
+
+    // Draw the chip body outline now that dimensions and pin locations are final
+    this.drawBody()
 
     this.bodySizeComputed = true
   }
+
+  getPinId(n: number): `${"left" | "right" | "top" | "bottom"}${number}` {
+    // TODO find the side and the index of the pin
+    let side: "left" | "right" | "top" | "bottom" = "left"
+    let sideIndex = 0
+    for (let i = 0; i < this.totalPins; i++) {
+      if (i + 1 === n) {
+        return `${side}${sideIndex + 1}` as `${"left" | "right" | "top" | "bottom"}${number}`
+      }
+      sideIndex++
+      while (sideIndex >= this.pinCounts[side]) {
+        side = SIDES_CCW[SIDES_CCW.indexOf(side) + 1]!
+        sideIndex = 0
+      }
+    }
+    throw new Error("Pin index out of bounds")
+  }
+
   pin(n: number) {
     if (!this.bodySizeComputed) {
       this.computeBodySize()
     }
-    return this.pinMap[n]!
+    return this.pinMap[this.getPinId(n)]!
   }
 
-  /** Draw the IC body onto the grid. */
+  /** Draw the IC body onto the grid. Called once by computeBodySize. */
   private drawBody(): void {
-    const w = this.bodyWidth + 1 // x‑coord of right border
-    const h = (Math.max(this.leftPins, this.rightPins) - 1) * 2 + 3 // bottom y
+    // bodyWidth and bodyHeight are the full dimensions (W, H) of the chip.
+    // Grid coordinates are 0-indexed, so max x is bodyWidth-1, max y is bodyHeight-1.
+    const W = this.bodyWidth
+    const H = this.bodyHeight
 
-    // horizontal borders
-    this.drawOrthogonalSegment(0, 0, w, 0) // top
-    this.drawOrthogonalSegment(0, h - 1, w, h - 1) // bottom
+    // W and H are guaranteed to be >= 1 by computeBodySize logic.
 
-    // vertical borders (skip corners so we don't double‑count)
-    this.drawOrthogonalSegment(0, 1, 0, h - 2)
-    this.drawOrthogonalSegment(w, 1, w, h - 2)
+    if (W === 1 && H === 1) {
+      // 1x1 chip (e.g. no pins)
+      this.grid.putOverlay(0, 0, "+") // Represent as a single point
+      return
+    }
+
+    if (W === 1) {
+      // Vertical line body (1xH, H > 1)
+      this.drawOrthogonalSegment(0, 0, 0, H - 1) // Draw as a single vertical line
+      return
+    }
+
+    if (H === 1) {
+      // Horizontal line body (Wx1, W > 1)
+      this.drawOrthogonalSegment(0, 0, W - 1, 0) // Draw as a single horizontal line
+      return
+    }
+
+    // Standard case: W > 1 and H > 1 (a box)
+    // Top border: (0,0) to (W-1,0)
+    this.drawOrthogonalSegment(0, 0, W - 1, 0)
+    // Bottom border: (0,H-1) to (W-1,H-1)
+    this.drawOrthogonalSegment(0, H - 1, W - 1, H - 1)
+    // Left border: (0,1) to (0,H-2) (Connects top and bottom corners)
+    this.drawOrthogonalSegment(0, 1, 0, H - 2)
+    // Right border: (W-1,1) to (W-1,H-2) (Connects top and bottom corners)
+    this.drawOrthogonalSegment(W - 1, 1, W - 1, H - 2)
   }
 
   /** Low‑level util shared by pins and body – draws straight H/V segment. */
@@ -270,6 +358,9 @@ class ChipBuilder {
 
   /** Convert whole design to ASCII. */
   toString(): string {
+    if (!this.bodySizeComputed) {
+      this.computeBodySize()
+    }
     return this.grid.toString()
   }
 }
