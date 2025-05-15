@@ -68,10 +68,10 @@ class Grid {
     if (this.traces.size === 0 && this.overlay.size === 0) return ""
 
     // Determine bounding box of *visible* area.
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity
+    let minX = Infinity
+    let maxX = -Infinity
+    let minY = Infinity
+    let maxY = -Infinity
     for (const [x, y] of this.coords()) {
       if (x < minX) minX = x
       if (x > maxX) maxX = x
@@ -325,8 +325,8 @@ class ChipBuilder {
     const dx = Math.sign(x1 - x0)
     const dy = Math.sign(y1 - y0)
 
-    let x = x0,
-      y = y0
+    let x = x0
+    let y = y0
     while (x !== x1 || y !== y1) {
       const nx = x + dx
       const ny = y + dy
