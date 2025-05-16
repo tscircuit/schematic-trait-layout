@@ -6,7 +6,9 @@ export interface NormalizedNetlistBox {
   boxIndex: number
 }
 export interface NormalizedNetlistConnection {
-  connectedPorts: Array<{ boxIndex: number; pinNumber: number } | { netIndex: number }>
+  connectedPorts: Array<
+    { boxIndex: number; pinNumber: number } | { netIndex: number }
+  >
 }
 export interface NormalizedNetlistNet {
   netIndex: number

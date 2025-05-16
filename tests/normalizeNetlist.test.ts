@@ -5,13 +5,22 @@ import { normalizeNetlist } from "lib/scoring/normalizeNetList"
 test("normalizeNetlist should correctly normalize a simple netlist", () => {
   const inputNetlist: InputNetlist = {
     boxes: [
-      { boxId: "chipA", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0 },
-      { boxId: "res1", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0 },
+      {
+        boxId: "chipA",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "res1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
-    nets: [
-      { netId: "N1" },
-      { netId: "N2" },
-    ],
+    nets: [{ netId: "N1" }, { netId: "N2" }],
     connections: [
       {
         connectedPorts: [
@@ -124,8 +133,20 @@ test("normalizeNetlist should correctly normalize a simple netlist", () => {
 test("normalizeNetlist with different ID order but same structure", () => {
   const inputNetlist1: InputNetlist = {
     boxes: [
-      { boxId: "U1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0 },
-      { boxId: "R1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0 },
+      {
+        boxId: "U1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "R1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "NetA" }],
     connections: [
@@ -135,12 +156,26 @@ test("normalizeNetlist with different ID order but same structure", () => {
   }
 
   const inputNetlist2: InputNetlist = {
-    boxes: [ // Different order
-      { boxId: "R1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0 },
-      { boxId: "U1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0 },
+    boxes: [
+      // Different order
+      {
+        boxId: "R1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "U1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "NetA" }], // Same net
-    connections: [ // Different order
+    connections: [
+      // Different order
       { connectedPorts: [{ boxId: "R1", pinNumber: 1 }, { netId: "NetA" }] },
       { connectedPorts: [{ boxId: "U1", pinNumber: 1 }, { netId: "NetA" }] },
     ],

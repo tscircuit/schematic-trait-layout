@@ -32,7 +32,7 @@ export const normalizeNetlist = (
 
   const normalizedBoxes: NormalizedNetlist["boxes"] = sortedBoxes.map(
     (box) => ({
-      boxIndex: transform.boxIdToBoxIndex[box.boxId],
+      boxIndex: transform.boxIdToBoxIndex[box.boxId]!,
       leftPinCount: box.leftPinCount,
       rightPinCount: box.rightPinCount,
       topPinCount: box.topPinCount,
@@ -49,7 +49,7 @@ export const normalizeNetlist = (
   })
 
   const normalizedNets: NormalizedNetlist["nets"] = sortedNets.map((net) => ({
-    netIndex: transform.netIdToNetIndex[net.netId],
+    netIndex: transform.netIdToNetIndex[net.netId]!,
   }))
 
   const normalizedConnections: NormalizedNetlist["connections"] =
@@ -74,13 +74,16 @@ export const normalizeNetlist = (
           if (aIsBox && bIsBox) {
             // Both are boxes, sort by boxIndex then pinNumber
             if (a.boxIndex !== b.boxIndex) {
-              return a.boxIndex - b.boxIndex
+              return a.boxIndex! - b.boxIndex!
             }
-            return a.pinNumber - b.pinNumber
+            return a.pinNumber! - b.pinNumber!
           }
           // Both are nets, sort by netIndex
           // Type assertion needed as TS doesn't automatically infer both are NetPorts here
-          return (a as { netIndex: number }).netIndex - (b as { netIndex: number }).netIndex
+          return (
+            (a as { netIndex: number }).netIndex -
+            (b as { netIndex: number }).netIndex
+          )
         })
       return { connectedPorts }
     })
@@ -90,16 +93,12 @@ export const normalizeNetlist = (
   normalizedConnections.sort((a, b) => {
     const aStr = a.connectedPorts
       .map((p) =>
-        "boxIndex" in p
-          ? `b${p.boxIndex}p${p.pinNumber}`
-          : `n${p.netIndex}`,
+        "boxIndex" in p ? `b${p.boxIndex}p${p.pinNumber}` : `n${p.netIndex}`,
       )
       .join(",")
     const bStr = b.connectedPorts
       .map((p) =>
-        "boxIndex" in p
-          ? `b${p.boxIndex}p${p.pinNumber}`
-          : `n${p.netIndex}`,
+        "boxIndex" in p ? `b${p.boxIndex}p${p.pinNumber}` : `n${p.netIndex}`,
       )
       .join(",")
     return aStr.localeCompare(bStr)

@@ -4,7 +4,9 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "generate-comments": "bun run scripts/generate-sample-comments.ts"
+    "generate-comments": "bun run scripts/generate-sample-comments.ts",
+    "format": "biome format --write .",
+    "format:check": "biome format --check ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
