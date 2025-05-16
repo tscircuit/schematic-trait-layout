@@ -505,6 +505,47 @@ class ChipBuilder {
     this.drawOrthogonalSegment(0, 0, 0, H - 1, bodySegmentItem)
     // Right border: (W-1,0) to (W-1,H-1)
     this.drawOrthogonalSegment(W - 1, 0, W - 1, H - 1, bodySegmentItem)
+
+    // Add pin numbers inside the chip body
+    for (const side of SIDES_CCW) {
+      const countOnThisSide = this.pinCounts[side as keyof typeof this.pinCounts]
+      for (let i = 0; i < countOnThisSide; i++) {
+        // i is 0-indexed for this side
+        const pinKey = `${side}${i + 1}` as keyof typeof this.pinMap
+        const pinBuilderInstance = this.pinMap[pinKey]
+
+        if (!pinBuilderInstance) continue // Should not happen
+
+        const pinNumberString = String(pinBuilderInstance.associatedChipPinNumber)
+        let numX: number, numY: number
+
+        switch (side) {
+          case "left": // Pin at (0, pinBuilderInstance.y)
+            if (W <= 1) continue // Not enough space for number inside
+            numX = 1
+            numY = pinBuilderInstance.y
+            break
+          case "right": // Pin at (W-1, pinBuilderInstance.y)
+            if (W <= 2) continue // Not enough space or would overwrite left border/number
+            numX = W - 2
+            numY = pinBuilderInstance.y
+            break
+          case "top": // Pin at (pinBuilderInstance.x, 0) - bottom edge on grid
+            if (H <= 1) continue // Not enough space
+            numX = pinBuilderInstance.x
+            numY = 1
+            break
+          case "bottom": // Pin at (pinBuilderInstance.x, H-1) - top edge on grid
+            if (H <= 2) continue // Not enough space or would overwrite
+            numX = pinBuilderInstance.x
+            numY = H - 2
+            break
+          default:
+            continue // Should not reach here
+        }
+        this.grid.putOverlay(numX, numY, pinNumberString)
+      }
+    }
   }
 
   /** Associates a coordinate with a netlist item. */
