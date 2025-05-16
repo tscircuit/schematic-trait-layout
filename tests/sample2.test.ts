@@ -13,7 +13,7 @@ test("sample1", () => {
     │   ├─────┐
     │   ├──┐  │
     │   ├┐ │  │
-    │   ├┤ │  │
+    │   ├● │  │
     └───┘│ B  B
          │ │  │
          L L  L
@@ -180,7 +180,7 @@ test("sample1", () => {
               "pinNumber": 7,
             },
             {
-              "netId": "L",
+              "netId": "_junction_1",
             },
           ],
         },
@@ -188,6 +188,9 @@ test("sample1", () => {
       "nets": [
         {
           "netId": "L",
+        },
+        {
+          "netId": "_junction_1",
         },
       ],
     }

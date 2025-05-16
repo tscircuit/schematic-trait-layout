@@ -33,9 +33,9 @@ export default () => {
   C.pin(6).line(1, 0).line(0, -4).label()
 
   // TODO
-  C.pin(7).line(1, 0).line(0, -3).label()
+  // C.pin(7).line(1, 0).line(0, -3).label()
   // change to....
-  // C.pin(7).line(1, 0).intersect()
+  C.pin(7).line(1, 0).intersect()
 
   return C
 }

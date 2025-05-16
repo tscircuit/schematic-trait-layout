@@ -249,6 +249,28 @@ class PinBuilder {
     this.lastConnectedItem = { netId }
     return this
   }
+
+  /** Marks the current point as a junction, drawing a '●' symbol. */
+  intersect(): this {
+    this.chip.grid.putOverlay(this.x, this.y, "●")
+
+    // TODO Find the net that connects to this point
+
+    const junctionNetId = `_junction_${this.chip.nextJunctionId++}`
+    if (
+      !this.chip.netlistComponents.nets.find((n) => n.netId === junctionNetId)
+    ) {
+      this.chip.netlistComponents.nets.push({ netId: junctionNetId })
+    }
+
+    if (this.lastConnectedItem) {
+      this.chip.netlistComponents.connections.push({
+        connectedPorts: [this.lastConnectedItem, { netId: junctionNetId }],
+      })
+    }
+    this.lastConnectedItem = { netId: junctionNetId }
+    return this
+  }
 }
 
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
@@ -270,9 +292,11 @@ class ChipBuilder {
 
   readonly mainChipId = "chip0"
   nextPassiveId = 1
+  nextJunctionId = 1 // Added for unique junction IDs
   netlistComponents: { boxes: Box[]; nets: Net[]; connections: Connection[] }
 
   constructor() {
+    this.nextJunctionId = 1
     this.pinCounts = {
       left: 0,
       right: 0,
