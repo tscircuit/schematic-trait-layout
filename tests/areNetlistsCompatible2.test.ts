@@ -131,7 +131,7 @@ test("areNetlistsCompatible2: template has extra connections/components not used
 
   const templateChip = chip().rightpins(2)
   templateChip.pin(1).line(2, 0).label("N1") // Matches input
-  templateChip.pin(2).line(2, 0).passive().label("ExtraN") // Extra component and net
+  templateChip.pin(2).line(2, 0).label("ExtraN") // Extra component and net
 
   expect(`\nInput:\n${inputChip.toString()}\n`).toMatchInlineSnapshot(`
     "
