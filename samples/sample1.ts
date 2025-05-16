@@ -1,10 +1,15 @@
-//         ┌───┐
-// ┌───────┤   ├───L
-// │       │   │
-// B    ┌──┤   ├───L
-// │    │  └───┘
-// L    L
 import { chip } from "lib/builder"
+
+/**
+ * ```
+ *         ┌───┐
+ * ┌───────┤   ├───L
+ * │       │   │
+ * B    ┌──┤   ├───L
+ * │    │  └───┘
+ * L    L
+ * ```
+ */
 
 export default () => {
   const C = chip().leftpins(2).rightpins(2)
