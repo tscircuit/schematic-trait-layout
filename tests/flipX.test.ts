@@ -18,11 +18,12 @@ test("flipX should flip the circuit horizontally", () => {
 
   c.flipX()
 
+  // When we flip, the pins are renumbered to be CCW
   expect(`\n${c.toString()}\n`).toMatchInlineSnapshot(`
     "
       ┌───┐
-    A─┤2  │
-    B─┤1  │
+    A─┤1  │
+    B─┤2  │
       └───┘
     "
   `)
