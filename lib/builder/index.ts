@@ -133,6 +133,7 @@ export class CircuitBuilder {
   readonly grid = new Grid()
   readonly coordinateToNetItem = new Map<string, PortReference>()
   private readonly boxPinLayouts: Record<string, Array<BoxPinLayoutEntry>> = {}
+  private readonly chipOrigins = new Map<string, { x: number; y: number }>()
 
   private nextChipIndex = 0
   nextPassiveId = 1
@@ -152,6 +153,9 @@ export class CircuitBuilder {
     copy.nextPassiveId = this.nextPassiveId
     copy.nextLabelId   = this.nextLabelId
     ;(copy as any).nextChipIndex = (this as any).nextChipIndex
+
+    // chip origins
+    for (const [k, v] of this.chipOrigins) copy.chipOrigins.set(k, { ...v })
 
     // pin-layout table
     for (const [k, v] of Object.entries(this.boxPinLayouts))
@@ -271,7 +275,131 @@ export class CircuitBuilder {
 
     // finally keep only what is still connected to the preserved pins
     builder._retainReachableFromChip(chipId)
+
+    // --- Redraw the chip body for the pruned chip ---
+    const chipBoxData = builder.netlistComponents.boxes.find(
+      (b) => b.boxId === chipId,
+    )!
+    const origin = builder.chipOrigins.get(chipId) ?? { x: 0, y: 0 }
+
+    const currentPinCounts = {
+      left: chipBoxData.leftPinCount,
+      right: chipBoxData.rightPinCount,
+      top: chipBoxData.topPinCount,
+      bottom: chipBoxData.bottomPinCount,
+    }
+    const { bodyWidth, bodyHeight } =
+      builder._calculateChipVisualDimensions(currentPinCounts)
+
+    builder._drawChipOutlineAndPinNumbers(
+      chipId,
+      origin.x,
+      origin.y,
+      bodyWidth,
+      bodyHeight,
+      currentPinCounts,
+      builder.boxPinLayouts[chipId] || [],
+      builder.grid, // Pass the grid explicitly
+    )
   }
+
+  private _calculateChipVisualDimensions(pinCounts: {
+    left: number
+    right: number
+    top: number
+    bottom: number
+  }): { bodyWidth: number; bodyHeight: number } {
+    const maxH = Math.max(pinCounts.top, pinCounts.bottom, 0)
+    const maxV = Math.max(pinCounts.left, pinCounts.right, 0)
+    // Ensure minimum dimensions for the chip body
+    const bodyWidth = Math.max(5, maxH === 0 ? 1 : maxH + 2)
+    const bodyHeight = Math.max(3, maxV === 0 ? 1 : maxV + 2)
+    return { bodyWidth, bodyHeight }
+  }
+
+  private _drawChipOutlineAndPinNumbers(
+    chipId: string,
+    originX: number,
+    originY: number,
+    bodyWidth: number,
+    bodyHeight: number,
+    pinCounts: { left: number; right: number; top: number; bottom: number },
+    boxLayout: ReadonlyArray<BoxPinLayoutEntry>,
+    targetGrid: Grid, // Accept Grid as a parameter
+  ): void {
+    const W = bodyWidth
+    const H = bodyHeight
+    const ox = originX
+    const oy = originY
+    const bodyItem: PortReference | null = null // Body segments are not net items
+
+    const seg = (x0: number, y0: number, x1: number, y1: number) =>
+      this.drawOrthogonalSegmentOnGrid(ox + x0, oy + y0, ox + x1, oy + y1, bodyItem, targetGrid)
+
+    if (W === 1 && H === 1) {
+      targetGrid.putOverlay(ox, oy, "+")
+    } else if (W === 1) {
+      seg(0, 0, 0, H - 1)
+    } else if (H === 1) {
+      seg(0, 0, W - 1, 0)
+    } else {
+      seg(0, 0, W - 1, 0) // Bottom edge
+      seg(0, H - 1, W - 1, H - 1) // Top edge
+      seg(0, 0, 0, H - 1) // Left edge
+      seg(W - 1, 0, W - 1, H - 1) // Right edge
+    }
+
+    // Draw pin numbers inside body
+    const pinSideIndices: Record<Side, number> = { left: 0, right: 0, top: 0, bottom: 0 }
+
+    const sortedBoxLayout = [...boxLayout].sort((a, b) => {
+      const sideAIndex = SIDES_CCW.indexOf(a.side)
+      const sideBIndex = SIDES_CCW.indexOf(b.side)
+      if (sideAIndex !== sideBIndex) return sideAIndex - sideBIndex
+      return a.startGlobalPin - b.startGlobalPin
+    })
+
+    for (const layoutEntry of sortedBoxLayout) {
+      const { side, count, startGlobalPin } = layoutEntry
+      for (let k = 0; k < count; k++) {
+        const globalPinNum = startGlobalPin + k
+        const sideIndex = pinSideIndices[side]++
+
+        let pinX = 0
+        let pinY = 0
+        switch (side) {
+          case "left":
+            pinX = ox
+            pinY = oy + H - 1 - (1 + sideIndex)
+            break
+          case "bottom": // Pins are along the bottom edge (y=oy), numbers inside (y=oy+1)
+            pinX = ox + 1 + sideIndex
+            pinY = oy
+            break
+          case "right":
+            pinX = ox + W - 1
+            pinY = oy + 1 + sideIndex
+            break
+          case "top": // Pins are along the top edge (y=oy+H-1), numbers inside (y=oy+H-2)
+            pinX = ox + 1 + sideIndex
+            pinY = oy + H - 1
+            break
+        }
+
+        const label = String(globalPinNum)
+        let lx = 0
+        let ly = 0
+        switch (side) {
+          case "left":   lx = pinX + 1; ly = pinY; break;
+          case "right":  lx = pinX - 1; ly = pinY; break;
+          case "top":    lx = pinX;     ly = pinY - 1; break;
+          case "bottom": lx = pinX;     ly = pinY + 1; break;
+        }
+        targetGrid.putOverlay(lx, ly, label)
+      }
+    }
+  }
+
 
   /**
    * Split the circuit into two independent circuits along a vertical
@@ -361,6 +489,7 @@ export class CircuitBuilder {
   /** Create a new chip inside the circuit. You can later move it with `.at()` */
   chip(): ChipBuilder {
     const chipId = `chip${this.nextChipIndex++}`
+    this.chipOrigins.set(chipId, { x: 0, y: 0 }) // Default origin
     const chip = new ChipBuilder(this, chipId)
     this.netlistComponents.boxes.push({
       boxId: chipId,
@@ -457,35 +586,80 @@ export class CircuitBuilder {
     x1: number,
     y1: number,
     item: PortReference | null,
+    targetGrid?: Grid, // Optional: specify which grid to draw on
   ): void {
+    const gridToUse = targetGrid ?? this.grid;
     const dx = Math.sign(x1 - x0)
     const dy = Math.sign(y1 - y0)
     let x = x0
     let y = y0
+    // Association with net item should still use the main circuit's map
     this.associateCoordinateWithNetItem(x, y, item)
     while (x !== x1 || y !== y1) {
       const nx = x + dx
       const ny = y + dy
       if (dx !== 0) {
         if (dx > 0) {
-          this.addEdge(x, y, "right")
-          this.addEdge(nx, ny, "left")
+          gridToUse.addEdge(x, y, "right")
+          gridToUse.addEdge(nx, ny, "left")
         } else {
-          this.addEdge(x, y, "left")
-          this.addEdge(nx, ny, "right")
+          gridToUse.addEdge(x, y, "left")
+          gridToUse.addEdge(nx, ny, "right")
         }
       } else if (dy !== 0) {
         if (dy > 0) {
-          this.addEdge(x, y, "up")
-          this.addEdge(nx, ny, "down")
+          gridToUse.addEdge(x, y, "up")
+          gridToUse.addEdge(nx, ny, "down")
         } else {
-          this.addEdge(x, y, "down")
-          this.addEdge(nx, ny, "up")
+          gridToUse.addEdge(x, y, "down")
+          gridToUse.addEdge(nx, ny, "up")
         }
       }
       x = nx
       y = ny
       this.associateCoordinateWithNetItem(x, y, item)
+    }
+  }
+
+  /** Draw orthogonal segment on a specific grid. Helper for _drawChipOutlineAndPinNumbers */
+  private drawOrthogonalSegmentOnGrid(
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    item: PortReference | null,
+    grid: Grid,
+  ): void {
+    const dx = Math.sign(x1 - x0)
+    const dy = Math.sign(y1 - y0)
+    let x = x0
+    let y = y0
+    // For body drawing, we don't associate with net items here,
+    // but if this were for general use, it might need more thought.
+    // this.associateCoordinateWithNetItem(x, y, item) // Potentially skip for body
+    while (x !== x1 || y !== y1) {
+      const nx = x + dx
+      const ny = y + dy
+      if (dx !== 0) {
+        if (dx > 0) {
+          grid.addEdge(x, y, "right")
+          grid.addEdge(nx, ny, "left")
+        } else {
+          grid.addEdge(x, y, "left")
+          grid.addEdge(nx, ny, "right")
+        }
+      } else if (dy !== 0) {
+        if (dy > 0) {
+          grid.addEdge(x, y, "up")
+          grid.addEdge(nx, ny, "down")
+        } else {
+          grid.addEdge(x, y, "down")
+          grid.addEdge(nx, ny, "up")
+        }
+      }
+      x = nx
+      y = ny
+      // this.associateCoordinateWithNetItem(x, y, item) // Potentially skip for body
     }
   }
 
@@ -636,11 +810,11 @@ export class CircuitBuilder {
   }
 }
 
-/***** ChipBuilder ************************************************************/
+// Moved Side and SIDES_CCW to module scope for broader use
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
-
 type Side = (typeof SIDES_CCW)[number]
 
+/***** ChipBuilder ************************************************************/
 export class ChipBuilder {
   /* Public counters (pin access, marks) */
   readonly pinMap: Record<`${Side}${number}`, PinBuilder> = {} as any
@@ -669,6 +843,8 @@ export class ChipBuilder {
   at(x: number, y: number): this {
     this.originX = x
     this.originY = y
+    // biome-ignore lint/complexity/useLiteralKeys: Accessing private member of CircuitBuilder
+    this.circuit["chipOrigins"].set(this.chipId, { x, y })
     return this
   }
 
@@ -763,19 +939,25 @@ export class ChipBuilder {
 
   private drawBody(): void {
     const { originX: ox, originY: oy, bodyWidth: W, bodyHeight: H } = this
+    // bodyItem is null for chip body segments
     const bodyItem: PortReference | null = null
 
+    // Use the main circuit's grid for drawing the initial chip body
+    const targetGrid = this.circuit.grid;
+
     const seg = (x0: number, y0: number, x1: number, y1: number) =>
-      this.circuit.drawOrthogonalSegment(
+      // biome-ignore lint/complexity/useLiteralKeys: Accessing private member
+      this.circuit["drawOrthogonalSegmentOnGrid"](
         ox + x0,
         oy + y0,
         ox + x1,
         oy + y1,
         bodyItem,
+        targetGrid,
       )
 
     if (W === 1 && H === 1) {
-      this.circuit.putOverlay(ox, oy, "+")
+      targetGrid.putOverlay(ox, oy, "+")
       return
     }
     if (W === 1) {
@@ -815,10 +997,14 @@ export class ChipBuilder {
             break
           case "bottom":
             lx = pin.x
-            ly = pin.y - 1
+            ly = pin.y - 1 // Grid Y is up, H-1 is top, so label is "below" pin on grid
+            break
+          case "bottom":
+            lx = pin.x
+            ly = pin.y + 1 // Grid Y is up, 0 is bottom, so label is "above" pin on grid
             break
         }
-        this.circuit.putOverlay(lx, ly, label)
+        targetGrid.putOverlay(lx, ly, label)
       }
     }
   }

@@ -30,7 +30,6 @@ test("bifurcate1", () => {
 
   expect(`\n${left.toString()}\n`).toMatchInlineSnapshot(`
     "
-            
        ┌───┐
     L──┤1  │
        │2  │
@@ -47,8 +46,8 @@ test("bifurcate1", () => {
     │  3├───┤
     │  2├─L │
     │  1├┐  P
-    └───┘│  │
-         L  L
+    └───┘│
+         L
     "
   `)
 })
