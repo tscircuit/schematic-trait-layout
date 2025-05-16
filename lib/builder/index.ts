@@ -1,7 +1,7 @@
 // ascii-schematic.ts – a minimal, self‑contained library for describing
 // simple ASCII schematic fragments with a fluent builder API.
 //
-// USAGE EXAMPLE (matches the snippet you provided):
+// USAGE EXAMPLE:
 //
 // import { chip } from "./ascii-schematic";
 //
@@ -12,29 +12,18 @@
 // C.pin4.line(1, 0).label();
 //
 // console.log(C.toString());
-// console.log(C.getNetlist()); // Example for new method
+// console.log(C.getNetlist());
 //
 // ---------------------------------------------------------------------------
 
 import type { InputNetlist, Box, Connection, Net } from "../input-types"
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: Remove any later
 
-/********************  INTERNAL PRIMITIVES ***********************************/
-//
-// import { chip } from "./ascii-schematic";
-//
-// const C = chip().leftpins(2).rightpins(2);
-// C.pin1.line(-3, 0).line(0, -1).passive("vertical").line(0, -1).label();
-// C.pin2.line(-1, 0).line(0, -1).label("B");
-// C.pin3.line(1, 0).label();
-// C.pin4.line(1, 0).label();
-//
-// console.log(C.toString());
-//
-// ---------------------------------------------------------------------------
+/********************  TYPES *************************************************/
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Represents a reference to a connectable point (a pin on a box or a named net). */
+type PortReference = { boxId: string; pinNumber: number } | { netId: string }
 
 /********************  INTERNAL PRIMITIVES ***********************************/
 
@@ -158,13 +147,10 @@ class Grid {
 /********************  PUBLIC BUILDER API *************************************/
 
 class PinBuilder {
-  private lastConnectedItem:
-    | { boxId: string; pinNumber: number }
-    | { netId: string }
-    | null = null
+  private lastConnectedItem: PortReference | null = null
 
   constructor(
-    private chip: ChipBuilder,
+    private readonly chip: ChipBuilder,
     public x: number, // Made public for ChipBuilder to set initial position
     public y: number, // Made public for ChipBuilder to set initial position
     private associatedChipPinNumber: number,
@@ -178,30 +164,36 @@ class PinBuilder {
       boxId: this.chip.mainChipId,
       pinNumber: this.associatedChipPinNumber,
     }
+    // Associate this initial chip pin coordinate with its electrical identity
+    // This is called by C.pin(N), which happens after computeBodySize ensures x,y are set.
+    if (this.lastConnectedItem) {
+      this.chip.associateCoordinateWithNetItem(
+        this.x,
+        this.y,
+        this.lastConnectedItem,
+      )
+    }
   }
 
   /** Draw an orthogonal segment, absolute step counts (may be negative). */
   line(dx: number, dy: number): this {
-    if (dx !== 0 && dy !== 0)
+    if (dx !== 0 && dy !== 0) {
       throw new Error("Only orthogonal line segments are supported.")
+    }
 
     const x0 = this.x
     const y0 = this.y
     const x1 = (this.x += dx)
     const y1 = (this.y += dy)
 
-    this.chip.drawOrthogonalSegment(x0, y0, x1, y1)
+    // The electrical identity of the line is the current lastConnectedItem
+    this.chip.drawOrthogonalSegment(x0, y0, x1, y1, this.lastConnectedItem)
     return this
   }
 
   /** Place a generic passive component symbol (very coarse – one glyph). */
   passive(orientation: "vertical" | "horizontal" = "vertical"): this {
-    // We just drop a "B" symbol to keep the example simple
-    this.chip.grid.putOverlay(this.x, this.y, "B")
-
     const passiveBoxId = `passive${this.chip.nextPassiveId++}`
-    // Convention: passive components are 2-pin devices. Pin 1 is considered the input, Pin 2 the output.
-    // The pin counts on each side are set based on the orientation.
     const passiveBox: Box = {
       boxId: passiveBoxId,
       leftPinCount: 0,
@@ -220,44 +212,68 @@ class PinBuilder {
     }
     this.chip.netlistComponents.boxes.push(passiveBox)
 
-    if (this.lastConnectedItem) {
-      this.chip.netlistComponents.connections.push({
-        connectedPorts: [
-          this.lastConnectedItem,
-          { boxId: passiveBoxId, pinNumber: 1 }, // Connect to "first" pin of passive
-        ],
-      })
-    }
-    this.lastConnectedItem = { boxId: passiveBoxId, pinNumber: 2 } // Next connection starts from "second" pin
+    const pin1Identity: PortReference = { boxId: passiveBoxId, pinNumber: 1 }
+    const pin2Identity: PortReference = { boxId: passiveBoxId, pinNumber: 2 }
+
+    // Associate the component's location (pin1 entry point) with its pin1 identity
+    this.chip.associateCoordinateWithNetItem(this.x, this.y, pin1Identity)
+    this.chip.grid.putOverlay(this.x, this.y, "B") // Draw 'B' at pin1 location
+
+    // Connect the incoming wire (lastConnectedItem) to pin1 of the passive
+    this.chip.connectItems(this.lastConnectedItem, pin1Identity)
+
+    this.lastConnectedItem = pin2Identity // Next connection starts from "second" pin (pin2)
+    // Associate current coordinate (still this.x, this.y) with pin2 for outgoing connections.
+    // This means pin1 and pin2 are at the same coordinate for connection purposes.
+    this.chip.associateCoordinateWithNetItem(this.x, this.y, pin2Identity)
     return this
   }
 
   /** Write a text label at the current cursor location. */
   label(text = "L"): this {
+    const netIdentity: PortReference = { netId: text }
+    if (
+      !this.chip.netlistComponents.nets.find(
+        (n) => n.netId === netIdentity.netId,
+      )
+    ) {
+      this.chip.netlistComponents.nets.push({ netId: netIdentity.netId })
+    }
+
+    // Associate the label's coordinate with the net identity
+    this.chip.associateCoordinateWithNetItem(this.x, this.y, netIdentity)
     this.chip.grid.putOverlay(this.x, this.y, text)
 
-    const netId = text
-    if (!this.chip.netlistComponents.nets.find((n) => n.netId === netId)) {
-      this.chip.netlistComponents.nets.push({ netId })
-    }
+    // Connect the incoming wire (lastConnectedItem) to this net
+    this.chip.connectItems(this.lastConnectedItem, netIdentity)
 
-    if (this.lastConnectedItem) {
-      this.chip.netlistComponents.connections.push({
-        connectedPorts: [this.lastConnectedItem, { netId }],
-      })
-    }
-    this.lastConnectedItem = { netId }
+    this.lastConnectedItem = netIdentity
     return this
   }
 
-  /** Marks the current point as a junction, drawing a '●' symbol. */
+  /** Marks the current point as a junction, drawing a '●' symbol and connecting nets. */
   intersect(): this {
-    if (this.lastConnectedItem) {
-      // TODO Find the net id or component that connects to this point and add
-      // a new connection to it
-    }
+    const currentPointKey = `${this.x},${this.y}`
+    const itemAtIntersection =
+      this.chip.coordinateToNetItem.get(currentPointKey)
 
-    this.chip.grid.putOverlay(this.x, this.y, "●")
+    if (this.lastConnectedItem && itemAtIntersection) {
+      this.chip.connectItems(this.lastConnectedItem, itemAtIntersection)
+      // The new electrical context for future segments is the item we just connected to.
+      this.lastConnectedItem = itemAtIntersection
+    } else if (this.lastConnectedItem) {
+      // If there's nothing at the intersection point yet,
+      // associate the current path's item with this coordinate.
+      this.chip.associateCoordinateWithNetItem(
+        this.x,
+        this.y,
+        this.lastConnectedItem,
+      )
+    }
+    // If itemAtIntersection exists, it's already associated with the coordinate.
+    // If this.lastConnectedItem is new to this point, it's now also associated via connectItems logic (merged net).
+
+    this.chip.grid.putOverlay(this.x, this.y, "●") // Visual marker
     return this
   }
 }
@@ -271,7 +287,7 @@ class ChipBuilder {
     PinBuilder
   > = {}
   pinBuilders: PinBuilder[] = []
-  private _currentGlobalPinIndex = 0
+  private _currentGlobalPinIndex = 0 // 0-indexed internally, exposed as 1-indexed
 
   pinCounts: Record<"left" | "right" | "top" | "bottom", number>
 
@@ -280,8 +296,9 @@ class ChipBuilder {
   bodySizeComputed = false
 
   readonly mainChipId = "chip0"
-  nextPassiveId = 1
+  nextPassiveId = 1 // Starts from 1 for passive component IDs
   netlistComponents: { boxes: Box[]; nets: Net[]; connections: Connection[] }
+  coordinateToNetItem = new Map<string, PortReference>()
 
   constructor() {
     this.pinCounts = {
@@ -452,13 +469,13 @@ class ChipBuilder {
 
     if (W === 1) {
       // Vertical line body (1xH, H > 1)
-      this.drawOrthogonalSegment(0, 0, 0, H - 1) // Draw as a single vertical line
+      this.drawOrthogonalSegment(0, 0, 0, H - 1, null) // Draw as a single vertical line
       return
     }
 
     if (H === 1) {
       // Horizontal line body (Wx1, W > 1)
-      this.drawOrthogonalSegment(0, 0, W - 1, 0) // Draw as a single horizontal line
+      this.drawOrthogonalSegment(0, 0, W - 1, 0, null) // Draw as a single horizontal line
       return
     }
 
@@ -466,24 +483,47 @@ class ChipBuilder {
     // Standard case: W > 1 and H > 1 (a box)
     // Assumes chip's bottom-left is at (0,0) in grid coordinates.
     // (W-1, H-1) is the top-right corner.
+    // Body segments are not associated with any specific netlist item initially.
+    const bodySegmentItem = null // Or a special marker if needed later
 
     // Bottom border: (0,0) to (W-1,0)
-    this.drawOrthogonalSegment(0, 0, W - 1, 0)
+    this.drawOrthogonalSegment(0, 0, W - 1, 0, bodySegmentItem)
     // Top border: (0,H-1) to (W-1,H-1)
-    this.drawOrthogonalSegment(0, H - 1, W - 1, H - 1)
+    this.drawOrthogonalSegment(0, H - 1, W - 1, H - 1, bodySegmentItem)
     // Left border: (0,0) to (0,H-1)
-    this.drawOrthogonalSegment(0, 0, 0, H - 1)
+    this.drawOrthogonalSegment(0, 0, 0, H - 1, bodySegmentItem)
     // Right border: (W-1,0) to (W-1,H-1)
-    this.drawOrthogonalSegment(W - 1, 0, W - 1, H - 1)
+    this.drawOrthogonalSegment(W - 1, 0, W - 1, H - 1, bodySegmentItem)
+  }
+
+  /** Associates a coordinate with a netlist item. */
+  associateCoordinateWithNetItem(
+    x: number,
+    y: number,
+    item: PortReference | null,
+  ): void {
+    if (item) {
+      this.coordinateToNetItem.set(`${x},${y}`, item)
+    }
   }
 
   /** Low‑level util shared by pins and body – draws straight H/V segment. */
-  drawOrthogonalSegment(x0: number, y0: number, x1: number, y1: number): void {
+  drawOrthogonalSegment(
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    connectedItem: PortReference | null,
+  ): void {
     const dx = Math.sign(x1 - x0)
     const dy = Math.sign(y1 - y0)
 
     let x = x0
     let y = y0
+
+    // Associate starting point
+    this.associateCoordinateWithNetItem(x, y, connectedItem)
+
     while (x !== x1 || y !== y1) {
       const nx = x + dx
       const ny = y + dy
@@ -499,19 +539,87 @@ class ChipBuilder {
           this.grid.addEdge(nx, ny, "right")
         }
       } else if (dy !== 0) {
-        // vertical: dy is Math.sign(y1 - y0) from user coordinates
+        // vertical
         if (dy > 0) {
-          // Moving UP in Cartesian (y1 > y0)
-          this.grid.addEdge(x, y, "up") // Current cell (x,y) gets an "up" edge
-          this.grid.addEdge(nx, ny, "down") // Next cell (nx,ny) gets a "down" edge
+          this.grid.addEdge(x, y, "up")
+          this.grid.addEdge(nx, ny, "down")
         } else {
-          // Moving DOWN in Cartesian (y1 < y0)
-          this.grid.addEdge(x, y, "down") // Current cell (x,y) gets a "down" edge
-          this.grid.addEdge(nx, ny, "up") // Next cell (nx,ny) gets an "up" edge
+          this.grid.addEdge(x, y, "down")
+          this.grid.addEdge(nx, ny, "up")
         }
       }
       x = nx
       y = ny
+      // Associate current point in path
+      this.associateCoordinateWithNetItem(x, y, connectedItem)
+    }
+  }
+
+  // --- Netlist Helper Methods ---
+
+  private areSamePortRef(a: PortReference, b: PortReference): boolean {
+    if ("boxId" in a && "boxId" in b) {
+      return a.boxId === b.boxId && a.pinNumber === b.pinNumber
+    }
+    if ("netId" in a && "netId" in b) {
+      return a.netId === b.netId
+    }
+    return false
+  }
+
+  private isPortInConnection(item: PortReference, conn: Connection): boolean {
+    return conn.connectedPorts.some((p) =>
+      this.areSamePortRef(item, p as PortReference),
+    )
+  }
+
+  private findConnectionContaining(
+    item: PortReference,
+  ): Connection | undefined {
+    return this.netlistComponents.connections.find((conn) =>
+      this.isPortInConnection(item, conn),
+    )
+  }
+
+  /** Connects two PortReferences, merging existing connections if necessary. */
+  public connectItems(
+    itemA: PortReference | null,
+    itemB: PortReference | null,
+  ): void {
+    if (!itemA || !itemB || this.areSamePortRef(itemA, itemB)) {
+      return // Nothing to do or self-connection
+    }
+
+    const connA = this.findConnectionContaining(itemA)
+    const connB = this.findConnectionContaining(itemB)
+
+    if (connA && connB) {
+      if (connA === connB) return // Already connected in the same net
+
+      // Merge connB into connA
+      connB.connectedPorts.forEach((port) => {
+        if (!this.isPortInConnection(port as PortReference, connA)) {
+          connA.connectedPorts.push(port as PortReference)
+        }
+      })
+      // Remove connB
+      this.netlistComponents.connections =
+        this.netlistComponents.connections.filter((c) => c !== connB)
+    } else if (connA) {
+      // Add itemB to connA
+      if (!this.isPortInConnection(itemB, connA)) {
+        connA.connectedPorts.push(itemB)
+      }
+    } else if (connB) {
+      // Add itemA to connB
+      if (!this.isPortInConnection(itemA, connB)) {
+        connB.connectedPorts.push(itemA)
+      }
+    } else {
+      // Create new connection
+      this.netlistComponents.connections.push({
+        connectedPorts: [itemA, itemB],
+      })
     }
   }
 

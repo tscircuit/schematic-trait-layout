@@ -55,38 +55,17 @@ test("sample1", () => {
             {
               "netId": "L",
             },
-          ],
-        },
-        {
-          "connectedPorts": [
             {
               "boxId": "chip0",
               "pinNumber": 2,
             },
             {
-              "netId": "L",
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
               "boxId": "chip0",
               "pinNumber": 3,
             },
             {
-              "netId": "L",
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
               "boxId": "chip0",
               "pinNumber": 4,
-            },
-            {
-              "netId": "L",
             },
           ],
         },
