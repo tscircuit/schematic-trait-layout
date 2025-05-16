@@ -230,19 +230,28 @@ class PinBuilder {
   }
 
   /** Write a text label at the current cursor location. */
-  label(text = "L"): this {
-    const netIdentity: PortReference = { netId: text }
+  label(text?: string): this {
+    let actualNetId: string
+    let displayCharacter: string
+
+    if (text === undefined) {
+      actualNetId = `L${this.chip.nextLabelId++}`
+      displayCharacter = "L"
+    } else {
+      actualNetId = text
+      displayCharacter = text
+    }
+
+    const netIdentity: PortReference = { netId: actualNetId }
     if (
-      !this.chip.netlistComponents.nets.find(
-        (n) => n.netId === netIdentity.netId,
-      )
+      !this.chip.netlistComponents.nets.find((n) => n.netId === actualNetId)
     ) {
-      this.chip.netlistComponents.nets.push({ netId: netIdentity.netId })
+      this.chip.netlistComponents.nets.push({ netId: actualNetId })
     }
 
     // Associate the label's coordinate with the net identity
     this.chip.associateCoordinateWithNetItem(this.x, this.y, netIdentity)
-    this.chip.grid.putOverlay(this.x, this.y, text)
+    this.chip.grid.putOverlay(this.x, this.y, displayCharacter)
 
     // Connect the incoming wire (lastConnectedItem) to this net
     this.chip.connectItems(this.lastConnectedItem, netIdentity)
@@ -256,6 +265,7 @@ class PinBuilder {
     const currentPointKey = `${this.x},${this.y}`
     const itemAtIntersection =
       this.chip.coordinateToNetItem.get(currentPointKey)
+    console.log("intersect", this.lastConnectedItem, itemAtIntersection)
 
     if (this.lastConnectedItem && itemAtIntersection) {
       this.chip.connectItems(this.lastConnectedItem, itemAtIntersection)
@@ -297,6 +307,7 @@ class ChipBuilder {
 
   readonly mainChipId = "chip0"
   nextPassiveId = 1 // Starts from 1 for passive component IDs
+  nextLabelId = 1 // Starts from 1 for default labels
   netlistComponents: { boxes: Box[]; nets: Net[]; connections: Connection[] }
   coordinateToNetItem = new Map<string, PortReference>()
 
@@ -502,6 +513,9 @@ class ChipBuilder {
     y: number,
     item: PortReference | null,
   ): void {
+    // Don't overwrite existing item
+    if (this.coordinateToNetItem.get(`${x},${y}`)) return
+
     if (item) {
       this.coordinateToNetItem.set(`${x},${y}`, item)
     }
@@ -597,11 +611,11 @@ class ChipBuilder {
       if (connA === connB) return // Already connected in the same net
 
       // Merge connB into connA
-      connB.connectedPorts.forEach((port) => {
+      for (const port of connB.connectedPorts) {
         if (!this.isPortInConnection(port as PortReference, connA)) {
           connA.connectedPorts.push(port as PortReference)
         }
-      })
+      }
       // Remove connB
       this.netlistComponents.connections =
         this.netlistComponents.connections.filter((c) => c !== connB)

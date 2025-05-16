@@ -53,26 +53,56 @@ test("sample1", () => {
               "pinNumber": 2,
             },
             {
-              "netId": "L",
+              "netId": "L1",
             },
+          ],
+        },
+        {
+          "connectedPorts": [
             {
               "boxId": "chip0",
               "pinNumber": 2,
             },
             {
+              "netId": "L2",
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
               "boxId": "chip0",
               "pinNumber": 3,
             },
             {
+              "netId": "L3",
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
               "boxId": "chip0",
               "pinNumber": 4,
+            },
+            {
+              "netId": "L4",
             },
           ],
         },
       ],
       "nets": [
         {
-          "netId": "L",
+          "netId": "L1",
+        },
+        {
+          "netId": "L2",
+        },
+        {
+          "netId": "L3",
+        },
+        {
+          "netId": "L4",
         },
       ],
     }
