@@ -11,7 +11,7 @@ function getProjectRoot(): string {
 
 async function main() {
   const projectRoot = getProjectRoot()
-  const sampleDir = path.resolve(projectRoot, "samples")
+  const sampleDir = path.resolve(projectRoot, "templates")
   const sampleFiles = await glob("*.ts", { cwd: sampleDir, absolute: true })
 
   for (const filePath of sampleFiles) {
