@@ -289,6 +289,8 @@ export class CircuitBuilder {
   flipX(): void {
     const pinMapsByBoxId: Record<string, Record<number, number>> = {}
 
+    console.log("this.coordinateToNetItem", this.coordinateToNetItem)
+
     // 1. Flip Netlist Boxes and Create Pin Mappings
     for (const box of this.netlistComponents.boxes) {
       const layout = this.boxPinLayouts[box.boxId]
@@ -304,11 +306,10 @@ export class CircuitBuilder {
 
       const currentPinMap: Record<number, number> = {}
       let newGlobalPinCounter = 1
+      console.log("layout", layout)
+      console.log("currentPinMap", currentPinMap)
 
-      // Define the order for assigning new pin numbers
-      const newSideProcessingOrder: Side[] = ["left", "right", "top", "bottom"]
-
-      for (const targetSide of newSideProcessingOrder) {
+      for (const targetSide of SIDES_CCW) {
         const originalSideIsNowTarget =
           targetSide === "left"
             ? "right"
@@ -318,12 +319,13 @@ export class CircuitBuilder {
 
         for (const entry of layout) {
           if (entry.side === originalSideIsNowTarget) {
-            for (let i = 0; i < entry.count; i++) {
+            for (let i = entry.count - 1; i >= 0; i--) {
               const oldPin = entry.startGlobalPin + i
-              const newPin = newGlobalPinCounter + i
+              const newPin = newGlobalPinCounter
+              console.log("oldPin", oldPin, "newPin", newPin)
               currentPinMap[oldPin] = newPin
+              newGlobalPinCounter++
             }
-            newGlobalPinCounter += entry.count
           }
         }
       }
@@ -334,6 +336,8 @@ export class CircuitBuilder {
       box.rightPinCount = tempLeft
     }
 
+    console.log("pinMapsByBoxId", pinMapsByBoxId)
+
     // 2. Flip Netlist Connections
     for (const connection of this.netlistComponents.connections) {
       for (const port of connection.connectedPorts) {
@@ -342,6 +346,7 @@ export class CircuitBuilder {
           const newPinNumber = pinMapsByBoxId[port.boxId]![oldPinNumber]
           if (newPinNumber !== undefined) {
             port.pinNumber = newPinNumber
+            // TODO Update the overlay with the new pin number
           } else {
             // This might happen if a pin number in a connection is out of bounds
             // or if layout recording was incomplete.
@@ -390,16 +395,56 @@ export class CircuitBuilder {
       if ("boxId" in clonedPortRef && pinMapsByBoxId[clonedPortRef.boxId]) {
         const oldPinNumber = clonedPortRef.pinNumber
         const newPinNumber = pinMapsByBoxId[clonedPortRef.boxId]![oldPinNumber]
+        console.log("swapping coord pin number", {
+          x: newX,
+          y,
+          oldPinNumber,
+          newPinNumber,
+        })
         if (newPinNumber !== undefined) {
           clonedPortRef.pinNumber = newPinNumber
         }
         // else: warning already issued or it's a netId
       }
+      console.log({ portRef, clonedPortRef })
       newCoordToNetItem.set(`${newX},${y}`, clonedPortRef)
     }
+
     this.coordinateToNetItem.clear()
     for (const [k, v] of newCoordToNetItem) {
       this.coordinateToNetItem.set(k, v)
+    }
+
+    console.log(
+      "this.coordinateToNetItem after update",
+      this.coordinateToNetItem,
+    )
+
+    // 5. Refresh numeric pin-labels in the overlay
+    for (const [coordKey, portRef] of this.coordinateToNetItem) {
+      if ("boxId" in portRef && pinMapsByBoxId[portRef.boxId]) {
+        const [xs, ys] = coordKey.split(",")
+        const x = Number(xs)
+        const y = Number(ys)
+        const newLabel = String(portRef.pinNumber)
+
+        // The printed number is always one step toward the chip body
+        const neighbors: Array<[number, number]> = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ]
+
+        for (const [dx, dy] of neighbors) {
+          const key = `${x + dx},${y + dy}`
+          const existing = this.grid.overlay.get(key)
+          if (existing !== undefined && /^\d+$/.test(existing)) {
+            this.grid.overlay.set(key, newLabel)
+            break // only one label per pin
+          }
+        }
+      }
     }
   }
 }
