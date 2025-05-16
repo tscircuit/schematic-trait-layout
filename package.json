@@ -1,5 +1,5 @@
 {
-  "name": "@tscircuit/schematic-trait-layout",
+  "name": "@tscircuit/mash-layout",
   "version": "0.0.1",
   "module": "index.ts",
   "type": "module",

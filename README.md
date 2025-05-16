@@ -1,4 +1,4 @@
-# @tscircuit/schematic-trait-layout
+# @tscircuit/mash-layout
 
 An automatic layout system for schematics that uses a pre-baked templates and
 a scoring system to determine the best layout.
@@ -10,7 +10,7 @@ use existing flow-diagram layout algorithms because readable schematics require
 using common conventions, such as orienting ground net labels down and V+
 labels up.
 
-The trait layout system is designed to be an extensible way to build a complex
+The mash layout system is designed to be an extensible way to build a complex
 layout system that adheres to common conventions. We do this by pre-processing a
 massive set of schematic templates that represent many common scenarios for
 partial or full representation of a schematic to create a large lookup table of

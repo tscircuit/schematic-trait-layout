@@ -1,8 +1,8 @@
 import { test, expect } from "bun:test"
-import sample2 from "../samples/sample2"
+import template2 from "../templates/template2"
 
-test("sample2", () => {
-  const C = sample2()
+test("template2", () => {
+  const C = template2()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
           L

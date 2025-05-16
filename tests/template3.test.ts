@@ -1,18 +1,17 @@
 import { test, expect } from "bun:test"
-import sample1 from "../samples/sample1"
+import template3 from "../templates/template3"
 
-test("sample1", () => {
-  const C = sample1()
-  expect(C.bodyWidth).toMatchInlineSnapshot(`5`)
-  expect(C.bodyHeight).toMatchInlineSnapshot(`4`)
+test("template3", () => {
+  const C = template3()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-            ┌───┐
-    ┌───────┤1 3├───L
-    │    ┌──┤2 4├───L
-    P    │  └───┘
-    │    L
-    L
+    ┌───┐      L
+    │  1├───●──┤
+    │  2├─┐ │  │
+    │  3├┐│ P  P
+    └───┘│└─┘  │
+         │     │
+         L     L
     "
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
@@ -21,13 +20,20 @@ test("sample1", () => {
         {
           "bottomPinCount": 0,
           "boxId": "chip0",
-          "leftPinCount": 2,
-          "rightPinCount": 2,
+          "leftPinCount": 0,
+          "rightPinCount": 3,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 1,
           "boxId": "passive1",
+          "leftPinCount": 0,
+          "rightPinCount": 0,
+          "topPinCount": 1,
+        },
+        {
+          "bottomPinCount": 1,
+          "boxId": "passive2",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
@@ -41,8 +47,15 @@ test("sample1", () => {
               "pinNumber": 1,
             },
             {
+              "netId": "L1",
+            },
+            {
               "boxId": "passive1",
               "pinNumber": 1,
+            },
+            {
+              "boxId": "passive2",
+              "pinNumber": 2,
             },
           ],
         },
@@ -53,7 +66,7 @@ test("sample1", () => {
               "pinNumber": 2,
             },
             {
-              "netId": "L1",
+              "netId": "L2",
             },
           ],
         },
@@ -64,7 +77,8 @@ test("sample1", () => {
               "pinNumber": 2,
             },
             {
-              "netId": "L2",
+              "boxId": "passive2",
+              "pinNumber": 1,
             },
           ],
         },
@@ -79,17 +93,6 @@ test("sample1", () => {
             },
           ],
         },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip0",
-              "pinNumber": 4,
-            },
-            {
-              "netId": "L4",
-            },
-          ],
-        },
       ],
       "nets": [
         {
@@ -100,9 +103,6 @@ test("sample1", () => {
         },
         {
           "netId": "L3",
-        },
-        {
-          "netId": "L4",
         },
       ],
     }
