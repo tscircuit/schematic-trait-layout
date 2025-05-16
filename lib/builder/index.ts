@@ -144,6 +144,150 @@ export class CircuitBuilder {
     connections: Connection[]
   } = { boxes: [], nets: [], connections: [] }
 
+  // --- CLONE: deep but shallow-array/map copy ---
+  private _clone(): CircuitBuilder {
+    const copy = circuit()
+
+    // numeric counters
+    copy.nextPassiveId = this.nextPassiveId
+    copy.nextLabelId   = this.nextLabelId
+    ;(copy as any).nextChipIndex = (this as any).nextChipIndex
+
+    // pin-layout table
+    for (const [k, v] of Object.entries(this.boxPinLayouts))
+      copy.boxPinLayouts[k] = v.map(e => ({ ...e }))
+
+    // grid
+    for (const [k, m] of this.grid.traces)  copy.grid.traces.set(k, m)
+    for (const [k, c] of this.grid.overlay) copy.grid.overlay.set(k, c)
+
+    // coordinate → port map
+    for (const [k, r] of this.coordinateToNetItem)
+      copy.coordinateToNetItem.set(k, { ...r })
+
+    // netlist
+    copy.netlistComponents.boxes       = JSON.parse(JSON.stringify(this.netlistComponents.boxes))
+    copy.netlistComponents.nets        = JSON.parse(JSON.stringify(this.netlistComponents.nets))
+    copy.netlistComponents.connections = JSON.parse(JSON.stringify(this.netlistComponents.connections))
+
+    return copy
+  }
+
+  // --- PRUNE CHIP SIDE: used by bifurcateX ---
+  private _pruneChipSide(
+    chipId: string,
+    builder: CircuitBuilder,
+    removeLeftSide: boolean,   // true ↦ delete left pins, keep right pins
+  ): void {
+    const box = builder.netlistComponents.boxes.find(b => b.boxId === chipId)!
+    const leftCnt  = box.leftPinCount
+    const rightCnt = box.rightPinCount
+
+    const pinsToRemove = new Set<number>()
+    const pinsToKeep   : number[] = []
+
+    // decide which global pin numbers disappear / survive
+    for (let i = 1; i <= leftCnt + rightCnt; i++) {
+      const isLeft = i <= leftCnt
+      if ((isLeft && removeLeftSide) || (!isLeft && !removeLeftSide))
+        pinsToRemove.add(i)
+      else
+        pinsToKeep.push(i)
+    }
+
+    // new contiguous pin numbers for the kept ones
+    const old2new: Record<number, number> = {}
+    pinsToKeep.forEach((old, idx) => { old2new[old] = idx + 1 })
+
+    /* ── update chip box ─────────────────────────────── */
+    if (removeLeftSide) {
+      box.leftPinCount  = 0
+      box.rightPinCount = pinsToKeep.length
+    } else {
+      box.rightPinCount = 0
+      box.leftPinCount  = pinsToKeep.length
+    }
+
+    /* ── boxPinLayouts table ─────────────────────────── */
+    builder.boxPinLayouts[chipId] = builder.boxPinLayouts[chipId]
+      .filter(e => (e.side === "left") !== removeLeftSide)          // keep wanted side(s)
+      .map(e => ({
+        ...e,
+        startGlobalPin: old2new[e.startGlobalPin],                  // shift numbering
+      }))
+
+    /* ── coordinate-to-net items, grid & overlay ─────── */
+    for (const [coord, ref] of [...builder.coordinateToNetItem]) {
+      if ("boxId" in ref && ref.boxId === chipId) {
+        if (pinsToRemove.has(ref.pinNumber)) {
+          builder.coordinateToNetItem.delete(coord)
+          builder.grid.traces.delete(coord)
+          builder.grid.overlay.delete(coord)
+        } else {
+          ref.pinNumber = old2new[ref.pinNumber]
+        }
+      }
+    }
+    // numeric labels printed inside the body
+    for (const [coord, ch] of [...builder.grid.overlay]) {
+      if (/^\d+$/.test(ch)) {
+        const n = Number(ch)
+        if (pinsToRemove.has(n)) builder.grid.overlay.delete(coord)
+        else if (old2new[n] && old2new[n] !== n)
+          builder.grid.overlay.set(coord, String(old2new[n]))
+      }
+    }
+
+    /* ── connections / nets  ─────────────────────────── */
+    for (const conn of [...builder.netlistComponents.connections]) {
+      conn.connectedPorts = conn.connectedPorts
+        .filter(p => !("boxId" in p && p.boxId === chipId && pinsToRemove.has(p.pinNumber)))
+        .map(p => {
+          if ("boxId" in p && p.boxId === chipId)
+            return { ...p, pinNumber: old2new[p.pinNumber] }
+          return p
+        }) as any
+
+      if (conn.connectedPorts.length < 2)
+        builder.netlistComponents.connections =
+          builder.netlistComponents.connections.filter(c => c !== conn)
+    }
+
+    // drop orphan nets + their geometry
+    const liveNets = new Set<string>()
+    for (const c of builder.netlistComponents.connections)
+      for (const p of c.connectedPorts)
+        if ("netId" in p) liveNets.add(p.netId)
+
+    builder.netlistComponents.nets =
+      builder.netlistComponents.nets.filter(n => liveNets.has(n.netId))
+
+    for (const [coord, ref] of [...builder.coordinateToNetItem])
+      if ("netId" in ref && !liveNets.has(ref.netId)) {
+        builder.coordinateToNetItem.delete(coord)
+        builder.grid.traces.delete(coord)
+        builder.grid.overlay.delete(coord)
+      }
+  }
+
+  /**
+   * Split the circuit into two independent circuits along a vertical
+   * axis through the specified chip.  The first element of the tuple
+   * keeps the chip's left-hand pins, the second keeps its right-hand pins.
+   */
+  bifurcateX(chipId: string): [CircuitBuilder, CircuitBuilder] {
+    const left  = this._clone()
+    const right = this._clone()
+
+    // remove right-hand pins from the “left” clone
+    this._pruneChipSide(chipId, left , false /* keep-left */)
+
+    // remove left-hand pins (and renumber) in the “right” clone
+    this._pruneChipSide(chipId, right, true  /* keep-right */)
+
+    return [left, right]
+  }
+
   /** Create a new chip inside the circuit. You can later move it with `.at()` */
   chip(): ChipBuilder {
     const chipId = `chip${this.nextChipIndex++}`
