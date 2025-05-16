@@ -11,7 +11,9 @@ export const getNetlistSubsetForSidesOfBox = (params: {
   netlist: InputNetlist
   boxId: string
 }): InputNetlist[] => {
-  const { netlist, boxId, side } = params
+  const { netlist, boxId } = params
 
   // TODO
+
+  return []
 }

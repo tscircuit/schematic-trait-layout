@@ -12,4 +12,5 @@ export const getNetlistSubsetsByBoxCut = (params: {
   const { netlist, boxId } = params
 
   // TODO
+  return null
 }
