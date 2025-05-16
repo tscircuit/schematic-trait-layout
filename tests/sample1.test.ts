@@ -7,11 +7,11 @@ test("sample1", () => {
   expect(C.bodyHeight).toMatchInlineSnapshot(`5`)
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-            -----
-    +-------+   +---L
-    |       |   |
-    B    +--+   +---L
-    |    |  -----
+            ┌───┐
+    ┌───────┤   ├───L
+    │       │   │
+    B    ┌──┤   ├───L
+    │    │  └───┘
     L    L
     "
   `)

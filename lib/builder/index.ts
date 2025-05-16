@@ -32,14 +32,34 @@ const EDGE_MASKS: Record<Edge, number> = {
 
 // Convert a set of edges into the correct ASCII glyph.
 function glyph(mask: number): string {
-  const horiz =
-    (mask & EDGE_MASKS.left) !== 0 || (mask & EDGE_MASKS.right) !== 0
-  const vert = (mask & EDGE_MASKS.up) !== 0 || (mask & EDGE_MASKS.down) !== 0
+  switch (mask) {
+    case 0: return " "; // No edges
 
-  if (horiz && vert) return "+"
-  if (horiz) return "-"
-  if (vert) return "|"
-  return " "
+    // Single edges (parts of a line)
+    case EDGE_MASKS.left: return "─";
+    case EDGE_MASKS.right: return "─";
+    case EDGE_MASKS.up: return "│";
+    case EDGE_MASKS.down: return "│";
+
+    // Two edges
+    case EDGE_MASKS.left | EDGE_MASKS.right: return "─"; // Horizontal line
+    case EDGE_MASKS.up | EDGE_MASKS.down: return "│";   // Vertical line
+    case EDGE_MASKS.left | EDGE_MASKS.up: return "┘";    // Corner: bottom-left in screen space (left, up in Cartesian)
+    case EDGE_MASKS.left | EDGE_MASKS.down: return "┐";  // Corner: top-left in screen space (left, down in Cartesian)
+    case EDGE_MASKS.right | EDGE_MASKS.up: return "└";   // Corner: bottom-right in screen space (right, up in Cartesian)
+    case EDGE_MASKS.right | EDGE_MASKS.down: return "┌"; // Corner: top-right in screen space (right, down in Cartesian)
+
+    // Three edges
+    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.up: return "┴"; // T-junction pointing down on screen
+    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.down: return "┬"; // T-junction pointing up on screen
+    case EDGE_MASKS.left | EDGE_MASKS.up | EDGE_MASKS.down: return "┤";   // T-junction pointing right on screen
+    case EDGE_MASKS.right | EDGE_MASKS.up | EDGE_MASKS.down: return "├";  // T-junction pointing left on screen
+
+    // Four edges
+    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.up | EDGE_MASKS.down: return "┼"; // Crossroads
+
+    default: return " "; // Should ideally not be reached if mask is a combination of EDGE_MASKS
+  }
 }
 
 /** 2‑D sparse grid – we keep it sparse so diagrams can grow in any direction */
@@ -323,14 +343,18 @@ class ChipBuilder {
     }
 
     // Standard case: W > 1 and H > 1 (a box)
-    // Top border: (0,0) to (W-1,0)
+    // Standard case: W > 1 and H > 1 (a box)
+    // Assumes chip's bottom-left is at (0,0) in grid coordinates.
+    // (W-1, H-1) is the top-right corner.
+
+    // Bottom border: (0,0) to (W-1,0)
     this.drawOrthogonalSegment(0, 0, W - 1, 0)
-    // Bottom border: (0,H-1) to (W-1,H-1)
+    // Top border: (0,H-1) to (W-1,H-1)
     this.drawOrthogonalSegment(0, H - 1, W - 1, H - 1)
-    // Left border: (0,1) to (0,H-2) (Connects top and bottom corners)
-    this.drawOrthogonalSegment(0, 1, 0, H - 2)
-    // Right border: (W-1,1) to (W-1,H-2) (Connects top and bottom corners)
-    this.drawOrthogonalSegment(W - 1, 1, W - 1, H - 2)
+    // Left border: (0,0) to (0,H-1)
+    this.drawOrthogonalSegment(0, 0, 0, H - 1)
+    // Right border: (W-1,0) to (W-1,H-1)
+    this.drawOrthogonalSegment(W - 1, 0, W - 1, H - 1)
   }
 
   /** Low‑level util shared by pins and body – draws straight H/V segment. */
