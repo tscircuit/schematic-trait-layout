@@ -289,8 +289,6 @@ export class CircuitBuilder {
   flipX(): void {
     const pinMapsByBoxId: Record<string, Record<number, number>> = {}
 
-    console.log("this.coordinateToNetItem", this.coordinateToNetItem)
-
     // 1. Flip Netlist Boxes and Create Pin Mappings
     for (const box of this.netlistComponents.boxes) {
       const layout = this.boxPinLayouts[box.boxId]
@@ -306,8 +304,6 @@ export class CircuitBuilder {
 
       const currentPinMap: Record<number, number> = {}
       let newGlobalPinCounter = 1
-      console.log("layout", layout)
-      console.log("currentPinMap", currentPinMap)
 
       for (const targetSide of SIDES_CCW) {
         const originalSideIsNowTarget =
@@ -322,7 +318,6 @@ export class CircuitBuilder {
             for (let i = entry.count - 1; i >= 0; i--) {
               const oldPin = entry.startGlobalPin + i
               const newPin = newGlobalPinCounter
-              console.log("oldPin", oldPin, "newPin", newPin)
               currentPinMap[oldPin] = newPin
               newGlobalPinCounter++
             }
@@ -335,8 +330,6 @@ export class CircuitBuilder {
       box.leftPinCount = box.rightPinCount
       box.rightPinCount = tempLeft
     }
-
-    console.log("pinMapsByBoxId", pinMapsByBoxId)
 
     // 2. Flip Netlist Connections
     for (const connection of this.netlistComponents.connections) {
@@ -391,34 +384,14 @@ export class CircuitBuilder {
       const x = Number(xStr)
       const y = Number(yStr)
       const newX = -x
-      const clonedPortRef = JSON.parse(JSON.stringify(portRef)) as PortReference
-      if ("boxId" in clonedPortRef && pinMapsByBoxId[clonedPortRef.boxId]) {
-        const oldPinNumber = clonedPortRef.pinNumber
-        const newPinNumber = pinMapsByBoxId[clonedPortRef.boxId]![oldPinNumber]
-        console.log("swapping coord pin number", {
-          x: newX,
-          y,
-          oldPinNumber,
-          newPinNumber,
-        })
-        if (newPinNumber !== undefined) {
-          clonedPortRef.pinNumber = newPinNumber
-        }
-        // else: warning already issued or it's a netId
-      }
-      console.log({ portRef, clonedPortRef })
-      newCoordToNetItem.set(`${newX},${y}`, clonedPortRef)
+
+      newCoordToNetItem.set(`${newX},${y}`, { ...portRef })
     }
 
     this.coordinateToNetItem.clear()
     for (const [k, v] of newCoordToNetItem) {
       this.coordinateToNetItem.set(k, v)
     }
-
-    console.log(
-      "this.coordinateToNetItem after update",
-      this.coordinateToNetItem,
-    )
 
     // 5. Refresh numeric pin-labels in the overlay
     for (const [coordKey, portRef] of this.coordinateToNetItem) {
