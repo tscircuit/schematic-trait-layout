@@ -19,11 +19,20 @@ export const findBestMatch = (
         templateName
       ] as () => CircuitBuilder
       if (typeof templateBuilderFunction === "function") {
+        // Try original template
         const templateCircuit = templateBuilderFunction()
-        const templateNetlist = templateCircuit.getNetlist()
+        let templateNetlist = templateCircuit.getNetlist()
 
         if (areNetlistsCompatible(inputNetlist, templateNetlist)) {
-          return templateCircuit // Return the first compatible template's CircuitBuilder
+          return templateCircuit
+        }
+
+        // Try flipped template
+        templateCircuit.flipX() // Modify the circuit instance in-place
+        templateNetlist = templateCircuit.getNetlist() // Get the new netlist from the flipped circuit
+
+        if (areNetlistsCompatible(inputNetlist, templateNetlist)) {
+          return templateCircuit // Return the (now flipped) CircuitBuilder
         }
       }
     }

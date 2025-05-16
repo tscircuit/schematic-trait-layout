@@ -9,6 +9,12 @@ import type {
 type Edge = "left" | "right" | "up" | "down"
 
 // Interfaces for storing and restoring pin state for mark/fromMark
+interface BoxPinLayoutEntry {
+  side: Side
+  count: number
+  startGlobalPin: number
+}
+
 interface PinConnectionState {
   x: number
   y: number
@@ -126,6 +132,7 @@ class Grid {
 export class CircuitBuilder {
   readonly grid = new Grid()
   readonly coordinateToNetItem = new Map<string, PortReference>()
+  private readonly boxPinLayouts: Record<string, Array<BoxPinLayoutEntry>> = {}
 
   private nextChipIndex = 0
   nextPassiveId = 1
@@ -149,6 +156,19 @@ export class CircuitBuilder {
       bottomPinCount: 0,
     })
     return chip
+  }
+
+  /** Records the pin layout for a given box, called by ChipBuilder. */
+  recordBoxPinLayout(
+    chipId: string,
+    side: Side,
+    count: number,
+    startGlobalPin: number,
+  ): void {
+    if (!this.boxPinLayouts[chipId]) {
+      this.boxPinLayouts[chipId] = []
+    }
+    this.boxPinLayouts[chipId].push({ side, count, startGlobalPin })
   }
 
   // ── Grid‑level helpers (ex‑ChipBuilder methods) ──────────────────────────
@@ -264,6 +284,126 @@ export class CircuitBuilder {
   getNetlist(): InputNetlist {
     return JSON.parse(JSON.stringify(this.netlistComponents))
   }
+
+  /** Flips the circuit horizontally (X-axis inversion). Modifies the instance in place. */
+  flipX(): void {
+    const pinMapsByBoxId: Record<string, Record<number, number>> = {}
+
+    // 1. Flip Netlist Boxes and Create Pin Mappings
+    for (const box of this.netlistComponents.boxes) {
+      const layout = this.boxPinLayouts[box.boxId]
+      if (!layout) {
+        // This should not happen if recordBoxPinLayout is called correctly
+        // console.warn(`No pin layout found for box ${box.boxId} during flipX`)
+        // Swap counts anyway, but pin remapping will be identity
+        const tempLeft = box.leftPinCount
+        box.leftPinCount = box.rightPinCount
+        box.rightPinCount = tempLeft
+        continue
+      }
+
+      const currentPinMap: Record<number, number> = {}
+      let newGlobalPinCounter = 1
+
+      // Define the order for assigning new pin numbers
+      const newSideProcessingOrder: Side[] = ["left", "right", "top", "bottom"]
+
+      for (const targetSide of newSideProcessingOrder) {
+        const originalSideIsNowTarget =
+          targetSide === "left"
+            ? "right"
+            : targetSide === "right"
+              ? "left"
+              : targetSide
+
+        for (const entry of layout) {
+          if (entry.side === originalSideIsNowTarget) {
+            for (let i = 0; i < entry.count; i++) {
+              const oldPin = entry.startGlobalPin + i
+              const newPin = newGlobalPinCounter + i
+              currentPinMap[oldPin] = newPin
+            }
+            newGlobalPinCounter += entry.count
+          }
+        }
+      }
+      pinMapsByBoxId[box.boxId] = currentPinMap
+
+      const tempLeft = box.leftPinCount
+      box.leftPinCount = box.rightPinCount
+      box.rightPinCount = tempLeft
+    }
+
+    // 2. Flip Netlist Connections
+    for (const connection of this.netlistComponents.connections) {
+      for (const port of connection.connectedPorts) {
+        if ("boxId" in port && pinMapsByBoxId[port.boxId]) {
+          const oldPinNumber = port.pinNumber
+          const newPinNumber = pinMapsByBoxId[port.boxId]![oldPinNumber]
+          if (newPinNumber !== undefined) {
+            port.pinNumber = newPinNumber
+          } else {
+            // This might happen if a pin number in a connection is out of bounds
+            // or if layout recording was incomplete.
+            console.warn(
+              `Could not map old pin ${oldPinNumber} for box ${port.boxId} during flipX`,
+            )
+          }
+        }
+      }
+    }
+
+    // 3. Flip Grid
+    const newTraces = new Map<string, number>()
+    for (const [key, mask] of this.grid.traces) {
+      const [xStr, yStr] = key.split(",")
+      const x = Number(xStr)
+      const y = Number(yStr)
+      const newX = -x
+      let newMask = 0
+      if (mask & EDGE_MASKS.left) newMask |= EDGE_MASKS.right
+      if (mask & EDGE_MASKS.right) newMask |= EDGE_MASKS.left
+      if (mask & EDGE_MASKS.up) newMask |= EDGE_MASKS.up
+      if (mask & EDGE_MASKS.down) newMask |= EDGE_MASKS.down
+      newTraces.set(`${newX},${y}`, newMask)
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: Grid internals
+    ;(this.grid as any).traces = newTraces
+
+    const newOverlay = new Map<string, string>()
+    for (const [key, char] of this.grid.overlay) {
+      const [xStr, yStr] = key.split(",")
+      const x = Number(xStr)
+      const y = Number(yStr)
+      const newX = -x
+      newOverlay.set(`${newX},${y}`, char)
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: Grid internals
+    ;(this.grid as any).overlay = newOverlay
+
+    // 4. Flip coordinateToNetItem
+    const newCoordToNetItem = new Map<string, PortReference>()
+    for (const [key, portRef] of this.coordinateToNetItem) {
+      const [xStr, yStr] = key.split(",")
+      const x = Number(xStr)
+      const y = Number(yStr)
+      const newX = -x
+      const clonedPortRef = JSON.parse(JSON.stringify(portRef)) as PortReference
+      if ("boxId" in clonedPortRef && pinMapsByBoxId[clonedPortRef.boxId]) {
+        const oldPinNumber = clonedPortRef.pinNumber
+        const newPinNumber = pinMapsByBoxId[clonedPortRef.boxId]![oldPinNumber]
+        if (newPinNumber !== undefined) {
+          clonedPortRef.pinNumber = newPinNumber
+        }
+        // else: warning already issued or it's a netId
+      }
+      newCoordToNetItem.set(`${newX},${y}`, clonedPortRef)
+    }
+    this.coordinateToNetItem.clear()
+    for (const [k, v] of newCoordToNetItem) {
+      this.coordinateToNetItem.set(k, v)
+    }
+  }
 }
 
 /***** ChipBuilder ************************************************************/
@@ -325,6 +465,16 @@ export class ChipBuilder {
   }
 
   private allocatePins(side: Side, count: number): void {
+    // Record layout with the circuit builder before pins are actually created
+    // _currentGlobalPin is the count of pins allocated *before* this call for this chip.
+    // So, the first pin in this group will be _currentGlobalPin + 1.
+    this.circuit.recordBoxPinLayout(
+      this.chipId,
+      side,
+      count,
+      this._currentGlobalPin + 1,
+    )
+
     for (let i = 0; i < count; i++) {
       this._currentGlobalPin++
       const globalNum = this._currentGlobalPin // 1‑indexed

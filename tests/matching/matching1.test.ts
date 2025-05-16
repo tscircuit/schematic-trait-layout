@@ -16,7 +16,7 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
     ┌───┐
     │  1├────┬──L
     │  2├─L  │
-    │  3│    P  
+    │  3│    P
     └───┘    │
              L
     "
