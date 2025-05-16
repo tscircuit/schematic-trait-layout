@@ -8,7 +8,7 @@ test("areNetlistsCompatible with template4", () => {
   // Create input circuit
   const inputCircuit = circuit()
   const u1 = inputCircuit.chip().rightpins(3) // chip0, global pin 1 is right pin 1
-  u1.pin(1).line(5, 0).mark("m1").line(0, -2).passive().line(0, -2).label() // Connects chip0.pin(1) to net "SignalOut"
+  u1.pin(3).line(5, 0).mark("m1").line(0, -2).passive().line(0, -2).label() // Connects chip0.pin(1) to net "SignalOut"
   u1.fromMark("m1").line(3, 0).label()
   u1.pin(2).line(2, 0).label()
 
@@ -30,9 +30,9 @@ test("areNetlistsCompatible with template4", () => {
   expect(`\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     ┌───┐
-    │  1├────┬──L
+    │  3├────┬──L
     │  2├─L  │
-    │  3│    P
+    │  1│    P
     └───┘    │
              L
     "
@@ -42,9 +42,9 @@ test("areNetlistsCompatible with template4", () => {
     "
             L
     ┌───┐   │
-    │  1├───┤
+    │  3├───┤
     │  2├─L │
-    │  3├┐  P
+    │  1├┐  P
     └───┘│  │
          L  L
     "
@@ -73,11 +73,7 @@ test("areNetlistsCompatible with template4", () => {
           "connectedPorts": [
             {
               "boxIndex": 0,
-              "pinNumber": 1,
-            },
-            {
-              "boxIndex": 1,
-              "pinNumber": 1,
+              "pinNumber": 2,
             },
             {
               "netIndex": 0,
@@ -88,7 +84,11 @@ test("areNetlistsCompatible with template4", () => {
           "connectedPorts": [
             {
               "boxIndex": 0,
-              "pinNumber": 2,
+              "pinNumber": 3,
+            },
+            {
+              "boxIndex": 1,
+              "pinNumber": 1,
             },
             {
               "netIndex": 1,
@@ -147,10 +147,6 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "boxIndex": 1,
-              "pinNumber": 1,
-            },
-            {
               "netIndex": 0,
             },
           ],
@@ -171,6 +167,10 @@ test("areNetlistsCompatible with template4", () => {
             {
               "boxIndex": 0,
               "pinNumber": 3,
+            },
+            {
+              "boxIndex": 1,
+              "pinNumber": 1,
             },
             {
               "netIndex": 2,

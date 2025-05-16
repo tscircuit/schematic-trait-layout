@@ -7,13 +7,13 @@ test("template2", () => {
     "
           L
     ┌───┐ │
-    │  1├─┘┌─P─L
-    │  2├──┘
-    │  3├────P─L
+    │  7├─┘┌─P─L
+    │  6├──┘
+    │  5├────P─L
     │  4├─────┐
-    │  5├──┐  │
-    │  6├┐ │  │
-    │  7├● │  │
+    │  3├──┐  │
+    │  2├┐ │  │
+    │  1├● │  │
     └───┘│ P  P
          │ │  │
          L L  L
@@ -63,7 +63,7 @@ test("template2", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 1,
+              "pinNumber": 7,
             },
             {
               "netId": "L1",
@@ -74,7 +74,7 @@ test("template2", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 2,
+              "pinNumber": 6,
             },
             {
               "boxId": "passive1",
@@ -97,7 +97,7 @@ test("template2", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 3,
+              "pinNumber": 5,
             },
             {
               "boxId": "passive2",
@@ -143,7 +143,7 @@ test("template2", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 5,
+              "pinNumber": 3,
             },
             {
               "boxId": "passive4",
@@ -166,14 +166,14 @@ test("template2", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 6,
+              "pinNumber": 2,
             },
             {
               "netId": "L6",
             },
             {
               "boxId": "chip0",
-              "pinNumber": 7,
+              "pinNumber": 1,
             },
           ],
         },

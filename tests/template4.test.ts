@@ -7,9 +7,9 @@ test("template4", () => {
     "
             L
     ┌───┐   │
-    │  1├───┤
+    │  3├───┤
     │  2├─L │
-    │  3├┐  P
+    │  1├┐  P
     └───┘│  │
          L  L
     "
@@ -37,7 +37,7 @@ test("template4", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 1,
+              "pinNumber": 3,
             },
             {
               "netId": "L1",
@@ -74,7 +74,7 @@ test("template4", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 3,
+              "pinNumber": 1,
             },
             {
               "netId": "L4",

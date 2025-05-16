@@ -6,8 +6,8 @@ test("template5", () => {
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
     ┌───┐     ┌───┐
-    │1 3├─────┤1 2│
-    │2 4│     └───┘
+    │1 4├─────┤1 2│
+    │2 3│     └───┘
     └───┘
     "
   `)
@@ -38,7 +38,7 @@ test("template5", () => {
             },
             {
               "boxId": "chip0",
-              "pinNumber": 3,
+              "pinNumber": 4,
             },
           ],
         },

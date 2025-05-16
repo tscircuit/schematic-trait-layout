@@ -7,9 +7,9 @@ test("template3", () => {
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
     ┌───┐      L
-    │  1├───●──┤
+    │  3├───●──┤
     │  2├─┐ │  │
-    │  3├┐│ P  P
+    │  1├┐│ P  P
     └───┘│└─┘  │
          │     │
          L     L
@@ -45,7 +45,7 @@ test("template3", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 1,
+              "pinNumber": 3,
             },
             {
               "netId": "L1",
@@ -87,7 +87,7 @@ test("template3", () => {
           "connectedPorts": [
             {
               "boxId": "chip0",
-              "pinNumber": 3,
+              "pinNumber": 1,
             },
             {
               "netId": "L3",
@@ -144,14 +144,6 @@ test("template3", () => {
               "pinNumber": 1,
             },
             {
-              "boxIndex": 1,
-              "pinNumber": 1,
-            },
-            {
-              "boxIndex": 2,
-              "pinNumber": 2,
-            },
-            {
               "netIndex": 0,
             },
           ],
@@ -163,7 +155,7 @@ test("template3", () => {
               "pinNumber": 2,
             },
             {
-              "boxIndex": 2,
+              "boxIndex": 1,
               "pinNumber": 1,
             },
           ],
@@ -175,6 +167,14 @@ test("template3", () => {
               "pinNumber": 3,
             },
             {
+              "boxIndex": 1,
+              "pinNumber": 2,
+            },
+            {
+              "boxIndex": 2,
+              "pinNumber": 1,
+            },
+            {
               "netIndex": 1,
             },
           ],
@@ -182,7 +182,7 @@ test("template3", () => {
         {
           "connectedPorts": [
             {
-              "boxIndex": 1,
+              "boxIndex": 2,
               "pinNumber": 2,
             },
             {

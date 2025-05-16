@@ -57,8 +57,8 @@ test("areNetlistsCompatible2: template has more pins on a box", () => {
     "
     Template:
     ┌───┐
-    │  1L1
     │  2│
+    │  1L1
     └───┘
     "
   `)
@@ -85,8 +85,8 @@ test("areNetlistsCompatible2: input requires more pins than template", () => {
     "
     Input:
     ┌───┐
-    │  1L1
     │  2L2
+    │  1L1
     └───┘
     "
   `)
@@ -163,8 +163,8 @@ test("areNetlistsCompatible2: template has extra connections/components not used
     "
     Template:
     ┌───┐
-    │  1├─N1
     │  2├─ExtraN
+    │  1├─N1
     └───┘
     "
   `)
@@ -181,21 +181,21 @@ test("areNetlistsCompatible2: input connection not satisfiable by template's con
   // Input connects chip.R1 to chip.R2
   const inputCircuit = circuit()
   const inputChip = inputCircuit.chip().rightpins(2)
-  inputChip.pin(1).line(1, 0).mark("p1_end")
-  inputChip.pin(2).line(1, 0).line(0, 1).intersect()
+  inputChip.pin(2).line(1, 0).mark("p1_end")
+  inputChip.pin(1).line(1, 0).line(0, 1).intersect()
 
   // Template connects chip.R1 to a Net, and chip.R2 to a different Net (or same net but separate connections)
   const templateCircuit = circuit()
   const templateChip = templateCircuit.chip().rightpins(2)
-  templateChip.pin(1).label("NetA")
-  templateChip.pin(2).label("NetB") // or .label("NetA") but still not a direct R1-R2 connection
+  templateChip.pin(2).label("A")
+  templateChip.pin(1).label("B") // or .label("NetA") but still not a direct R1-R2 connection
 
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
     ┌───┐
-    │  1├●
-    │  2├┘
+    │  2├●
+    │  1├┘
     └───┘
     "
   `)
@@ -203,8 +203,8 @@ test("areNetlistsCompatible2: input connection not satisfiable by template's con
     "
     Template:
     ┌───┐
-    │  1NetA
-    │  2NetB
+    │  2A
+    │  1B
     └───┘
     "
   `)
@@ -220,21 +220,21 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
   // Input: chip.R1 connects to chip.R2
   const inputCircuit = circuit()
   const inputChip = inputCircuit.chip().rightpins(2)
-  inputChip.pin(1).line(1, 0).mark("p1_end_input")
-  inputChip.pin(2).line(1, 0).line(0, 1).intersect()
+  inputChip.pin(2).line(1, 0).mark("p1_end_input")
+  inputChip.pin(1).line(1, 0).line(0, 1).intersect()
 
   // Template: chip.R1, chip.R2, and an external Net "N_Extra" are all part of the same connection
   const templateCircuit = circuit()
   const templateChip = templateCircuit.chip().rightpins(2)
-  templateChip.pin(1).line(1, 0).mark("p1_end_template")
-  templateChip.pin(2).line(1, 0).line(0, 1).intersect().label("N_Extra")
+  templateChip.pin(2).line(1, 0).mark("p1_end_template")
+  templateChip.pin(1).line(1, 0).line(0, 1).intersect().line(2, 0).label("A")
 
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
     ┌───┐
-    │  1├●
-    │  2├┘
+    │  2├●
+    │  1├┘
     └───┘
     "
   `)
@@ -242,8 +242,8 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
     "
     Template:
     ┌───┐
-    │  1├N_Extra
-    │  2├┘
+    │  2├●─A
+    │  1├┘
     └───┘
     "
   `)
@@ -272,8 +272,8 @@ test("areNetlistsCompatible2: complex compatible case with passives", () => {
     "
     Input:
     ┌───┐
-    │  1├─P
     │  2├─A
+    │  1├─P
     └───┘
     "
   `)
@@ -281,8 +281,8 @@ test("areNetlistsCompatible2: complex compatible case with passives", () => {
     "
     Template:
       ┌───┐
-    B─┤1 2├─P
-      │  3├─C
+    B─┤1 3├─C
+      │  2├─P
       └───┘
     "
   `)

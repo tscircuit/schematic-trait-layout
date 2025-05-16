@@ -500,17 +500,17 @@ export class ChipBuilder {
             pin.x = this.originX
             pin.y = this.originY + this.bodyHeight - 1 - (1 + i)
             break
+          case "bottom":
+            pin.x = this.originX + 1 + i
+            pin.y = this.originY + this.bodyHeight - 1
+            break
           case "right":
             pin.x = this.originX + this.bodyWidth - 1
-            pin.y = this.originY + this.bodyHeight - 1 - (1 + i)
+            pin.y = this.originY + (1 + i)
             break
           case "top":
             pin.x = this.originX + 1 + i
             pin.y = this.originY
-            break
-          case "bottom":
-            pin.x = this.originX + 1 + i
-            pin.y = this.originY + this.bodyHeight - 1
             break
         }
       }

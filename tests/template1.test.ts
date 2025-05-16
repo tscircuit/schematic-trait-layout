@@ -6,8 +6,8 @@ test("sample1", () => {
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
             ┌───┐
-    ┌───────┤1 3├───L
-    │    ┌──┤2 4├───L
+    ┌───────┤1 4├───L
+    │    ┌──┤2 3├───L
     P    │  └───┘
     │    L
     L

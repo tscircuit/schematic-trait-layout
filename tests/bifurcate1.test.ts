@@ -13,13 +13,14 @@ test("bifurcate1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+    ┌───┐
+    │1 6├┐  L
+    │2 5├┼L │
+    │3 4├L──┤
+    └───┘   │
+            P
+            │
             L
-    ┌───┐   │
-    │1 4├───┤
-    │2 5├─L │
-    │3 6├┐  P
-    └───┘│  │
-         L  L
     "
   `)
 })
