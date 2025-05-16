@@ -74,8 +74,8 @@ function glyph(mask: number): string {
 
 /** 2‑D sparse grid – we keep it sparse so diagrams can grow in any direction */
 class Grid {
-  private traces = new Map<string, number>() // key "x,y" → Edge mask
-  private overlay = new Map<string, string>() // key "x,y" → literal char
+  traces = new Map<string, number>() // key "x,y" → Edge mask
+  overlay = new Map<string, string>() // key "x,y" → literal char
 
   addEdge(x: number, y: number, edge: Edge): void {
     const key = `${x},${y}`
@@ -100,10 +100,10 @@ class Grid {
   toString(): string {
     if (this.traces.size === 0 && this.overlay.size === 0) return ""
 
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity
+    let minX = Infinity
+    let maxX = -Infinity
+    let minY = Infinity
+    let maxY = -Infinity
     for (const [x, y] of this.coords()) {
       if (x < minX) minX = x
       if (x > maxX) maxX = x
@@ -246,12 +246,12 @@ export class CircuitBuilder {
   ): void {
     const dx = Math.sign(x1 - x0)
     const dy = Math.sign(y1 - y0)
-    let x = x0,
-      y = y0
+    let x = x0
+    let y = y0
     this.associateCoordinateWithNetItem(x, y, item)
     while (x !== x1 || y !== y1) {
-      const nx = x + dx,
-        ny = y + dy
+      const nx = x + dx
+      const ny = y + dy
       if (dx !== 0) {
         if (dx > 0) {
           this.addEdge(x, y, "right")
@@ -367,7 +367,6 @@ export class CircuitBuilder {
       if (mask & EDGE_MASKS.down) newMask |= EDGE_MASKS.down
       newTraces.set(`${newX},${y}`, newMask)
     }
-    // biome-ignore lint/suspicious/noExplicitAny: Grid internals
     ;(this.grid as any).traces = newTraces
 
     const newOverlay = new Map<string, string>()
@@ -378,7 +377,6 @@ export class CircuitBuilder {
       const newX = -x
       newOverlay.set(`${newX},${y}`, char)
     }
-    // biome-ignore lint/suspicious/noExplicitAny: Grid internals
     ;(this.grid as any).overlay = newOverlay
 
     // 4. Flip coordinateToNetItem
