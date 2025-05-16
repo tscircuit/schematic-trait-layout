@@ -14,35 +14,19 @@ export const areNetlistsCompatible = (
   input: InputNetlist,
   template: InputNetlist,
 ): boolean => {
-  const { normalizedNetlist: normInput, transform: normInputTransform } =
-    normalizeNetlist(input)
-  const { normalizedNetlist: normTemplate, transform: normTemplateTransform } =
-    normalizeNetlist(template)
+  const { normalizedNetlist: normInput } = normalizeNetlist(input)
+  const { normalizedNetlist: normTemplate } = normalizeNetlist(template)
 
-  // 1. Check if the set of Box IDs is identical.
-  // This ensures that normInput.boxes[i] and normTemplate.boxes[i] correspond
-  // to the same original component, assuming normalizeNetlist sorts them by ID
-  // before creating the indexed 'boxes' array in NormalizedNetlist.
-  const inputUniqueBoxIds = Object.keys(
-    normInputTransform.boxIdToBoxIndex,
-  ).sort()
-  const templateUniqueBoxIds = Object.keys(
-    normTemplateTransform.boxIdToBoxIndex,
-  ).sort()
-
-  if (
-    inputUniqueBoxIds.length !== templateUniqueBoxIds.length ||
-    !inputUniqueBoxIds.every((id, index) => id === templateUniqueBoxIds[index])
-  ) {
-    return false // Sets of Box IDs are not identical
+  // 1. Check if the number of boxes is the same
+  if (normInput.boxes.length !== normTemplate.boxes.length) {
+    return false
   }
 
-  // 2. Check pin counts for each box.
-  // Since sets of Box IDs are identical and normalizeNetlist produces sorted box arrays,
-  // normInput.boxes[i] corresponds to normTemplate.boxes[i].
+  // 2. Check pin counts for each box
+  // Boxes are sorted by boxIndex in normalized netlists, so they correspond by index.
   for (let i = 0; i < normInput.boxes.length; i++) {
     const inputBox = normInput.boxes[i]!
-    const templateBox = normTemplate.boxes[i]!
+    const templateBox = normTemplate.boxes[i]! // Corresponding box
 
     if (
       inputBox.leftPinCount > templateBox.leftPinCount ||
@@ -54,62 +38,28 @@ export const areNetlistsCompatible = (
     }
   }
 
-  // Create reverse lookup maps from index to ID for robust comparison
-  const createReverseMap = (
-    idToIndexMap: Record<string, number>,
-  ): Record<number, string> => {
-    const reverseMap: Record<number, string> = {}
-    for (const [id, index] of Object.entries(idToIndexMap)) {
-      reverseMap[index] = id
-    }
-    return reverseMap
-  }
-
-  const inputNetIndexToId = createReverseMap(
-    normInputTransform.netIdToNetIndex,
-  )
-  const templateNetIndexToId = createReverseMap(
-    normTemplateTransform.netIdToNetIndex,
-  )
-  const inputBoxIndexToId = createReverseMap(
-    normInputTransform.boxIdToBoxIndex,
-  )
-  const templateBoxIndexToId = createReverseMap(
-    normTemplateTransform.boxIdToBoxIndex,
-  )
-
-  // Helper function to compare two NormalizedPort objects by their original IDs.
-  // portA is assumed to be from the input netlist, portB from the template netlist.
+  // Helper function to compare two NormalizedPort objects
   const arePortsEqual = (
     portA: NormalizedPort,
     portB: NormalizedPort,
   ): boolean => {
     if ("boxIndex" in portA && "boxIndex" in portB) {
-      const boxIdA = inputBoxIndexToId[portA.boxIndex]
-      const boxIdB = templateBoxIndexToId[portB.boxIndex]
       return (
-        boxIdA === boxIdB &&
-        boxIdA !== undefined && // Ensure IDs were found (i.e., index was valid)
-        portA.pinNumber === portB.pinNumber
+        portA.boxIndex === portB.boxIndex && portA.pinNumber === portB.pinNumber
       )
     }
     if ("netIndex" in portA && "netIndex" in portB) {
-      const netIdA = inputNetIndexToId[portA.netIndex]
-      const netIdB = templateNetIndexToId[portB.netIndex]
-      return netIdA === netIdB && netIdA !== undefined // Ensure IDs were found
+      return portA.netIndex === portB.netIndex
     }
-    return false // Ports are of different types or an ID lookup failed
+    return false // Ports are of different types (e.g., one box, one net)
   }
 
-  // Helper function to check if a specific port from the input's connection
-  // exists in an array of ports from the template's connection.
+  // Helper function to check if a specific port exists in an array of ports
   const isPortInArray = (
-    portToFind: NormalizedPort, // This port is from normInput's connection (acts as portA)
-    portArray: NormalizedPort[], // This array is from normTemplate's connection (elements act as portB)
+    portToFind: NormalizedPort,
+    portArray: NormalizedPort[],
   ): boolean => {
-    return portArray.some((pInTemplateArray) =>
-      arePortsEqual(portToFind, pInTemplateArray),
-    )
+    return portArray.some((p) => arePortsEqual(portToFind, p))
   }
 
   // 3. Check connections
