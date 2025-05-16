@@ -252,23 +252,12 @@ class PinBuilder {
 
   /** Marks the current point as a junction, drawing a '●' symbol. */
   intersect(): this {
-    this.chip.grid.putOverlay(this.x, this.y, "●")
-
-    // TODO Find the net that connects to this point
-
-    const junctionNetId = `_junction_${this.chip.nextJunctionId++}`
-    if (
-      !this.chip.netlistComponents.nets.find((n) => n.netId === junctionNetId)
-    ) {
-      this.chip.netlistComponents.nets.push({ netId: junctionNetId })
-    }
-
     if (this.lastConnectedItem) {
-      this.chip.netlistComponents.connections.push({
-        connectedPorts: [this.lastConnectedItem, { netId: junctionNetId }],
-      })
+      // TODO Find the net id or component that connects to this point and add
+      // a new connection to it
     }
-    this.lastConnectedItem = { netId: junctionNetId }
+
+    this.chip.grid.putOverlay(this.x, this.y, "●")
     return this
   }
 }
