@@ -126,7 +126,10 @@ async function main() {
         contentFromExportDefault.length > 0 &&
         contentFromExportDefault[0]!.trim() !== ""
       ) {
-        resultingLines.push("")
+        // Only add a blank line if the current content does not end with a docstring comment
+        if (!resultingLines[resultingLines.length - 1]!.trim().endsWith("*/")) {
+          resultingLines.push("")
+        }
       } else if (
         resultingLines.length === 0 &&
         newDocstring &&

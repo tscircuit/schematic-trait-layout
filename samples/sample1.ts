@@ -10,7 +10,6 @@ import { chip } from "lib/builder"
  * L    L
  * ```
  */
-
 export default () => {
   const C = chip().leftpins(2).rightpins(2)
   C.pin(1).line(-8, 0).line(0, -2).passive("vertical").line(0, -2).label()
