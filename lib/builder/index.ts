@@ -299,6 +299,12 @@ class PinBuilder {
     this.chip.grid.putOverlay(this.x, this.y, "●") // Visual marker
     return this
   }
+
+  /** Marks the current pin builder's state for later reference. */
+  mark(name: string): this {
+    this.chip.addMark(name, this)
+    return this
+  }
 }
 
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
@@ -323,6 +329,7 @@ class ChipBuilder {
   nextLabelId = 1 // Starts from 1 for default labels
   netlistComponents: { boxes: Box[]; nets: Net[]; connections: Connection[] }
   coordinateToNetItem = new Map<string, PortReference>()
+  private markedPinBuilders = new Map<string, PinBuilder>()
 
   constructor() {
     this.pinCounts = {
@@ -473,6 +480,21 @@ class ChipBuilder {
       )
     }
     pinBuilder.resetConnectionPoint() // Initialize for netlist generation
+    return pinBuilder
+  }
+
+  /**
+   * Retrieves a PinBuilder instance that was previously marked.
+   * Allows continuing drawing operations from the marked point.
+   * @param name The name of the mark.
+   * @returns The PinBuilder instance associated with the mark.
+   * @throws Error if the mark is not found.
+   */
+  fromMark(name: string): PinBuilder {
+    const pinBuilder = this.markedPinBuilders.get(name)
+    if (!pinBuilder) {
+      throw new Error(`Mark "${name}" not found.`)
+    }
     return pinBuilder
   }
 
@@ -692,6 +714,17 @@ class ChipBuilder {
         connectedPorts: [itemA, itemB],
       })
     }
+  }
+
+  /**
+   * Registers a PinBuilder instance with a given name.
+   * This method is called by `PinBuilder.mark()`.
+   * If a mark with the same name already exists, it will be overwritten.
+   * @param name The name of the mark.
+   * @param pinBuilder The PinBuilder instance to associate with the mark.
+   */
+  public addMark(name: string, pinBuilder: PinBuilder): void {
+    this.markedPinBuilders.set(name, pinBuilder)
   }
 
   /** Convert whole design to ASCII. */

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test"
 import sample2 from "../samples/sample2"
 
-test("sample1", () => {
+test("sample2", () => {
   const C = sample2()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
