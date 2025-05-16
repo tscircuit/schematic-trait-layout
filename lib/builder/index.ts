@@ -268,6 +268,9 @@ export class CircuitBuilder {
         builder.grid.traces.delete(coord)
         builder.grid.overlay.delete(coord)
       }
+
+    // finally keep only what is still connected to the preserved pins
+    builder._retainReachableFromChip(chipId)
   }
 
   /**
@@ -286,6 +289,73 @@ export class CircuitBuilder {
     this._pruneChipSide(chipId, right, true  /* keep-right */)
 
     return [left, right]
+  }
+
+  // ── Keep only the part of the circuit that is electrically reachable
+  //    from the still-present pins of the chosen chip ─────────────────────
+  private _retainReachableFromChip(chipId: string): void {
+    const portKey = (p: PortReference): string =>
+      "boxId" in p ? `b:${p.boxId}:${p.pinNumber}` : `n:${p.netId}`
+
+    /* 1 – seed the search with every remaining pin of the chip */
+    const chipBox = this.netlistComponents.boxes.find(b => b.boxId === chipId)!
+    const totalPins =
+      chipBox.leftPinCount +
+      chipBox.rightPinCount +
+      chipBox.topPinCount +
+      chipBox.bottomPinCount
+    const queue: PortReference[] = []
+    const visited = new Set<string>()
+    for (let i = 1; i <= totalPins; i++) {
+      const p: PortReference = { boxId: chipId, pinNumber: i }
+      visited.add(portKey(p))
+      queue.push(p)
+    }
+
+    /* 2 – breadth-first walk over the connection graph */
+    while (queue.length) {
+      const current = queue.pop()!
+      for (const conn of this.netlistComponents.connections) {
+        if (!conn.connectedPorts.some(cp => portKey(cp as PortReference) === portKey(current)))
+          continue
+        for (const cp of conn.connectedPorts as PortReference[]) {
+          const k = portKey(cp)
+          if (!visited.has(k)) {
+            visited.add(k)
+            queue.push(cp)
+          }
+        }
+      }
+    }
+
+    const keepBoxes = new Set<string>()
+    const keepNets  = new Set<string>()
+    for (const k of visited)
+      k.startsWith("b:")
+        ? keepBoxes.add(k.split(":")[1]!)
+        : keepNets.add(k.split(":")[1]!)
+
+    /* 3 – prune every structure that is not reachable */
+    this.netlistComponents.connections = this.netlistComponents.connections
+      .map(c => ({
+        connectedPorts: c.connectedPorts.filter(p => visited.has(portKey(p as PortReference)))
+      }))
+      .filter(c => c.connectedPorts.length >= 2)
+
+    this.netlistComponents.boxes = this.netlistComponents.boxes
+      .filter(b => keepBoxes.has(b.boxId))
+
+    this.netlistComponents.nets = this.netlistComponents.nets
+      .filter(n => keepNets.has(n.netId))
+
+    for (const id of Object.keys(this.boxPinLayouts))
+      if (!keepBoxes.has(id)) delete this.boxPinLayouts[id]
+
+    for (const [coord, ref] of [...this.coordinateToNetItem])
+      if (!visited.has(portKey(ref)))
+        { this.coordinateToNetItem.delete(coord)
+          this.grid.traces.delete(coord)
+          this.grid.overlay.delete(coord) }
   }
 
   /** Create a new chip inside the circuit. You can later move it with `.at()` */
