@@ -155,7 +155,7 @@ class PinBuilder {
     private readonly chip: ChipBuilder,
     public x: number, // Made public for ChipBuilder to set initial position
     public y: number, // Made public for ChipBuilder to set initial position
-    private associatedChipPinNumber: number,
+    public associatedChipPinNumber: number,
   ) {
     this.resetConnectionPoint()
   }
@@ -185,8 +185,10 @@ class PinBuilder {
 
     const x0 = this.x
     const y0 = this.y
-    const x1 = (this.x += dx)
-    const y1 = (this.y += dy)
+    this.x += dx
+    this.y += dy
+    const x1 = this.x
+    const y1 = this.y
 
     this.lastLineDx = dx
     this.lastLineDy = dy
@@ -555,7 +557,8 @@ class ChipBuilder {
         const pinNumberString = String(
           pinBuilderInstance.associatedChipPinNumber,
         )
-        let numX: number, numY: number
+        let numX: number
+        let numY: number
 
         switch (side) {
           case "left": // Pin at (0, pinBuilderInstance.y)
