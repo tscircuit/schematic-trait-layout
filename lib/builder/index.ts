@@ -8,6 +8,20 @@ import type {
 
 type Edge = "left" | "right" | "up" | "down"
 
+// Interfaces for storing and restoring pin state for mark/fromMark
+interface PinConnectionState {
+  x: number
+  y: number
+  lastConnected: PortReference | null
+  lastDx: number
+  lastDy: number
+}
+
+interface StoredMarkData {
+  pinBuilder: PinBuilder
+  state: PinConnectionState
+}
+
 const EDGE_MASKS: Record<Edge, number> = {
   left: 1,
   right: 2,
@@ -274,7 +288,7 @@ export class ChipBuilder {
 
   /* helpers */
   private _currentGlobalPin = 0
-  private readonly marked = new Map<string, PinBuilder>()
+  private readonly marked = new Map<string, StoredMarkData>()
 
   constructor(
     private readonly circuit: CircuitBuilder,
@@ -439,13 +453,19 @@ export class ChipBuilder {
 
   /** Mark & retrieve */
   fromMark(name: string): PinBuilder {
-    const p = this.marked.get(name)
-    if (!p) throw new Error(`Mark "${name}" not found`)
-    return p
+    const storedData = this.marked.get(name)
+    if (!storedData) throw new Error(`Mark "${name}" not found`)
+
+    const { pinBuilder, state } = storedData
+    pinBuilder.applyMarkableState(state)
+    return pinBuilder
   }
 
   addMark(name: string, p: PinBuilder): void {
-    this.marked.set(name, p)
+    this.marked.set(name, {
+      pinBuilder: p,
+      state: p.getMarkableState(),
+    })
   }
 }
 
@@ -573,6 +593,25 @@ export class PinBuilder {
   mark(name: string): this {
     this.chip.addMark(name, this)
     return this
+  }
+
+  // Methods for mark/fromMark state management
+  getMarkableState(): PinConnectionState {
+    return {
+      x: this.x,
+      y: this.y,
+      lastConnected: this.lastConnected,
+      lastDx: this.lastDx,
+      lastDy: this.lastDy,
+    }
+  }
+
+  applyMarkableState(state: PinConnectionState): void {
+    this.x = state.x
+    this.y = state.y
+    this.lastConnected = state.lastConnected
+    this.lastDx = state.lastDx
+    this.lastDy = state.lastDy
   }
 }
 

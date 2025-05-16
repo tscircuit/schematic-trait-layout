@@ -7,18 +7,18 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
   // 1. Construct an input netlist using the circuit builder
   const inputCircuit = circuit()
   const u1 = inputCircuit.chip().rightpins(3) // chip0, global pin 1 is right pin 1
-  u1.pin(1).line(3, 0).mark("m1").line(0, -2).passive().line(0, -2).label() // Connects chip0.pin(1) to net "SignalOut"
-  u1.fromMark("m1").line(0, 6).label()
+  u1.pin(1).line(5, 0).mark("m1").line(0, -2).passive().line(0, -2).label() // Connects chip0.pin(1) to net "SignalOut"
+  u1.fromMark("m1").line(3, 0).label()
+  u1.pin(2).line(2, 0).label()
 
   expect(`\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
-           L
-    ┌───┐  │
-    │  1├──┤
-    │  2│  │
-    │  3│  P
-    └───┘  │
-           L
+    ┌───┐
+    │  1├────┬──L
+    │  2├─L  │
+    │  3│    P
+    └───┘    │
+             L
     "
   `)
 
