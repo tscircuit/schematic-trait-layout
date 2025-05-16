@@ -332,7 +332,7 @@ export class ChipBuilder {
     for (const side of SIDES_CCW) {
       const cnt = this.pinCounts[side]
       for (let i = 0; i < cnt; i++) {
-        const pin = this.pinMap[`${side}${i + 1}`]
+        const pin = this.pinMap[`${side}${i + 1}`]!
         switch (side) {
           case "left":
             pin.x = this.originX
@@ -380,9 +380,18 @@ export class ChipBuilder {
         bodyItem,
       )
 
-    if (W === 1 && H === 1) return this.circuit.putOverlay(ox, oy, "+")
-    if (W === 1) return seg(0, 0, 0, H - 1)
-    if (H === 1) return seg(0, 0, W - 1, 0)
+    if (W === 1 && H === 1) {
+      this.circuit.putOverlay(ox, oy, "+")
+      return
+    }
+    if (W === 1) {
+      seg(0, 0, 0, H - 1)
+      return
+    }
+    if (H === 1) {
+      seg(0, 0, W - 1, 0)
+      return
+    }
 
     seg(0, 0, W - 1, 0)
     seg(0, H - 1, W - 1, H - 1)
@@ -393,10 +402,10 @@ export class ChipBuilder {
     for (const side of SIDES_CCW) {
       const cnt = this.pinCounts[side]
       for (let i = 0; i < cnt; i++) {
-        const pin = this.pinMap[`${side}${i + 1}`]
+        const pin = this.pinMap[`${side}${i + 1}`]!
         const label = String(pin.pinNumber)
-        let lx = 0,
-          ly = 0
+        let lx = 0
+        let ly = 0
         switch (side) {
           case "left":
             lx = pin.x + 1
@@ -423,7 +432,7 @@ export class ChipBuilder {
   /** Access pin by global number (1‑indexed) */
   pin(n: number): PinBuilder {
     this.computeBody()
-    const p = this.pinBuilders[n - 1]
+    const p = this.pinBuilders[n - 1]!
     p.resetConnectionPoint()
     return p
   }
@@ -456,6 +465,7 @@ export class PinBuilder {
   ) {}
 
   private get circuit(): CircuitBuilder {
+    // biome-ignore lint/complexity/useLiteralKeys: <explanation>
     return this.chip["circuit"]
   }
 
@@ -471,8 +481,8 @@ export class PinBuilder {
   line(dx: number, dy: number): this {
     if (dx !== 0 && dy !== 0)
       throw new Error("Only orthogonal segments allowed")
-    const x0 = this.x,
-      y0 = this.y
+    const x0 = this.x
+    const y0 = this.y
     this.x += dx
     this.y += dy
     this.circuit.drawOrthogonalSegment(
@@ -497,7 +507,7 @@ export class PinBuilder {
       topPinCount: 0,
       bottomPinCount: 0,
     }
-    let orient: "v" | "h" =
+    const orient: "v" | "h" =
       Math.abs(this.lastDx) > Math.abs(this.lastDy) ? "h" : "v"
     if (orient === "v") {
       box.topPinCount = 1

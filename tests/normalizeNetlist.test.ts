@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test"
 import type { InputNetlist } from "lib/input-types"
-import { normalizeNetlist } from "lib/scoring/normalizeNetList"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 
 test("normalizeNetlist should correctly normalize a simple netlist", () => {
   const inputNetlist: InputNetlist = {

@@ -49,7 +49,7 @@ async function main() {
       if (asciiArt && asciiArt.length > 0) {
         const commentLines = asciiArt
           .split("\n")
-          .map((line) => ` * ${line}`.trimEnd())
+          .map((line: string) => ` * ${line}`.trimEnd())
         newDocstring = `/**\n * \`\`\`\n${commentLines.join("\n")}\n * \`\`\`\n */`
       }
 

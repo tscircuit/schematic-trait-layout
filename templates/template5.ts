@@ -1,4 +1,4 @@
-import { circuit, chip } from "lib/builder"
+import { circuit } from "lib/builder"
 
 /**
  * ```
