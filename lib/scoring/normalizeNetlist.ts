@@ -58,11 +58,11 @@ export const normalizeNetlist = (
         .map((port) => {
           if ("boxId" in port) {
             return {
-              boxIndex: transform.boxIdToBoxIndex[port.boxId],
+              boxIndex: transform.boxIdToBoxIndex[port.boxId]!,
               pinNumber: port.pinNumber,
             }
           }
-          return { netIndex: transform.netIdToNetIndex[port.netId] }
+          return { netIndex: transform.netIdToNetIndex[port.netId]! }
         })
         .sort((a, b) => {
           const aIsBox = "boxIndex" in a
