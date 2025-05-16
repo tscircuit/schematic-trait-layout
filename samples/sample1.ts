@@ -4,10 +4,10 @@ import { chip } from "lib/builder"
  * ```
  *         ┌───┐
  * ┌───────┤   ├───L
- * │       │   │
- * B    ┌──┤   ├───L
- * │    │  └───┘
- * L    L
+ * │    ┌──┤   ├───L
+ * B    │  └───┘
+ * │    L
+ * L
  * ```
  */
 export default () => {

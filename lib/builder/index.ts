@@ -16,12 +16,7 @@
 //
 // ---------------------------------------------------------------------------
 
-import {
-  type InputNetlist,
-  type Box,
-  type Connection,
-  type Net,
-} from "../input-types"
+import type { InputNetlist, Box, Connection, Net } from "../input-types"
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -57,32 +52,49 @@ const EDGE_MASKS: Record<Edge, number> = {
 // Convert a set of edges into the correct ASCII glyph.
 function glyph(mask: number): string {
   switch (mask) {
-    case 0: return " "; // No edges
+    case 0:
+      return " " // No edges
 
     // Single edges (parts of a line)
-    case EDGE_MASKS.left: return "─";
-    case EDGE_MASKS.right: return "─";
-    case EDGE_MASKS.up: return "│";
-    case EDGE_MASKS.down: return "│";
+    case EDGE_MASKS.left:
+      return "─"
+    case EDGE_MASKS.right:
+      return "─"
+    case EDGE_MASKS.up:
+      return "│"
+    case EDGE_MASKS.down:
+      return "│"
 
     // Two edges
-    case EDGE_MASKS.left | EDGE_MASKS.right: return "─"; // Horizontal line
-    case EDGE_MASKS.up | EDGE_MASKS.down: return "│";   // Vertical line
-    case EDGE_MASKS.left | EDGE_MASKS.up: return "┘";    // Corner: bottom-left in screen space (left, up in Cartesian)
-    case EDGE_MASKS.left | EDGE_MASKS.down: return "┐";  // Corner: top-left in screen space (left, down in Cartesian)
-    case EDGE_MASKS.right | EDGE_MASKS.up: return "└";   // Corner: bottom-right in screen space (right, up in Cartesian)
-    case EDGE_MASKS.right | EDGE_MASKS.down: return "┌"; // Corner: top-right in screen space (right, down in Cartesian)
+    case EDGE_MASKS.left | EDGE_MASKS.right:
+      return "─" // Horizontal line
+    case EDGE_MASKS.up | EDGE_MASKS.down:
+      return "│" // Vertical line
+    case EDGE_MASKS.left | EDGE_MASKS.up:
+      return "┘" // Corner: bottom-left in screen space (left, up in Cartesian)
+    case EDGE_MASKS.left | EDGE_MASKS.down:
+      return "┐" // Corner: top-left in screen space (left, down in Cartesian)
+    case EDGE_MASKS.right | EDGE_MASKS.up:
+      return "└" // Corner: bottom-right in screen space (right, up in Cartesian)
+    case EDGE_MASKS.right | EDGE_MASKS.down:
+      return "┌" // Corner: top-right in screen space (right, down in Cartesian)
 
     // Three edges
-    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.up: return "┴"; // T-junction pointing down on screen
-    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.down: return "┬"; // T-junction pointing up on screen
-    case EDGE_MASKS.left | EDGE_MASKS.up | EDGE_MASKS.down: return "┤";   // T-junction pointing right on screen
-    case EDGE_MASKS.right | EDGE_MASKS.up | EDGE_MASKS.down: return "├";  // T-junction pointing left on screen
+    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.up:
+      return "┴" // T-junction pointing down on screen
+    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.down:
+      return "┬" // T-junction pointing up on screen
+    case EDGE_MASKS.left | EDGE_MASKS.up | EDGE_MASKS.down:
+      return "┤" // T-junction pointing right on screen
+    case EDGE_MASKS.right | EDGE_MASKS.up | EDGE_MASKS.down:
+      return "├" // T-junction pointing left on screen
 
     // Four edges
-    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.up | EDGE_MASKS.down: return "┼"; // Crossroads
+    case EDGE_MASKS.left | EDGE_MASKS.right | EDGE_MASKS.up | EDGE_MASKS.down:
+      return "┼" // Crossroads
 
-    default: return " "; // Should ideally not be reached if mask is a combination of EDGE_MASKS
+    default:
+      return " " // Should ideally not be reached if mask is a combination of EDGE_MASKS
   }
 }
 
@@ -352,11 +364,11 @@ class ChipBuilder {
     // If N=0 pins on an axis, dimension is 1 (a single line/point for that axis).
     this.bodyWidth = Math.max(
       5,
-      maxPinsHorizontal === 0 ? 1 : maxPinsHorizontal * 2 + 1,
+      maxPinsHorizontal === 0 ? 1 : maxPinsHorizontal + 2,
     )
     this.bodyHeight = Math.max(
-      5,
-      maxPinsVertical === 0 ? 1 : maxPinsVertical * 2 + 1,
+      3,
+      maxPinsVertical === 0 ? 1 : maxPinsVertical + 2,
     )
 
     // Set the position of each pin now that we know the body size
@@ -371,19 +383,19 @@ class ChipBuilder {
             case "left":
               pin.x = 0
               // Assign Y coordinates from top to bottom (higher Y is top)
-              pin.y = this.bodyHeight - 1 - (1 + i * 2)
+              pin.y = this.bodyHeight - 1 - (1 + i)
               break
             case "right":
               pin.x = this.bodyWidth - 1
               // Assign Y coordinates from top to bottom (higher Y is top)
-              pin.y = this.bodyHeight - 1 - (1 + i * 2)
+              pin.y = this.bodyHeight - 1 - (1 + i)
               break
             case "top":
-              pin.x = 1 + i * 2
+              pin.x = 1 + i
               pin.y = 0
               break
             case "bottom":
-              pin.x = 1 + i * 2
+              pin.x = 1 + i
               pin.y = this.bodyHeight - 1
               break
           }
