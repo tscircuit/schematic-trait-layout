@@ -281,11 +281,9 @@ class ChipBuilder {
 
   readonly mainChipId = "chip0"
   nextPassiveId = 1
-  nextJunctionId = 1 // Added for unique junction IDs
   netlistComponents: { boxes: Box[]; nets: Net[]; connections: Connection[] }
 
   constructor() {
-    this.nextJunctionId = 1
     this.pinCounts = {
       left: 0,
       right: 0,
