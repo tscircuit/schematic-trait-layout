@@ -5,6 +5,9 @@ import type {
   Net,
   PortReference,
 } from "../input-types"
+import Debug from "debug"
+
+const debug = Debug("mash")
 
 type Edge = "left" | "right" | "up" | "down"
 
@@ -151,7 +154,7 @@ export class CircuitBuilder {
 
     // numeric counters
     copy.nextPassiveId = this.nextPassiveId
-    copy.nextLabelId   = this.nextLabelId
+    copy.nextLabelId = this.nextLabelId
     ;(copy as any).nextChipIndex = (this as any).nextChipIndex
 
     // chip origins
@@ -159,10 +162,10 @@ export class CircuitBuilder {
 
     // pin-layout table
     for (const [k, v] of Object.entries(this.boxPinLayouts))
-      copy.boxPinLayouts[k] = v.map(e => ({ ...e }))
+      copy.boxPinLayouts[k] = v.map((e) => ({ ...e }))
 
     // grid
-    for (const [k, m] of this.grid.traces)  copy.grid.traces.set(k, m)
+    for (const [k, m] of this.grid.traces) copy.grid.traces.set(k, m)
     for (const [k, c] of this.grid.overlay) copy.grid.overlay.set(k, c)
 
     // coordinate → port map
@@ -170,9 +173,15 @@ export class CircuitBuilder {
       copy.coordinateToNetItem.set(k, { ...r })
 
     // netlist
-    copy.netlistComponents.boxes       = JSON.parse(JSON.stringify(this.netlistComponents.boxes))
-    copy.netlistComponents.nets        = JSON.parse(JSON.stringify(this.netlistComponents.nets))
-    copy.netlistComponents.connections = JSON.parse(JSON.stringify(this.netlistComponents.connections))
+    copy.netlistComponents.boxes = JSON.parse(
+      JSON.stringify(this.netlistComponents.boxes),
+    )
+    copy.netlistComponents.nets = JSON.parse(
+      JSON.stringify(this.netlistComponents.nets),
+    )
+    copy.netlistComponents.connections = JSON.parse(
+      JSON.stringify(this.netlistComponents.connections),
+    )
 
     return copy
   }
@@ -181,43 +190,44 @@ export class CircuitBuilder {
   private _pruneChipSide(
     chipId: string,
     builder: CircuitBuilder,
-    removeLeftSide: boolean,   // true ↦ delete left pins, keep right pins
+    removeLeftSide: boolean, // true ↦ delete left pins, keep right pins
   ): void {
-    const box = builder.netlistComponents.boxes.find(b => b.boxId === chipId)!
-    const leftCnt  = box.leftPinCount
+    const box = builder.netlistComponents.boxes.find((b) => b.boxId === chipId)!
+    const leftCnt = box.leftPinCount
     const rightCnt = box.rightPinCount
 
     const pinsToRemove = new Set<number>()
-    const pinsToKeep   : number[] = []
+    const pinsToKeep: number[] = []
 
     // decide which global pin numbers disappear / survive
     for (let i = 1; i <= leftCnt + rightCnt; i++) {
       const isLeft = i <= leftCnt
       if ((isLeft && removeLeftSide) || (!isLeft && !removeLeftSide))
         pinsToRemove.add(i)
-      else
-        pinsToKeep.push(i)
+      else pinsToKeep.push(i)
     }
 
     // new contiguous pin numbers for the kept ones
     const old2new: Record<number, number> = {}
-    pinsToKeep.forEach((old, idx) => { old2new[old] = idx + 1 })
+    pinsToKeep.forEach((old, idx) => {
+      old2new[old] = idx + 1
+    })
 
     /* ── update chip box ─────────────────────────────── */
     if (removeLeftSide) {
-      box.leftPinCount  = 0
+      box.leftPinCount = 0
       box.rightPinCount = pinsToKeep.length
     } else {
       box.rightPinCount = 0
-      box.leftPinCount  = pinsToKeep.length
+      box.leftPinCount = pinsToKeep.length
     }
 
     /* ── boxPinLayouts table ─────────────────────────── */
     builder.boxPinLayouts[chipId] = builder.boxPinLayouts[chipId]
-      .filter(e => (e.side === "left") !== removeLeftSide)          // keep wanted side(s)
-      .map(e => ({
+      .filter((e) => (e.side === "left") !== removeLeftSide) // keep wanted side(s)
+      .map((e) => ({
         ...e,
-        startGlobalPin: old2new[e.startGlobalPin],                  // shift numbering
+        startGlobalPin: old2new[e.startGlobalPin], // shift numbering
       }))
 
     /* ── coordinate-to-net items, grid & overlay ─────── */
@@ -245,8 +255,15 @@ export class CircuitBuilder {
     /* ── connections / nets  ─────────────────────────── */
     for (const conn of [...builder.netlistComponents.connections]) {
       conn.connectedPorts = conn.connectedPorts
-        .filter(p => !("boxId" in p && p.boxId === chipId && pinsToRemove.has(p.pinNumber)))
-        .map(p => {
+        .filter(
+          (p) =>
+            !(
+              "boxId" in p &&
+              p.boxId === chipId &&
+              pinsToRemove.has(p.pinNumber)
+            ),
+        )
+        .map((p) => {
           if ("boxId" in p && p.boxId === chipId)
             return { ...p, pinNumber: old2new[p.pinNumber] }
           return p
@@ -254,17 +271,17 @@ export class CircuitBuilder {
 
       if (conn.connectedPorts.length < 2)
         builder.netlistComponents.connections =
-          builder.netlistComponents.connections.filter(c => c !== conn)
+          builder.netlistComponents.connections.filter((c) => c !== conn)
     }
 
     // drop orphan nets + their geometry
     const liveNets = new Set<string>()
     for (const c of builder.netlistComponents.connections)
-      for (const p of c.connectedPorts)
-        if ("netId" in p) liveNets.add(p.netId)
+      for (const p of c.connectedPorts) if ("netId" in p) liveNets.add(p.netId)
 
-    builder.netlistComponents.nets =
-      builder.netlistComponents.nets.filter(n => liveNets.has(n.netId))
+    builder.netlistComponents.nets = builder.netlistComponents.nets.filter(
+      (n) => liveNets.has(n.netId),
+    )
 
     for (const [coord, ref] of [...builder.coordinateToNetItem])
       if ("netId" in ref && !liveNets.has(ref.netId)) {
@@ -334,7 +351,14 @@ export class CircuitBuilder {
     const bodyItem: PortReference | null = null // Body segments are not net items
 
     const seg = (x0: number, y0: number, x1: number, y1: number) =>
-      this.drawOrthogonalSegmentOnGrid(ox + x0, oy + y0, ox + x1, oy + y1, bodyItem, targetGrid)
+      this.drawOrthogonalSegmentOnGrid(
+        ox + x0,
+        oy + y0,
+        ox + x1,
+        oy + y1,
+        bodyItem,
+        targetGrid,
+      )
 
     if (W === 1 && H === 1) {
       targetGrid.putOverlay(ox, oy, "+")
@@ -350,7 +374,12 @@ export class CircuitBuilder {
     }
 
     // Draw pin numbers inside body
-    const pinSideIndices: Record<Side, number> = { left: 0, right: 0, top: 0, bottom: 0 }
+    const pinSideIndices: Record<Side, number> = {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    }
 
     const sortedBoxLayout = [...boxLayout].sort((a, b) => {
       const sideAIndex = SIDES_CCW.indexOf(a.side)
@@ -390,16 +419,27 @@ export class CircuitBuilder {
         let lx = 0
         let ly = 0
         switch (side) {
-          case "left":   lx = pinX + 1; ly = pinY; break;
-          case "right":  lx = pinX - 1; ly = pinY; break;
-          case "top":    lx = pinX;     ly = pinY - 1; break;
-          case "bottom": lx = pinX;     ly = pinY + 1; break;
+          case "left":
+            lx = pinX + 1
+            ly = pinY
+            break
+          case "right":
+            lx = pinX - 1
+            ly = pinY
+            break
+          case "top":
+            lx = pinX
+            ly = pinY - 1
+            break
+          case "bottom":
+            lx = pinX
+            ly = pinY + 1
+            break
         }
         targetGrid.putOverlay(lx, ly, label)
       }
     }
   }
-
 
   /**
    * Split the circuit into two independent circuits along a vertical
@@ -407,14 +447,14 @@ export class CircuitBuilder {
    * keeps the chip's left-hand pins, the second keeps its right-hand pins.
    */
   bifurcateX(chipId: string): [CircuitBuilder, CircuitBuilder] {
-    const left  = this._clone()
+    const left = this._clone()
     const right = this._clone()
 
     // remove right-hand pins from the “left” clone
-    this._pruneChipSide(chipId, left , false /* keep-left */)
+    this._pruneChipSide(chipId, left, false /* keep-left */)
 
     // remove left-hand pins (and renumber) in the “right” clone
-    this._pruneChipSide(chipId, right, true  /* keep-right */)
+    this._pruneChipSide(chipId, right, true /* keep-right */)
 
     return [left, right]
   }
@@ -426,7 +466,9 @@ export class CircuitBuilder {
       "boxId" in p ? `b:${p.boxId}:${p.pinNumber}` : `n:${p.netId}`
 
     /* 1 – seed the search with every remaining pin of the chip */
-    const chipBox = this.netlistComponents.boxes.find(b => b.boxId === chipId)!
+    const chipBox = this.netlistComponents.boxes.find(
+      (b) => b.boxId === chipId,
+    )!
     const totalPins =
       chipBox.leftPinCount +
       chipBox.rightPinCount +
@@ -444,7 +486,11 @@ export class CircuitBuilder {
     while (queue.length) {
       const current = queue.pop()!
       for (const conn of this.netlistComponents.connections) {
-        if (!conn.connectedPorts.some(cp => portKey(cp as PortReference) === portKey(current)))
+        if (
+          !conn.connectedPorts.some(
+            (cp) => portKey(cp as PortReference) === portKey(current),
+          )
+        )
           continue
         for (const cp of conn.connectedPorts as PortReference[]) {
           const k = portKey(cp)
@@ -457,7 +503,7 @@ export class CircuitBuilder {
     }
 
     const keepBoxes = new Set<string>()
-    const keepNets  = new Set<string>()
+    const keepNets = new Set<string>()
     for (const k of visited)
       k.startsWith("b:")
         ? keepBoxes.add(k.split(":")[1]!)
@@ -465,25 +511,30 @@ export class CircuitBuilder {
 
     /* 3 – prune every structure that is not reachable */
     this.netlistComponents.connections = this.netlistComponents.connections
-      .map(c => ({
-        connectedPorts: c.connectedPorts.filter(p => visited.has(portKey(p as PortReference)))
+      .map((c) => ({
+        connectedPorts: c.connectedPorts.filter((p) =>
+          visited.has(portKey(p as PortReference)),
+        ),
       }))
-      .filter(c => c.connectedPorts.length >= 2)
+      .filter((c) => c.connectedPorts.length >= 2)
 
-    this.netlistComponents.boxes = this.netlistComponents.boxes
-      .filter(b => keepBoxes.has(b.boxId))
+    this.netlistComponents.boxes = this.netlistComponents.boxes.filter((b) =>
+      keepBoxes.has(b.boxId),
+    )
 
-    this.netlistComponents.nets = this.netlistComponents.nets
-      .filter(n => keepNets.has(n.netId))
+    this.netlistComponents.nets = this.netlistComponents.nets.filter((n) =>
+      keepNets.has(n.netId),
+    )
 
     for (const id of Object.keys(this.boxPinLayouts))
       if (!keepBoxes.has(id)) delete this.boxPinLayouts[id]
 
     for (const [coord, ref] of [...this.coordinateToNetItem])
-      if (!visited.has(portKey(ref)))
-        { this.coordinateToNetItem.delete(coord)
-          this.grid.traces.delete(coord)
-          this.grid.overlay.delete(coord) }
+      if (!visited.has(portKey(ref))) {
+        this.coordinateToNetItem.delete(coord)
+        this.grid.traces.delete(coord)
+        this.grid.overlay.delete(coord)
+      }
   }
 
   /** Create a new chip inside the circuit. You can later move it with `.at()` */
@@ -588,7 +639,7 @@ export class CircuitBuilder {
     item: PortReference | null,
     targetGrid?: Grid, // Optional: specify which grid to draw on
   ): void {
-    const gridToUse = targetGrid ?? this.grid;
+    const gridToUse = targetGrid ?? this.grid
     const dx = Math.sign(x1 - x0)
     const dy = Math.sign(y1 - y0)
     let x = x0
@@ -943,7 +994,7 @@ export class ChipBuilder {
     const bodyItem: PortReference | null = null
 
     // Use the main circuit's grid for drawing the initial chip body
-    const targetGrid = this.circuit.grid;
+    const targetGrid = this.circuit.grid
 
     const seg = (x0: number, y0: number, x1: number, y1: number) =>
       // biome-ignore lint/complexity/useLiteralKeys: Accessing private member
