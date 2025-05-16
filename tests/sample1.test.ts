@@ -35,50 +35,60 @@ test("sample1", () => {
       ],
       "connections": [
         {
-          "from": {
-            "boxId": "chip0",
-            "pinNumber": 1,
-          },
-          "to": {
-            "boxId": "passive1",
-            "pinNumber": 1,
-          },
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 1,
+            },
+            {
+              "boxId": "passive1",
+              "pinNumber": 1,
+            },
+          ],
         },
         {
-          "from": {
-            "boxId": "passive1",
-            "pinNumber": 2,
-          },
-          "to": {
-            "netId": "L",
-          },
+          "connectedPorts": [
+            {
+              "boxId": "passive1",
+              "pinNumber": 2,
+            },
+            {
+              "netId": "L",
+            },
+          ],
         },
         {
-          "from": {
-            "boxId": "chip0",
-            "pinNumber": 2,
-          },
-          "to": {
-            "netId": "L",
-          },
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 2,
+            },
+            {
+              "netId": "L",
+            },
+          ],
         },
         {
-          "from": {
-            "boxId": "chip0",
-            "pinNumber": 3,
-          },
-          "to": {
-            "netId": "L",
-          },
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 3,
+            },
+            {
+              "netId": "L",
+            },
+          ],
         },
         {
-          "from": {
-            "boxId": "chip0",
-            "pinNumber": 4,
-          },
-          "to": {
-            "netId": "L",
-          },
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 4,
+            },
+            {
+              "netId": "L",
+            },
+          ],
         },
       ],
       "nets": [

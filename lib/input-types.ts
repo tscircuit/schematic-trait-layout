@@ -7,8 +7,7 @@ export interface Box {
 }
 
 export interface Connection {
-  from: { boxId: string; pinNumber: number } | { netId: string }
-  to: { boxId: string; pinNumber: number } | { netId: string }
+  connectedPorts: Array<{ boxId: string; pinNumber: number } | { netId: string }>
 }
 
 export interface Net {

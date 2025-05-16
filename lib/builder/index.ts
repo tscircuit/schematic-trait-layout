@@ -210,8 +210,10 @@ class PinBuilder {
 
     if (this.lastConnectedItem) {
       this.chip.netlistComponents.connections.push({
-        from: this.lastConnectedItem,
-        to: { boxId: passiveBoxId, pinNumber: 1 }, // Connect to "first" pin of passive
+        connectedPorts: [
+          this.lastConnectedItem,
+          { boxId: passiveBoxId, pinNumber: 1 }, // Connect to "first" pin of passive
+        ],
       })
     }
     this.lastConnectedItem = { boxId: passiveBoxId, pinNumber: 2 } // Next connection starts from "second" pin
@@ -229,8 +231,7 @@ class PinBuilder {
 
     if (this.lastConnectedItem) {
       this.chip.netlistComponents.connections.push({
-        from: this.lastConnectedItem,
-        to: { netId },
+        connectedPorts: [this.lastConnectedItem, { netId }],
       })
     }
     this.lastConnectedItem = { netId }
