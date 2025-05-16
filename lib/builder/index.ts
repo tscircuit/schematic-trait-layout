@@ -84,7 +84,8 @@ class Grid {
     }
 
     const rows: string[] = []
-    for (let y = minY; y <= maxY; y++) {
+    // Iterate from maxY down to minY to render with Y increasing upwards.
+    for (let y = maxY; y >= minY; y--) {
       let row = ""
       for (let x = minX; x <= maxX; x++) {
         const key = `${x},${y}`
@@ -223,8 +224,14 @@ class ChipBuilder {
     // Calculate body dimensions.
     // N pins require N*2+1 units of space (e.g., N=1 pin -> 3 units; N=2 pins -> 5 units).
     // If N=0 pins on an axis, dimension is 1 (a single line/point for that axis).
-    this.bodyWidth = maxPinsHorizontal === 0 ? 1 : maxPinsHorizontal * 2 + 1
-    this.bodyHeight = maxPinsVertical === 0 ? 1 : maxPinsVertical * 2 + 1
+    this.bodyWidth = Math.max(
+      5,
+      maxPinsHorizontal === 0 ? 1 : maxPinsHorizontal * 2 + 1,
+    )
+    this.bodyHeight = Math.max(
+      5,
+      maxPinsVertical === 0 ? 1 : maxPinsVertical * 2 + 1,
+    )
 
     // Set the position of each pin now that we know the body size
     for (const side of SIDES_CCW) {
@@ -237,11 +244,13 @@ class ChipBuilder {
           switch (side) {
             case "left":
               pin.x = 0
-              pin.y = 1 + i * 2
+              // Assign Y coordinates from top to bottom (higher Y is top)
+              pin.y = this.bodyHeight - 1 - (1 + i * 2)
               break
             case "right":
               pin.x = this.bodyWidth - 1
-              pin.y = 1 + i * 2
+              // Assign Y coordinates from top to bottom (higher Y is top)
+              pin.y = this.bodyHeight - 1 - (1 + i * 2)
               break
             case "top":
               pin.x = 1 + i * 2
@@ -346,13 +355,15 @@ class ChipBuilder {
           this.grid.addEdge(nx, ny, "right")
         }
       } else if (dy !== 0) {
-        // vertical
+        // vertical: dy is Math.sign(y1 - y0) from user coordinates
         if (dy > 0) {
-          this.grid.addEdge(x, y, "down")
-          this.grid.addEdge(nx, ny, "up")
+          // Moving UP in Cartesian (y1 > y0)
+          this.grid.addEdge(x, y, "up") // Current cell (x,y) gets an "up" edge
+          this.grid.addEdge(nx, ny, "down") // Next cell (nx,ny) gets a "down" edge
         } else {
-          this.grid.addEdge(x, y, "up")
-          this.grid.addEdge(nx, ny, "down")
+          // Moving DOWN in Cartesian (y1 < y0)
+          this.grid.addEdge(x, y, "down") // Current cell (x,y) gets a "down" edge
+          this.grid.addEdge(nx, ny, "up") // Next cell (nx,ny) gets an "up" edge
         }
       }
       x = nx
