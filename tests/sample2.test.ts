@@ -171,16 +171,9 @@ test("sample1", () => {
             {
               "netId": "L",
             },
-          ],
-        },
-        {
-          "connectedPorts": [
             {
               "boxId": "chip0",
               "pinNumber": 7,
-            },
-            {
-              "netId": "_junction_1",
             },
           ],
         },
@@ -188,10 +181,7 @@ test("sample1", () => {
       "nets": [
         {
           "netId": "L",
-        },
-        {
-          "netId": "_junction_1",
-        },
+        }
       ],
     }
   `)
