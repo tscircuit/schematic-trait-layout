@@ -1,9 +1,35 @@
 import type { InputNetlist } from "lib/input-types"
 import { normalizeNetlist } from "./normalizeNetlist"
-import type { NormalizedNetlistConnection } from "./types"
+import type { NormalizedNetlist, NormalizedNetlistConnection } from "./types"
 
 // A type alias for individual ports within a normalized connection
 type NormalizedPort = NormalizedNetlistConnection["connectedPorts"][number]
+
+// Helper to get a string representation of box ports connected to a net
+const getBoxPortsForNet = (
+  netlist: NormalizedNetlist,
+  netIndex: number,
+): Set<string> => {
+  const ports = new Set<string>()
+  for (const connection of netlist.connections) {
+    let isNetInConnection = false
+    for (const port of connection.connectedPorts) {
+      if ("netIndex" in port && port.netIndex === netIndex) {
+        isNetInConnection = true
+        break
+      }
+    }
+
+    if (isNetInConnection) {
+      for (const port of connection.connectedPorts) {
+        if ("boxIndex" in port) {
+          ports.add(`b${port.boxIndex}p${port.pinNumber}`)
+        }
+      }
+    }
+  }
+  return ports
+}
 
 /**
  * For netlists to be compatible, they must have the same number of boxes. It
@@ -38,54 +64,113 @@ export const areNetlistsCompatible = (
     }
   }
 
-  // Helper function to compare two NormalizedPort objects
+  // 3. Build a map from input net indices to template net indices
+  const inputNetToBoxPinsSigs = normInput.nets.map((n) =>
+    getBoxPortsForNet(normInput, n.netIndex),
+  )
+  const templateNetToBoxPinsSigs = normTemplate.nets.map((n) =>
+    getBoxPortsForNet(normTemplate, n.netIndex),
+  )
+
+  const netIndexMap: Record<number, number> = {}
+  const templateNetIndicesUsed = new Set<number>()
+
+  for (let i = 0; i < normInput.nets.length; i++) {
+    const inputNetSignature = inputNetToBoxPinsSigs[i]!
+    let foundMapForInputNet = false
+    for (let j = 0; j < normTemplate.nets.length; j++) {
+      if (templateNetIndicesUsed.has(j)) {
+        continue // This template net is already mapped
+      }
+      const templateNetSignature = templateNetToBoxPinsSigs[j]!
+
+      // Check if input net's connected box pins are a subset of template net's
+      let isSubset = true
+      for (const pinSig of inputNetSignature) {
+        if (!templateNetSignature.has(pinSig)) {
+          isSubset = false
+          break
+        }
+      }
+
+      if (isSubset) {
+        // Additional check: ensure the template net doesn't connect FEWER pins than the input if both are non-empty.
+        // This is implicitly handled if inputNetSignature is empty, then isSubset is true.
+        // If inputNetSignature is not empty, templateNetSignature must also be not empty and contain all its pins.
+        // A stronger check could be inputNetSignature.size === templateNetSignature.size for exact match,
+        // but "template can have too many connections" suggests subset is fine.
+        netIndexMap[i] = j
+        templateNetIndicesUsed.add(j)
+        foundMapForInputNet = true
+        break
+      }
+    }
+    if (!foundMapForInputNet) {
+      return false // Could not find a suitable template net for this input net
+    }
+  }
+
+  // Helper function to compare two NormalizedPort objects using the netIndexMap
   const arePortsEqual = (
-    portA: NormalizedPort,
-    portB: NormalizedPort,
+    inputPort: NormalizedPort, // Port from normInput
+    templatePort: NormalizedPort, // Port from normTemplate
+    currentNetIndexMap: Record<number, number>,
   ): boolean => {
-    if ("boxIndex" in portA && "boxIndex" in portB) {
+    if ("boxIndex" in inputPort && "boxIndex" in templatePort) {
       return (
-        portA.boxIndex === portB.boxIndex && portA.pinNumber === portB.pinNumber
+        inputPort.boxIndex === templatePort.boxIndex &&
+        inputPort.pinNumber === templatePort.pinNumber
       )
     }
-    if ("netIndex" in portA && "netIndex" in portB) {
-      return portA.netIndex === portB.netIndex
+    if ("netIndex" in inputPort && "netIndex" in templatePort) {
+      const mappedInputNetIndex = currentNetIndexMap[inputPort.netIndex]
+      // If inputPort.netIndex is not in map, it means something went wrong with map construction or logic
+      // or the input net genuinely has no corresponding template net (which buildNetIndexMap should catch).
+      if (mappedInputNetIndex === undefined) return false
+      return mappedInputNetIndex === templatePort.netIndex
     }
-    return false // Ports are of different types (e.g., one box, one net)
+    return false // Ports are of different types
   }
 
-  // Helper function to check if a specific port exists in an array of ports
+  // Helper function to check if a specific input port exists in an array of template ports
   const isPortInArray = (
-    portToFind: NormalizedPort,
-    portArray: NormalizedPort[],
+    portToFind: NormalizedPort, // This port is from normInput
+    portArray: NormalizedPort[], // This array is from normTemplate.connectedPorts
+    currentNetIndexMap: Record<number, number>,
   ): boolean => {
-    return portArray.some((p) => arePortsEqual(portToFind, p))
+    return portArray.some((p) =>
+      arePortsEqual(portToFind, p, currentNetIndexMap),
+    )
   }
 
-  // 3. Check connections
+  // 4. Check connections
   // Every connection in normInput must be satisfiable by a connection in normTemplate.
   // A template connection satisfies an input connection if all ports of the input
-  // connection are present in the template connection.
+  // connection are present in the template connection (considering netIndexMap).
   for (const inputConnection of normInput.connections) {
     let foundMatchingTemplateConnection = false
     for (const templateConnection of normTemplate.connections) {
       let allInputPortsFoundInTemplate = true
       for (const inputPort of inputConnection.connectedPorts) {
-        if (!isPortInArray(inputPort, templateConnection.connectedPorts)) {
+        if (
+          !isPortInArray(
+            inputPort,
+            templateConnection.connectedPorts,
+            netIndexMap,
+          )
+        ) {
           allInputPortsFoundInTemplate = false
-          break // This input port is not in the current template connection's ports
+          break
         }
       }
 
       if (allInputPortsFoundInTemplate) {
         foundMatchingTemplateConnection = true
-        break // Found a template connection that satisfies the current input connection
+        break
       }
     }
 
     if (!foundMatchingTemplateConnection) {
-      console.log("found no match for", inputConnection)
-      console.log(normTemplate.connections.map((c) => c.connectedPorts))
       return false // No template connection could satisfy this input connection
     }
   }
