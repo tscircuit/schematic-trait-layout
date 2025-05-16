@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test"
 import template3 from "../templates/template3"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 
 test("template3", () => {
   const C = template3()
@@ -103,6 +104,102 @@ test("template3", () => {
         },
         {
           "netId": "L3",
+        },
+      ],
+    }
+  `)
+
+  expect(
+    normalizeNetlist(C.getNetlist()).normalizedNetlist,
+  ).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxIndex": 0,
+          "leftPinCount": 0,
+          "rightPinCount": 3,
+          "topPinCount": 0,
+        },
+        {
+          "bottomPinCount": 1,
+          "boxIndex": 1,
+          "leftPinCount": 0,
+          "rightPinCount": 0,
+          "topPinCount": 1,
+        },
+        {
+          "bottomPinCount": 1,
+          "boxIndex": 2,
+          "leftPinCount": 0,
+          "rightPinCount": 0,
+          "topPinCount": 1,
+        },
+      ],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxIndex": 0,
+              "pinNumber": 1,
+            },
+            {
+              "boxIndex": 1,
+              "pinNumber": 1,
+            },
+            {
+              "boxIndex": 2,
+              "pinNumber": 2,
+            },
+            {
+              "netIndex": 0,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxIndex": 0,
+              "pinNumber": 2,
+            },
+            {
+              "boxIndex": 2,
+              "pinNumber": 1,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxIndex": 0,
+              "pinNumber": 3,
+            },
+            {
+              "netIndex": 1,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxIndex": 1,
+              "pinNumber": 2,
+            },
+            {
+              "netIndex": 2,
+            },
+          ],
+        },
+      ],
+      "nets": [
+        {
+          "netIndex": 0,
+        },
+        {
+          "netIndex": 1,
+        },
+        {
+          "netIndex": 2,
         },
       ],
     }
