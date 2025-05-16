@@ -217,7 +217,7 @@ class PinBuilder {
 
     // Associate the component's location (pin1 entry point) with its pin1 identity
     this.chip.associateCoordinateWithNetItem(this.x, this.y, pin1Identity)
-    this.chip.grid.putOverlay(this.x, this.y, "B") // Draw 'B' at pin1 location
+    this.chip.grid.putOverlay(this.x, this.y, "P") // Draw 'P' at pin1 location
 
     // Connect the incoming wire (lastConnectedItem) to pin1 of the passive
     this.chip.connectItems(this.lastConnectedItem, pin1Identity)
@@ -265,7 +265,6 @@ class PinBuilder {
     const currentPointKey = `${this.x},${this.y}`
     const itemAtIntersection =
       this.chip.coordinateToNetItem.get(currentPointKey)
-    console.log("intersect", this.lastConnectedItem, itemAtIntersection)
 
     if (this.lastConnectedItem && itemAtIntersection) {
       this.chip.connectItems(this.lastConnectedItem, itemAtIntersection)
@@ -508,7 +507,8 @@ class ChipBuilder {
 
     // Add pin numbers inside the chip body
     for (const side of SIDES_CCW) {
-      const countOnThisSide = this.pinCounts[side as keyof typeof this.pinCounts]
+      const countOnThisSide =
+        this.pinCounts[side as keyof typeof this.pinCounts]
       for (let i = 0; i < countOnThisSide; i++) {
         // i is 0-indexed for this side
         const pinKey = `${side}${i + 1}` as keyof typeof this.pinMap
@@ -516,7 +516,9 @@ class ChipBuilder {
 
         if (!pinBuilderInstance) continue // Should not happen
 
-        const pinNumberString = String(pinBuilderInstance.associatedChipPinNumber)
+        const pinNumberString = String(
+          pinBuilderInstance.associatedChipPinNumber,
+        )
         let numX: number, numY: number
 
         switch (side) {
