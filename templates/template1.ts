@@ -1,4 +1,4 @@
-import { chip } from "lib/builder"
+import { circuit } from "lib/builder"
 
 /**
  * ```
@@ -11,11 +11,12 @@ import { chip } from "lib/builder"
  * ```
  */
 export default () => {
-  const C = chip().leftpins(2).rightpins(2)
-  C.pin(1).line(-8, 0).line(0, -2).passive().line(0, -2).label()
-  C.pin(2).line(-3, 0).line(0, -2).label()
-  C.pin(3).line(4, 0).label()
-  C.pin(4).line(4, 0).label()
+  const C = circuit()
+  const U1 = C.chip().leftpins(2).rightpins(2)
+  U1.pin(1).line(-8, 0).line(0, -2).passive().line(0, -2).label()
+  U1.pin(2).line(-3, 0).line(0, -2).label()
+  U1.pin(3).line(4, 0).label()
+  U1.pin(4).line(4, 0).label()
 
   return C
 }

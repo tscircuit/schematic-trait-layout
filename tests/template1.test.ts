@@ -3,8 +3,6 @@ import sample1 from "../templates/template1"
 
 test("sample1", () => {
   const C = sample1()
-  expect(C.bodyWidth).toMatchInlineSnapshot(`5`)
-  expect(C.bodyHeight).toMatchInlineSnapshot(`4`)
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
             ┌───┐
