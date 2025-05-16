@@ -4,15 +4,15 @@ import sample1 from "../samples/sample1"
 test("sample1", () => {
   const C = sample1()
   expect(C.bodyWidth).toMatchInlineSnapshot(`5`)
-  expect(C.bodyHeight).toMatchInlineSnapshot(`5`)
+  expect(C.bodyHeight).toMatchInlineSnapshot(`4`)
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
             ┌───┐
     ┌───────┤   ├───L
-    │       │   │
-    B    ┌──┤   ├───L
-    │    │  └───┘
-    L    L
+    │    ┌──┤   ├───L
+    B    │  └───┘
+    │    L
+    L
     "
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
