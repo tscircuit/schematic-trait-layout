@@ -22,13 +22,77 @@ export const normalizeNetlist = (
     netIdToNetIndex: {},
   }
 
-  // Sort boxes by boxId to ensure deterministic boxIndex assignment
-  const sortedBoxes = [...netlist.boxes].sort((a, b) =>
-    a.boxId.localeCompare(b.boxId),
-  )
-  sortedBoxes.forEach((box, index) => {
-    transform.boxIdToBoxIndex[box.boxId] = index
-  })
+  const mainChipId = "chip0"; // Assumed convention for the main chip
+  const orderedBoxIds: string[] = [];
+  const orderedNetIds: string[] = [];
+
+  // Precompute sets of existing IDs for efficient lookups
+  const existingBoxIds = new Set(netlist.boxes.map(b => b.boxId));
+  const existingNetIds = new Set(netlist.nets.map(n => n.netId));
+
+  // Check if the main chip exists in the provided netlist boxes
+  if (existingBoxIds.has(mainChipId)) {
+    orderedBoxIds.push(mainChipId);
+
+    let maxPinNumber = 0;
+    // Determine the highest pin number used by the main chip in connections
+    for (const connection of netlist.connections) {
+      for (const port of connection.connectedPorts) {
+        if ("boxId" in port && port.boxId === mainChipId) {
+          maxPinNumber = Math.max(maxPinNumber, port.pinNumber);
+        }
+      }
+    }
+
+    // Iterate through main chip pins by number to establish order
+    for (let pinNum = 1; pinNum <= maxPinNumber; pinNum++) {
+      for (const connection of netlist.connections) {
+        // Check if this connection involves the current main chip pin
+        const mainChipPinInConnection = connection.connectedPorts.find(
+          p => "boxId" in p && p.boxId === mainChipId && p.pinNumber === pinNum
+        );
+
+        if (mainChipPinInConnection) {
+          // If so, process all ports in this connection
+          for (const port of connection.connectedPorts) {
+            if ("boxId" in port) {
+              // If it's a box port and not the main chip itself
+              if (port.boxId !== mainChipId && !orderedBoxIds.includes(port.boxId)) {
+                // Add to ordered list if it's an existing box
+                if (existingBoxIds.has(port.boxId)) {
+                  orderedBoxIds.push(port.boxId);
+                }
+              }
+            } else { // It's a net port
+              if (!orderedNetIds.includes(port.netId)) {
+                // Add to ordered list if it's an existing net
+                if (existingNetIds.has(port.netId)) {
+                  orderedNetIds.push(port.netId);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Add any remaining boxes not found through main chip pin iteration, sorted by ID
+  const remainingBoxIds = Array.from(existingBoxIds)
+    .filter(id => !orderedBoxIds.includes(id))
+    .sort((a, b) => a.localeCompare(b));
+  const finalSortedBoxIds = [...orderedBoxIds, ...remainingBoxIds];
+
+  // Populate boxIdToBoxIndex transform and create the sortedBoxes array
+  finalSortedBoxIds.forEach((boxId, index) => {
+    transform.boxIdToBoxIndex[boxId] = index;
+  });
+  const sortedBoxes = finalSortedBoxIds.map(boxId => {
+    const box = netlist.boxes.find(b => b.boxId === boxId);
+    // This error should ideally not be reached if logic is correct and netlist is consistent
+    if (!box) throw new Error(`Box ID ${boxId} not found in netlist.boxes.`);
+    return box;
+  });
 
   const normalizedBoxes: NormalizedNetlist["boxes"] = sortedBoxes.map(
     (box) => ({
@@ -38,19 +102,28 @@ export const normalizeNetlist = (
       topPinCount: box.topPinCount,
       bottomPinCount: box.bottomPinCount,
     }),
-  )
+  );
 
-  // Sort nets by netId to ensure deterministic netIndex assignment
-  const sortedNets = [...netlist.nets].sort((a, b) =>
-    a.netId.localeCompare(b.netId),
-  )
-  sortedNets.forEach((net, index) => {
-    transform.netIdToNetIndex[net.netId] = index
-  })
+  // Add any remaining nets not found through main chip pin iteration, sorted by ID
+  const remainingNetIds = Array.from(existingNetIds)
+    .filter(id => !orderedNetIds.includes(id))
+    .sort((a, b) => a.localeCompare(b));
+  const finalSortedNetIds = [...orderedNetIds, ...remainingNetIds];
+
+  // Populate netIdToNetIndex transform and create the sortedNets array
+  finalSortedNetIds.forEach((netId, index) => {
+    transform.netIdToNetIndex[netId] = index;
+  });
+  const sortedNets = finalSortedNetIds.map(netId => {
+    const net = netlist.nets.find(n => n.netId === netId);
+    // This error should ideally not be reached
+    if (!net) throw new Error(`Net ID ${netId} not found in netlist.nets.`);
+    return net;
+  });
 
   const normalizedNets: NormalizedNetlist["nets"] = sortedNets.map((net) => ({
     netIndex: transform.netIdToNetIndex[net.netId]!,
-  }))
+  }));
 
   const normalizedConnections: NormalizedNetlist["connections"] =
     netlist.connections.map((connection) => {
