@@ -84,6 +84,8 @@ export const areNetlistsCompatible = (
     }
 
     if (!foundMatchingTemplateConnection) {
+      console.log("found no match for", inputConnection)
+      console.log(normTemplate.connections.map((c) => c.connectedPorts))
       return false // No template connection could satisfy this input connection
     }
   }
