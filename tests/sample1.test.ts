@@ -26,11 +26,11 @@ test("sample1", () => {
           "topPinCount": 0,
         },
         {
-          "bottomPinCount": 0,
+          "bottomPinCount": 1,
           "boxId": "passive1",
-          "leftPinCount": 1,
-          "rightPinCount": 1,
-          "topPinCount": 0,
+          "leftPinCount": 0,
+          "rightPinCount": 0,
+          "topPinCount": 1,
         },
       ],
       "connections": [

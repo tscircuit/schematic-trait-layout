@@ -188,16 +188,23 @@ class PinBuilder {
     this.chip.grid.putOverlay(this.x, this.y, "B")
 
     const passiveBoxId = `passive${this.chip.nextPassiveId++}`
-    // Convention: passive components are 2-pin devices.
-    // Pin 1 is 'left', Pin 2 is 'right' for netlist purposes, regardless of visual orientation.
-    // This matches a Box with leftPinCount:1, rightPinCount:1.
-    // Pin numbers for connection: 1 (for left), 2 (for right relative to the box's own pin order).
+    // Convention: passive components are 2-pin devices. Pin 1 is considered the input, Pin 2 the output.
+    // The pin counts on each side are set based on the orientation.
     const passiveBox: Box = {
       boxId: passiveBoxId,
-      leftPinCount: 1, // Pin 1
-      rightPinCount: 1, // Pin 2
+      leftPinCount: 0,
+      rightPinCount: 0,
       topPinCount: 0,
       bottomPinCount: 0,
+    }
+
+    if (orientation === "vertical") {
+      passiveBox.topPinCount = 1 // Pin 1 (input)
+      passiveBox.bottomPinCount = 1 // Pin 2 (output)
+    } else {
+      // Default to horizontal
+      passiveBox.leftPinCount = 1 // Pin 1 (input)
+      passiveBox.rightPinCount = 1 // Pin 2 (output)
     }
     this.chip.netlistComponents.boxes.push(passiveBox)
 
