@@ -148,6 +148,8 @@ class Grid {
 
 class PinBuilder {
   private lastConnectedItem: PortReference | null = null
+  private lastLineDx = 0
+  private lastLineDy = 0
 
   constructor(
     private readonly chip: ChipBuilder,
@@ -186,13 +188,16 @@ class PinBuilder {
     const x1 = (this.x += dx)
     const y1 = (this.y += dy)
 
+    this.lastLineDx = dx
+    this.lastLineDy = dy
+
     // The electrical identity of the line is the current lastConnectedItem
     this.chip.drawOrthogonalSegment(x0, y0, x1, y1, this.lastConnectedItem)
     return this
   }
 
   /** Place a generic passive component symbol (very coarse – one glyph). */
-  passive(orientation: "vertical" | "horizontal" = "vertical"): this {
+  passive(): this {
     const passiveBoxId = `passive${this.chip.nextPassiveId++}`
     const passiveBox: Box = {
       boxId: passiveBoxId,
@@ -200,6 +205,15 @@ class PinBuilder {
       rightPinCount: 0,
       topPinCount: 0,
       bottomPinCount: 0,
+    }
+
+    let orientation: "vertical" | "horizontal" | undefined
+
+    // Infer orientation from the last line dx/dy
+    if (this.lastLineDx === 0) {
+      orientation = "vertical"
+    } else if (this.lastLineDy === 0) {
+      orientation = "horizontal"
     }
 
     if (orientation === "vertical") {
