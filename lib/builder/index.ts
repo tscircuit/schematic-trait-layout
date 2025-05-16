@@ -555,6 +555,21 @@ export class PinBuilder {
     return this
   }
 
+  connect(): this {
+    const key = `${this.x},${this.y}`
+    const existing = this.circuit.coordinateToNetItem.get(key)
+    if (this.lastConnected && existing)
+      this.circuit.connectItems(this.lastConnected, existing)
+    else if (this.lastConnected)
+      this.circuit.associateCoordinateWithNetItem(
+        this.x,
+        this.y,
+        this.lastConnected,
+      )
+    // No overlay for connect
+    return this
+  }
+
   mark(name: string): this {
     this.chip.addMark(name, this)
     return this

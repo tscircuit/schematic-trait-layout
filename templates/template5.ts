@@ -3,7 +3,7 @@ import { circuit } from "lib/builder"
 /**
  * ```
  * ┌───┐     ┌───┐
- * │1 3├──●──┤1 2│
+ * │1 3├─────┤1 2│
  * │2 4│     └───┘
  * └───┘
  * ```
@@ -14,7 +14,7 @@ export default () => {
   const U2 = C.chip().leftpins(1).rightpins(1).at(10, 1)
 
   U1.pin(3).line(3, 0).mark("bus")
-  U2.pin(1).line(-3, 0).intersect()
+  U2.pin(1).line(-3, 0).connect()
 
   return C
 }
