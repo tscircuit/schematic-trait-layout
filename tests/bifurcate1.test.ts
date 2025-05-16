@@ -50,4 +50,75 @@ test("bifurcate1", () => {
          L
     "
   `)
+
+  expect(right.getNetlist()).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0",
+          "leftPinCount": 0,
+          "rightPinCount": 3,
+          "topPinCount": 0,
+        },
+        {
+          "bottomPinCount": 1,
+          "boxId": "passive1",
+          "leftPinCount": 0,
+          "rightPinCount": 0,
+          "topPinCount": 1,
+        },
+      ],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 3,
+            },
+            {
+              "netId": "L1",
+            },
+            {
+              "boxId": "passive1",
+              "pinNumber": 1,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 2,
+            },
+            {
+              "netId": "L3",
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 1,
+            },
+            {
+              "netId": "L4",
+            },
+          ],
+        },
+      ],
+      "nets": [
+        {
+          "netId": "L1",
+        },
+        {
+          "netId": "L3",
+        },
+        {
+          "netId": "L4",
+        },
+      ],
+    }
+  `)
 })
