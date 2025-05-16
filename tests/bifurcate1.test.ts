@@ -25,4 +25,30 @@ test("bifurcate1", () => {
      L      L  L
     "
   `)
+
+  const [left, right] = C.bifurcateX(U1.chipId)
+
+  expect(`\n${left.toString()}\n`).toMatchInlineSnapshot(`
+    "
+            
+       ┌───┐
+    L──┤1  │
+       │2  │
+     ┌─┤3  │
+     │ └───┘
+     L
+    "
+  `)
+
+  expect(`\n${right.toString()}\n`).toMatchInlineSnapshot(`
+    "
+            L
+    ┌───┐   │
+    │  3├───┤
+    │  2├─L │
+    │  1├┐  P
+    └───┘│  │
+         L  L
+    "
+  `)
 })
