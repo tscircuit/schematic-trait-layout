@@ -15,4 +15,77 @@ test("sample1", () => {
     L    L
     "
   `)
+  expect(C.getNetlist()).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0",
+          "leftPinCount": 2,
+          "rightPinCount": 2,
+          "topPinCount": 0,
+        },
+        {
+          "bottomPinCount": 0,
+          "boxId": "passive1",
+          "leftPinCount": 1,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+      ],
+      "connections": [
+        {
+          "from": {
+            "boxId": "chip0",
+            "pinNumber": 1,
+          },
+          "to": {
+            "boxId": "passive1",
+            "pinNumber": 1,
+          },
+        },
+        {
+          "from": {
+            "boxId": "passive1",
+            "pinNumber": 2,
+          },
+          "to": {
+            "netId": "L",
+          },
+        },
+        {
+          "from": {
+            "boxId": "chip0",
+            "pinNumber": 2,
+          },
+          "to": {
+            "netId": "L",
+          },
+        },
+        {
+          "from": {
+            "boxId": "chip0",
+            "pinNumber": 3,
+          },
+          "to": {
+            "netId": "L",
+          },
+        },
+        {
+          "from": {
+            "boxId": "chip0",
+            "pinNumber": 4,
+          },
+          "to": {
+            "netId": "L",
+          },
+        },
+      ],
+      "nets": [
+        {
+          "netId": "L",
+        },
+      ],
+    }
+  `)
 })

@@ -12,6 +12,30 @@
 // C.pin4.line(1, 0).label();
 //
 // console.log(C.toString());
+// console.log(C.getNetlist()); // Example for new method
+//
+// ---------------------------------------------------------------------------
+
+import {
+  type InputNetlist,
+  type Box,
+  type Connection,
+  type Net,
+} from "../input-types"
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/********************  INTERNAL PRIMITIVES ***********************************/
+//
+// import { chip } from "./ascii-schematic";
+//
+// const C = chip().leftpins(2).rightpins(2);
+// C.pin1.line(-3, 0).line(0, -1).passive("vertical").line(0, -1).label();
+// C.pin2.line(-1, 0).line(0, -1).label("B");
+// C.pin3.line(1, 0).label();
+// C.pin4.line(1, 0).label();
+//
+// console.log(C.toString());
 //
 // ---------------------------------------------------------------------------
 
@@ -122,11 +146,27 @@ class Grid {
 /********************  PUBLIC BUILDER API *************************************/
 
 class PinBuilder {
+  private lastConnectedItem:
+    | { boxId: string; pinNumber: number }
+    | { netId: string }
+    | null = null
+
   constructor(
     private chip: ChipBuilder,
     public x: number, // Made public for ChipBuilder to set initial position
     public y: number, // Made public for ChipBuilder to set initial position
-  ) {}
+    private associatedChipPinNumber: number,
+  ) {
+    this.resetConnectionPoint()
+  }
+
+  /** Resets the starting point for netlist connections to this pin on the main chip. */
+  resetConnectionPoint(): void {
+    this.lastConnectedItem = {
+      boxId: this.chip.mainChipId,
+      pinNumber: this.associatedChipPinNumber,
+    }
+  }
 
   /** Draw an orthogonal segment, absolute step counts (may be negative). */
   line(dx: number, dy: number): this {
@@ -143,15 +183,50 @@ class PinBuilder {
   }
 
   /** Place a generic passive component symbol (very coarse – one glyph). */
-  passive(_orientation: "vertical" | "horizontal" = "vertical"): this {
+  passive(orientation: "vertical" | "horizontal" = "vertical"): this {
     // We just drop a "B" symbol to keep the example simple
     this.chip.grid.putOverlay(this.x, this.y, "B")
+
+    const passiveBoxId = `passive${this.chip.nextPassiveId++}`
+    // Convention: passive components are 2-pin devices.
+    // Pin 1 is 'left', Pin 2 is 'right' for netlist purposes, regardless of visual orientation.
+    // This matches a Box with leftPinCount:1, rightPinCount:1.
+    // Pin numbers for connection: 1 (for left), 2 (for right relative to the box's own pin order).
+    const passiveBox: Box = {
+      boxId: passiveBoxId,
+      leftPinCount: 1, // Pin 1
+      rightPinCount: 1, // Pin 2
+      topPinCount: 0,
+      bottomPinCount: 0,
+    }
+    this.chip.netlistComponents.boxes.push(passiveBox)
+
+    if (this.lastConnectedItem) {
+      this.chip.netlistComponents.connections.push({
+        from: this.lastConnectedItem,
+        to: { boxId: passiveBoxId, pinNumber: 1 }, // Connect to "first" pin of passive
+      })
+    }
+    this.lastConnectedItem = { boxId: passiveBoxId, pinNumber: 2 } // Next connection starts from "second" pin
     return this
   }
 
   /** Write a text label at the current cursor location. */
   label(text = "L"): this {
     this.chip.grid.putOverlay(this.x, this.y, text)
+
+    const netId = text
+    if (!this.chip.netlistComponents.nets.find((n) => n.netId === netId)) {
+      this.chip.netlistComponents.nets.push({ netId })
+    }
+
+    if (this.lastConnectedItem) {
+      this.chip.netlistComponents.connections.push({
+        from: this.lastConnectedItem,
+        to: { netId },
+      })
+    }
+    this.lastConnectedItem = { netId }
     return this
   }
 }
@@ -164,11 +239,18 @@ class ChipBuilder {
     `${"left" | "right" | "top" | "bottom"}${number}`,
     PinBuilder
   > = {}
+  pinBuilders: PinBuilder[] = []
+  private _currentGlobalPinIndex = 0
+
   pinCounts: Record<"left" | "right" | "top" | "bottom", number>
 
   bodyWidth = 0
   bodyHeight = 0
   bodySizeComputed = false
+
+  readonly mainChipId = "chip0"
+  nextPassiveId = 1
+  netlistComponents: { boxes: Box[]; nets: Net[]; connections: Connection[] }
 
   constructor() {
     this.pinCounts = {
@@ -177,10 +259,23 @@ class ChipBuilder {
       top: 0,
       bottom: 0,
     }
+    this.netlistComponents = {
+      boxes: [
+        {
+          boxId: this.mainChipId,
+          leftPinCount: 0,
+          rightPinCount: 0,
+          topPinCount: 0,
+          bottomPinCount: 0,
+        },
+      ],
+      nets: [],
+      connections: [],
+    }
   }
 
   get totalPins(): number {
-    return Object.values(this.pinCounts).reduce((a, b) => a + b, 0)
+    return this.pinBuilders.length
   }
 
   /** Declare *n* left‑hand pins (top‑to‑bottom). */
@@ -213,13 +308,16 @@ class ChipBuilder {
 
   private allocatePins(
     side: "left" | "right" | "top" | "bottom",
-    n: number,
+    countOnSide: number,
   ): void {
-    for (let i = 0; i < n; i++) {
-      const pin = new PinBuilder(this, 0, 0) // Initial x,y will be updated in computeBodySize
-      this.pinMap[`${side}${i + 1}`] = pin
+    for (let i = 0; i < countOnSide; i++) {
+      // i is local 0-indexed for this side
+      this._currentGlobalPinIndex++
+      const globalPinNum = this._currentGlobalPinIndex // 1-indexed global pin number
+      const pinBuilder = new PinBuilder(this, 0, 0, globalPinNum) // Initial x,y will be updated later
+      this.pinBuilders[globalPinNum - 1] = pinBuilder // Store in 0-indexed array
+      this.pinMap[`${side}${i + 1}`] = pinBuilder // Key is 1-indexed for side name
     }
-
     // Body is drawn once in computeBodySize after all dimensions are final.
   }
 
@@ -291,28 +389,19 @@ class ChipBuilder {
     this.bodySizeComputed = true
   }
 
-  getPinId(n: number): `${"left" | "right" | "top" | "bottom"}${number}` {
-    // TODO find the side and the index of the pin
-    let side: "left" | "right" | "top" | "bottom" = "left"
-    let sideIndex = 0
-    for (let i = 0; i < this.totalPins; i++) {
-      if (i + 1 === n) {
-        return `${side}${sideIndex + 1}` as `${"left" | "right" | "top" | "bottom"}${number}`
-      }
-      sideIndex++
-      while (sideIndex >= this.pinCounts[side]) {
-        side = SIDES_CCW[SIDES_CCW.indexOf(side) + 1]!
-        sideIndex = 0
-      }
-    }
-    throw new Error("Pin index out of bounds")
-  }
-
   pin(n: number) {
+    // n is 1-indexed global pin number
     if (!this.bodySizeComputed) {
       this.computeBodySize()
     }
-    return this.pinMap[this.getPinId(n)]!
+    const pinBuilder = this.pinBuilders[n - 1]
+    if (!pinBuilder) {
+      throw new Error(
+        `Pin ${n} not found. Total pins: ${this.pinBuilders.length}`,
+      )
+    }
+    pinBuilder.resetConnectionPoint() // Initialize for netlist generation
+    return pinBuilder
   }
 
   /** Draw the IC body onto the grid. Called once by computeBodySize. */
@@ -401,6 +490,27 @@ class ChipBuilder {
       this.computeBodySize()
     }
     return this.grid.toString()
+  }
+
+  /** Generate a netlist representation of the chip. */
+  getNetlist(): InputNetlist {
+    if (!this.bodySizeComputed) {
+      this.computeBodySize()
+    }
+
+    // Update the main chip's box definition with final pin counts
+    const mainChipBox = this.netlistComponents.boxes.find(
+      (b) => b.boxId === this.mainChipId,
+    )
+    if (mainChipBox) {
+      mainChipBox.leftPinCount = this.pinCounts.left
+      mainChipBox.rightPinCount = this.pinCounts.right
+      mainChipBox.topPinCount = this.pinCounts.top
+      mainChipBox.bottomPinCount = this.pinCounts.bottom
+    }
+
+    // Return a deep copy to prevent external modification
+    return JSON.parse(JSON.stringify(this.netlistComponents))
   }
 }
 
