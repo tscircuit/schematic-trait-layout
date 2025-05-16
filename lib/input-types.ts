@@ -6,6 +6,8 @@ export interface Box {
   boxId: string
 }
 
+export type Side = "left" | "right" | "top" | "bottom"
+
 export interface Connection {
   connectedPorts: Array<
     { boxId: string; pinNumber: number } | { netId: string }
