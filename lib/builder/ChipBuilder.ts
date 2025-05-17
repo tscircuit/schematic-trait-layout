@@ -58,17 +58,8 @@ export class ChipBuilder {
   /**
    * Get a pin by its side and index.
    */
-  pin(side: Side, index: number): PinBuilder {
+  pin(pinNumber: number): PinBuilder {
     // TODO: Implement getting a pin by side and index
-    return this.pinMap[`${side}${index}`]
-  }
-
-  /**
-   * Get a pin by its global pin number.
-   */
-  pinByNumber(globalPinNumber: number): PinBuilder | undefined {
-    // TODO: Implement getting a pin by global pin number
-    return this.pinBuilders[globalPinNumber - 1]
   }
 
   /**
