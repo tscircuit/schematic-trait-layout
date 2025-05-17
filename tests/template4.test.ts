@@ -44,7 +44,7 @@ test("template4", () => {
             },
             {
               "boxId": "passive1",
-              "pinNumber": 1,
+              "pinNumber": 2,
             },
           ],
         },
@@ -52,7 +52,7 @@ test("template4", () => {
           "connectedPorts": [
             {
               "boxId": "passive1",
-              "pinNumber": 2,
+              "pinNumber": 1,
             },
             {
               "netId": "L2",

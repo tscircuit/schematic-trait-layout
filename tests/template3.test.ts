@@ -52,7 +52,7 @@ test("template3", () => {
             },
             {
               "boxId": "passive1",
-              "pinNumber": 1,
+              "pinNumber": 2,
             },
             {
               "boxId": "passive2",
@@ -64,7 +64,7 @@ test("template3", () => {
           "connectedPorts": [
             {
               "boxId": "passive1",
-              "pinNumber": 2,
+              "pinNumber": 1,
             },
             {
               "netId": "L2",
@@ -172,7 +172,7 @@ test("template3", () => {
             },
             {
               "boxIndex": 2,
-              "pinNumber": 1,
+              "pinNumber": 2,
             },
             {
               "netIndex": 1,
@@ -183,7 +183,7 @@ test("template3", () => {
           "connectedPorts": [
             {
               "boxIndex": 2,
-              "pinNumber": 2,
+              "pinNumber": 1,
             },
             {
               "netIndex": 2,

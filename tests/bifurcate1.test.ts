@@ -81,7 +81,7 @@ test("bifurcate1", () => {
             },
             {
               "boxId": "passive1",
-              "pinNumber": 1,
+              "pinNumber": 2,
             },
           ],
         },

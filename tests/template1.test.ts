@@ -40,7 +40,7 @@ test("sample1", () => {
             },
             {
               "boxId": "passive1",
-              "pinNumber": 1,
+              "pinNumber": 2,
             },
           ],
         },
@@ -48,7 +48,7 @@ test("sample1", () => {
           "connectedPorts": [
             {
               "boxId": "passive1",
-              "pinNumber": 2,
+              "pinNumber": 1,
             },
             {
               "netId": "L1",
