@@ -33,4 +33,12 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
 
   const variations = createTemplateVariationsByJoiningHalfBoxes(T1, [T2])
   expect(variations.length).toBe(1)
+  expect(`\n${variations[0]!.toString()}\n`).toMatchInlineSnapshot(`
+    "
+      ┌───┐
+    L─┤1 4├─┐
+    L─┤2 3│ │
+      └───┘ L
+    "
+  `)
 })
