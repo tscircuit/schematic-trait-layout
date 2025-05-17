@@ -51,7 +51,7 @@ test("getReadableNetlist", () => {
                         └────────────────┘
       - Box ID: passive1
         Type: L:0 R:0 T:1 B:1
-                                L7       
+                               ...       
                                 │        
                                 2        
                         ┌────────────────┐
@@ -59,7 +59,7 @@ test("getReadableNetlist", () => {
                         └────────────────┘
                                 1        
                                 │        
-                               ...       
+                                L7       
 
     Nets:
       - Net ID: L1
@@ -92,9 +92,9 @@ test("getReadableNetlist", () => {
       - Connection 7:
         - Box Pin: chip1, Pin 4
         - Net: L6
-        - Box Pin: passive1, Pin 1
-      - Connection 8:
         - Box Pin: passive1, Pin 2
+      - Connection 8:
+        - Box Pin: passive1, Pin 1
         - Net: L7"
     `)
 })

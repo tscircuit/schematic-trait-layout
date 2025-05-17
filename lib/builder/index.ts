@@ -1154,8 +1154,15 @@ export class PinBuilder {
       box.rightPinCount = 1
     }
     circuit.netlistComponents.boxes.push(box)
-    const p1: PortReference = { boxId: pid, pinNumber: 1 }
-    const p2: PortReference = { boxId: pid, pinNumber: 2 }
+    let p1: PortReference = { boxId: pid, pinNumber: 1 }
+    let p2: PortReference = { boxId: pid, pinNumber: 2 }
+
+    if (orient === "v" && this.lastDy < 0) {
+      ;[p1, p2] = [p2, p1]
+    } else if (orient === "h" && this.lastDx < 0) {
+      ;[p1, p2] = [p2, p1]
+    }
+
     circuit.associateCoordinateWithNetItem(this.x, this.y, p1)
     circuit.putOverlay(this.x, this.y, "P")
     circuit.connectItems(this.lastConnected, p1)
