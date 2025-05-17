@@ -36,15 +36,15 @@ test("getReadableNetlist", () => {
       - Box ID: chip0
         Type: L:3 R:3 T:0 B:0
                         ┌────────────────┐
-                L3 ──  1│                │4  ── L2        
+                L3 ──  1│                │6  ── L1        
                        2│     chip0      │5  ── chip1.1   
-                L4 ──  3│                │6  ── L1        
+                L4 ──  3│                │4  ── L2        
                         └────────────────┘
       - Box ID: chip1
         Type: L:2 R:2 T:0 B:0
                         ┌────────────────┐
-           chip0.5 ──  1│     chip1      │3               
-                L5 ──  2│                │4  ── L6        
+           chip0.5 ──  1│     chip1      │4  ── L6        
+                L5 ──  2│                │3               
                         └────────────────┘
 
     Nets:

@@ -88,7 +88,11 @@ const drawBoxAscii = (
 
   for (let i = 0; i < bodyHeight; i++) {
     const currentLeftPinNumber = i < lp ? i + 1 : 0
-    const currentRightPinNumber = i < rp ? lp + i + 1 : 0
+    // Right pins are numbered CCW, so after left and bottom pins.
+    // Visually, they appear from top to bottom on the diagram (i=0 is top-most right pin slot).
+    // So, i=0 corresponds to the highest right pin number (lp + bp + rp).
+    // And i=rp-1 corresponds to the lowest right pin number (lp + bp + 1).
+    const currentRightPinNumber = i < rp ? lp + bp + (rp - 1 - i) + 1 : 0
 
     const leftPinLabel = currentLeftPinNumber > 0 ? currentLeftPinNumber.toString() : ""
     const rightPinLabel = currentRightPinNumber > 0 ? currentRightPinNumber.toString() : ""
@@ -135,14 +139,16 @@ const drawBoxAscii = (
   output.push(`${" ".repeat(SIDE_PADDING_WIDTH)}└${"─".repeat(innerWidth)}┘`)
 
   if (tp > 0) {
-    const startPin = lp + rp + 1
+    // Top pins are after left, bottom, and right pins in CCW order
+    const startPin = lp + bp + rp + 1
     const topPinsStr = Array.from({ length: tp }, (_, k) => startPin + k).join(
       ", ",
     )
     output.push(" ".repeat(SIDE_PADDING_WIDTH) + `Top Pins: ${topPinsStr}`)
   }
   if (bp > 0) {
-    const startPin = lp + rp + tp + 1
+    // Bottom pins are after left pins in CCW order
+    const startPin = lp + 1
     const bottomPinsStr = Array.from(
       { length: bp },
       (_, k) => startPin + k,
