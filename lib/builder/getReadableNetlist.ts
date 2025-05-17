@@ -51,6 +51,19 @@ const getPinConnectionLabel = (
   return "...";
 };
 
+// Helper function to format content within a cell, centering it.
+const formatCell = (content: string, cellWidth: number): string => {
+  const contentLen = content.length
+  if (contentLen >= cellWidth) {
+    // If content is too long, truncate it. For single char like '│', ensure it's not cut.
+    return content.substring(0, cellWidth > 0 ? cellWidth : 0)
+  }
+  const paddingTotal = cellWidth - contentLen
+  const paddingLeft = Math.floor(paddingTotal / 2)
+  const paddingRight = paddingTotal - paddingLeft
+  return " ".repeat(paddingLeft) + content + " ".repeat(paddingRight)
+}
+
 // Helper function to generate ASCII art for a single box
 const drawBoxAscii = (
   box: Box,
@@ -73,33 +86,67 @@ const drawBoxAscii = (
 
   const bodyHeight = Math.max(lp, rp, 1) // Min height of 1 for the box name
 
-  // Max length for boxId *inside* the box, allowing for " name " or " truncatedN… "
+  // Max length for boxId *inside* the box
   const maxDisplayableBoxIdLength = BOX_INNER_WIDTH - 2
   let displayBoxId = boxId
   if (boxId.length > maxDisplayableBoxIdLength) {
-    // Truncate to maxDisplayableBoxIdLength - 1 to make space for the ellipsis
     displayBoxId = `${boxId.substring(0, maxDisplayableBoxIdLength - 1)}…`
   }
-  // If boxId is shorter, it will be padded with spaces later when creating lineContent.
 
-  const innerWidth = BOX_INNER_WIDTH // Fixed inner width
+  const innerWidth = BOX_INNER_WIDTH
 
+  // --- TOP PINS ---
+  if (tp > 0) {
+    let labelsRow = ""
+    let pinsRow = ""
+    let connectorsRow = ""
+
+    const baseCellWidth = Math.floor(innerWidth / tp)
+    const remainderCells = innerWidth % tp
+    const cellWidths: number[] = Array(tp).fill(baseCellWidth)
+    for (let i = 0; i < remainderCells; i++) {
+      cellWidths[i % tp]++ // Distribute remainder
+    }
+
+    for (let i = 0; i < tp; i++) {
+      const currentTopPinNumber = lp + bp + rp + i + 1 // CCW: L, B, R, then T
+      const pinStr = currentTopPinNumber.toString()
+      const connLabel =
+        getPinConnectionLabel(boxId, currentTopPinNumber, connections) ?? ""
+      const cellWidth = cellWidths[i]
+
+      labelsRow += formatCell(connLabel, cellWidth)
+      pinsRow += formatCell(pinStr, cellWidth)
+      connectorsRow += formatCell("│", cellWidth)
+    }
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + labelsRow)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + pinsRow)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + connectorsRow)
+  }
+
+  // --- BOX TOP BORDER ---
   output.push(`${" ".repeat(SIDE_PADDING_WIDTH)}┌${"─".repeat(innerWidth)}┐`)
 
+  // --- BOX MIDDLE (SIDES and NAME) ---
   for (let i = 0; i < bodyHeight; i++) {
     const currentLeftPinNumber = i < lp ? i + 1 : 0
-    // Right pins are numbered CCW, so after left and bottom pins.
-    // Visually, they appear from top to bottom on the diagram (i=0 is top-most right pin slot).
-    // So, i=0 corresponds to the highest right pin number (lp + bp + rp).
-    // And i=rp-1 corresponds to the lowest right pin number (lp + bp + 1).
+    // Right pins are numbered CCW: after Left and Bottom pins.
+    // Visually, they appear from top to bottom (i=0 is top-most right pin slot).
+    // Pin number for visual index `i` is `lp + bp + (rp - 1 - i) + 1`.
     const currentRightPinNumber = i < rp ? lp + bp + (rp - 1 - i) + 1 : 0
 
-    const leftPinLabel = currentLeftPinNumber > 0 ? currentLeftPinNumber.toString() : ""
-    const rightPinLabel = currentRightPinNumber > 0 ? currentRightPinNumber.toString() : ""
+    const leftPinLabel =
+      currentLeftPinNumber > 0 ? currentLeftPinNumber.toString() : ""
+    const rightPinLabel =
+      currentRightPinNumber > 0 ? currentRightPinNumber.toString() : ""
 
     let leftDecorator = ""
     if (currentLeftPinNumber > 0) {
-      const label = getPinConnectionLabel(boxId, currentLeftPinNumber, connections)
+      const label = getPinConnectionLabel(
+        boxId,
+        currentLeftPinNumber,
+        connections,
+      )
       if (label) {
         leftDecorator = `${label} ── `
       }
@@ -107,7 +154,11 @@ const drawBoxAscii = (
 
     let rightDecorator = ""
     if (currentRightPinNumber > 0) {
-      const label = getPinConnectionLabel(boxId, currentRightPinNumber, connections)
+      const label = getPinConnectionLabel(
+        boxId,
+        currentRightPinNumber,
+        connections,
+      )
       if (label) {
         rightDecorator = ` ── ${label}`
       }
@@ -117,43 +168,54 @@ const drawBoxAscii = (
     if (i === Math.floor((bodyHeight - 1) / 2)) {
       const paddingLeft = Math.floor((innerWidth - displayBoxId.length) / 2)
       const paddingRight = innerWidth - displayBoxId.length - paddingLeft
-      lineContent = " ".repeat(paddingLeft) + displayBoxId + " ".repeat(paddingRight)
+      lineContent =
+        " ".repeat(paddingLeft) + displayBoxId + " ".repeat(paddingRight)
     } else {
       lineContent = " ".repeat(innerWidth)
     }
-    // Prepare parts for left and right of the box
-    const leftPinDisplay = leftPinLabel.padStart(2) // e.g., " 1" or "10"
-    const rightPinDisplay = rightPinLabel.padEnd(2)  // e.g., "4 " or "10"
 
-    const leftPart = `${leftDecorator}${leftPinDisplay}` // e.g., "L1 ──  1" or "  1"
-    const rightPart = `${rightPinDisplay}${rightDecorator}` // e.g., "4  ── L2" or "4 "
+    const leftPinDisplay = leftPinLabel.padStart(2)
+    const rightPinDisplay = rightPinLabel.padEnd(2)
+
+    const leftPart = `${leftDecorator}${leftPinDisplay}`
+    const rightPart = `${rightPinDisplay}${rightDecorator}`
 
     const paddedLeftFull = leftPart.padStart(SIDE_PADDING_WIDTH)
     const paddedRightFull = rightPart.padEnd(SIDE_PADDING_WIDTH)
 
-    output.push(
-      `${paddedLeftFull}│${lineContent}│${paddedRightFull}`,
-    )
+    output.push(`${paddedLeftFull}│${lineContent}│${paddedRightFull}`)
   }
 
+  // --- BOX BOTTOM BORDER ---
   output.push(`${" ".repeat(SIDE_PADDING_WIDTH)}└${"─".repeat(innerWidth)}┘`)
 
-  if (tp > 0) {
-    // Top pins are after left, bottom, and right pins in CCW order
-    const startPin = lp + bp + rp + 1
-    const topPinsStr = Array.from({ length: tp }, (_, k) => startPin + k).join(
-      ", ",
-    )
-    output.push(" ".repeat(SIDE_PADDING_WIDTH) + `Top Pins: ${topPinsStr}`)
-  }
+  // --- BOTTOM PINS ---
   if (bp > 0) {
-    // Bottom pins are after left pins in CCW order
-    const startPin = lp + 1
-    const bottomPinsStr = Array.from(
-      { length: bp },
-      (_, k) => startPin + k,
-    ).join(", ")
-    output.push(" ".repeat(SIDE_PADDING_WIDTH) + `Bottom Pins: ${bottomPinsStr}`)
+    let labelsRow = ""
+    let pinsRow = ""
+    let connectorsRow = ""
+
+    const baseCellWidth = Math.floor(innerWidth / bp)
+    const remainderCells = innerWidth % bp
+    const cellWidths: number[] = Array(bp).fill(baseCellWidth)
+    for (let i = 0; i < remainderCells; i++) {
+      cellWidths[i % bp]++ // Distribute remainder
+    }
+
+    for (let i = 0; i < bp; i++) {
+      const currentBottomPinNumber = lp + i + 1 // CCW: L, then B
+      const pinStr = currentBottomPinNumber.toString()
+      const connLabel =
+        getPinConnectionLabel(boxId, currentBottomPinNumber, connections) ?? ""
+      const cellWidth = cellWidths[i]
+
+      labelsRow += formatCell(connLabel, cellWidth)
+      pinsRow += formatCell(pinStr, cellWidth)
+      connectorsRow += formatCell("│", cellWidth)
+    }
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + connectorsRow)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + pinsRow)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + labelsRow)
   }
 
   return output
