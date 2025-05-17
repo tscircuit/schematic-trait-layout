@@ -1,4 +1,9 @@
-import type { InputNetlist, Box, Connection, PortReference } from "lib/input-types"
+import type {
+  InputNetlist,
+  Box,
+  Connection,
+  PortReference,
+} from "lib/input-types"
 
 // Helper function to determine the label for a pin connection
 const getPinConnectionLabel = (
@@ -6,14 +11,14 @@ const getPinConnectionLabel = (
   pinNumber: number,
   connections: ReadonlyArray<Connection>,
 ): string | null => {
-  const relevantConnections = connections.filter(conn =>
+  const relevantConnections = connections.filter((conn) =>
     conn.connectedPorts.some(
-      p => "boxId" in p && p.boxId === boxId && p.pinNumber === pinNumber,
-    )
-  );
+      (p) => "boxId" in p && p.boxId === boxId && p.pinNumber === pinNumber,
+    ),
+  )
 
   if (relevantConnections.length === 0) {
-    return null; // No connection
+    return null // No connection
   }
 
   // A pin should ideally be part of only one connection object due to merging logic in the builder.
@@ -21,35 +26,44 @@ const getPinConnectionLabel = (
   // or if the single connection it's in is complex (connects to multiple other things),
   // we simplify the label to "...".
   if (relevantConnections.length > 1) {
-    return "...";
+    return "..."
   }
 
-  const connection = relevantConnections[0];
-  const otherPorts = connection.connectedPorts.filter(p => {
-    if ("boxId" in p && typeof p.boxId === 'string' && typeof p.pinNumber === 'number') { // Type guard for PortReference
-      return !(p.boxId === boxId && p.pinNumber === pinNumber);
+  const connection = relevantConnections[0]
+  const otherPorts = connection.connectedPorts.filter((p) => {
+    if (
+      "boxId" in p &&
+      typeof p.boxId === "string" &&
+      typeof p.pinNumber === "number"
+    ) {
+      // Type guard for PortReference
+      return !(p.boxId === boxId && p.pinNumber === pinNumber)
     }
-    return true; // Keep netIds or other types of ports
-  });
+    return true // Keep netIds or other types of ports
+  })
 
   if (otherPorts.length === 0) {
     // This case (a pin connected only to itself within a connection object) should ideally not occur.
-    return null;
+    return null
   }
 
   if (otherPorts.length === 1) {
-    const otherPort = otherPorts[0];
-    if ("boxId" in otherPort && typeof otherPort.boxId === 'string' && typeof otherPort.pinNumber === 'number') {
-      return `${otherPort.boxId}.${otherPort.pinNumber}`;
+    const otherPort = otherPorts[0]
+    if (
+      "boxId" in otherPort &&
+      typeof otherPort.boxId === "string" &&
+      typeof otherPort.pinNumber === "number"
+    ) {
+      return `${otherPort.boxId}.${otherPort.pinNumber}`
     }
-    if ("netId" in otherPort && typeof otherPort.netId === 'string') {
-      return otherPort.netId;
+    if ("netId" in otherPort && typeof otherPort.netId === "string") {
+      return otherPort.netId
     }
   }
 
   // If connected to more than one other port, or if the port types are mixed/unexpected.
-  return "...";
-};
+  return "..."
+}
 
 // Helper function to format content within a cell, centering it.
 const formatCell = (content: string, cellWidth: number): string => {
@@ -70,14 +84,11 @@ const drawBoxAscii = (
   connections: ReadonlyArray<Connection>,
 ): string[] => {
   const output: string[] = []
-  const { boxId, leftPinCount, rightPinCount, topPinCount, bottomPinCount } = box
+  const { boxId, leftPinCount, rightPinCount, topPinCount, bottomPinCount } =
+    box
 
   const BOX_INNER_WIDTH = 16
   const SIDE_PADDING_WIDTH = 16
-
-  output.push(
-    `Type: L:${leftPinCount} R:${rightPinCount} T:${topPinCount} B:${bottomPinCount}`,
-  )
 
   const lp = leftPinCount
   const rp = rightPinCount
@@ -234,10 +245,10 @@ export const getReadableNetlist = (netlist: InputNetlist): string => {
     lines.push("  (none)")
   } else {
     for (const box of netlist.boxes) {
-      lines.push(`  - Box ID: ${box.boxId}`)
+      lines.push("\n")
       const boxArtLines = drawBoxAscii(box, netlist.connections)
       for (const artLine of boxArtLines) {
-        lines.push(`    ${artLine}`) // Indent box art
+        lines.push(`  ${artLine}`)
       }
     }
   }

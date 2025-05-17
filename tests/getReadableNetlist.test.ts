@@ -36,30 +36,30 @@ test("getReadableNetlist", () => {
 
   expect(getReadableNetlist(C.getNetlist())).toMatchInlineSnapshot(`
     "Boxes:
-      - Box ID: chip0
-        Type: L:3 R:3 T:0 B:0
-                        ┌────────────────┐
-                L3 ──  1│                │6  ── L1        
-                       2│     chip0      │5  ── chip1.1   
-                L4 ──  3│                │4  ── L2        
-                        └────────────────┘
-      - Box ID: chip1
-        Type: L:2 R:2 T:0 B:0
-                        ┌────────────────┐
-           chip0.5 ──  1│     chip1      │4  ── ...       
-                L5 ──  2│                │3               
-                        └────────────────┘
-      - Box ID: passive1
-        Type: L:0 R:0 T:1 B:1
-                               ...       
-                                │        
-                                2        
-                        ┌────────────────┐
-                        │    passive1    │                
-                        └────────────────┘
-                                1        
-                                │        
-                                L7       
+
+
+                      ┌────────────────┐
+              L3 ──  1│                │6  ── L1        
+                     2│     chip0      │5  ── chip1.1   
+              L4 ──  3│                │4  ── L2        
+                      └────────────────┘
+
+
+                      ┌────────────────┐
+         chip0.5 ──  1│     chip1      │4  ── ...       
+              L5 ──  2│                │3               
+                      └────────────────┘
+
+
+                             ...       
+                              │        
+                              2        
+                      ┌────────────────┐
+                      │    passive1    │                
+                      └────────────────┘
+                              1        
+                              │        
+                              L7       
 
     Complex Connections (more than 2 points):
       - Connection 1:
