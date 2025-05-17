@@ -61,40 +61,10 @@ test("getReadableNetlist", () => {
                                 │        
                                 L7       
 
-    Nets:
-      - Net ID: L1
-      - Net ID: L2
-      - Net ID: L3
-      - Net ID: L4
-      - Net ID: L5
-      - Net ID: L6
-      - Net ID: L7
-
-    Connections:
+    Complex Connections (more than 2 points):
       - Connection 1:
-        - Box Pin: chip0, Pin 6
-        - Net: L1
-      - Connection 2:
-        - Box Pin: chip0, Pin 4
-        - Net: L2
-      - Connection 3:
-        - Box Pin: chip0, Pin 1
-        - Net: L3
-      - Connection 4:
-        - Box Pin: chip0, Pin 3
-        - Net: L4
-      - Connection 5:
-        - Box Pin: chip1, Pin 1
-        - Box Pin: chip0, Pin 5
-      - Connection 6:
-        - Box Pin: chip1, Pin 2
-        - Net: L5
-      - Connection 7:
         - Box Pin: chip1, Pin 4
         - Net: L6
-        - Box Pin: passive1, Pin 2
-      - Connection 8:
-        - Box Pin: passive1, Pin 1
-        - Net: L7"
+        - Box Pin: passive1, Pin 2"
     `)
 })

@@ -243,23 +243,17 @@ export const getReadableNetlist = (netlist: InputNetlist): string => {
   }
   lines.push("")
 
-  lines.push("Nets:")
-  if (netlist.nets.length === 0) {
-    lines.push("  (none)")
-  } else {
-    for (const net of netlist.nets) {
-      lines.push(`  - Net ID: ${net.netId}`)
-    }
-  }
-  lines.push("")
+  const complexConnections = netlist.connections.filter(
+    (conn) => conn.connectedPorts.length > 2,
+  )
 
-  lines.push("Connections:")
-  if (netlist.connections.length === 0) {
+  lines.push("Complex Connections (more than 2 points):")
+  if (complexConnections.length === 0) {
     lines.push("  (none)")
   } else {
-    for (let i = 0; i < netlist.connections.length; i++) {
-      const connection = netlist.connections[i]
-      lines.push(`  - Connection ${i + 1}:`)
+    for (let i = 0; i < complexConnections.length; i++) {
+      const connection = complexConnections[i]
+      lines.push(`  - Connection ${i + 1}:`) // Or use original index if preferred
       for (const port of connection.connectedPorts) {
         if ("boxId" in port) {
           lines.push(`    - Box Pin: ${port.boxId}, Pin ${port.pinNumber}`)
