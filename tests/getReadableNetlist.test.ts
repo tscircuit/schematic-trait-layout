@@ -33,8 +33,19 @@ test("getReadableNetlist", () => {
 
   expect(getReadableNetlist(C.getNetlist())).toMatchInlineSnapshot(`
     "Boxes:
-      - Box ID: chip0, Pins: L:3 R:3 T:0 B:0
-      - Box ID: chip1, Pins: L:2 R:2 T:0 B:0
+      - Box ID: chip0
+        Type: L:3 R:3 T:0 B:0
+        ┌───────┐
+         1 │       │ 4 
+         2 │ chip0 │ 5 
+         3 │       │ 6 
+        └───────┘
+      - Box ID: chip1
+        Type: L:2 R:2 T:0 B:0
+        ┌───────┐
+         1 │ chip1 │ 3 
+         2 │       │ 4 
+        └───────┘
 
     Nets:
       - Net ID: L1
