@@ -27,7 +27,12 @@ export const getPinSideIndex = (
     topSideCount?: number
     bottomSideCount?: number
   },
-): { side: Side; indexOnSide: number } => {
+): {
+  side: Side
+  indexOnSide: number
+  indexFromTop?: number
+  indexFromLeft?: number
+} => {
   let currentSideIndex = 0
   let currentIndexOnSide = 0
   for (let i = 0; i < pinNumber; ) {
@@ -47,7 +52,23 @@ export const getPinSideIndex = (
     }
 
     if (i + 1 === pinNumber) {
-      return { side: currentSide!, indexOnSide: currentIndexOnSide }
+      const result: any = {
+        side: currentSide!,
+        indexOnSide: currentIndexOnSide,
+      }
+      if (currentSide === "left") {
+        result.indexFromTop = currentIndexOnSide
+      } else if (currentSide === "right") {
+        result.indexFromTop =
+          chipDimensions.rightSideCount! - currentIndexOnSide - 1
+      }
+      if (currentSide === "bottom") {
+        result.indexFromLeft = currentIndexOnSide
+      } else if (currentSide === "top") {
+        result.indexFromLeft =
+          chipDimensions.topSideCount! - currentIndexOnSide - 1
+      }
+      return result
     }
 
     currentIndexOnSide++
