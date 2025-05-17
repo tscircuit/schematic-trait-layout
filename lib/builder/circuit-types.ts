@@ -27,4 +27,5 @@ export interface ConnectionPoint {
   ref: PortReference
   x: number
   y: number
+  showAsIntersection?: boolean
 }

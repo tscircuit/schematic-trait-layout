@@ -78,15 +78,6 @@ export class PinBuilder {
     // this.circuit.getGrid().putOverlay(this.x, this.y, id)
   }
 
-  intersect(): this {
-    this.circuit.connectionPoints.push({
-      ref: this.ref,
-      showAsIntersection: true,
-    })
-    // TODO: Implement intersect method (this is the same as connect)
-    return this
-  }
-
   connect(): this {
     this.circuit.connectionPoints.push({
       ref: this.ref,
