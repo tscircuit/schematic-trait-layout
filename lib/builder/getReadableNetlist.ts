@@ -120,8 +120,8 @@ const drawBoxAscii = (
       connectorsRow += formatCell("│", cellWidth)
     }
     output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + labelsRow)
-    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + pinsRow)
     output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + connectorsRow)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + pinsRow)
   }
 
   // --- BOX TOP BORDER ---
@@ -213,8 +213,8 @@ const drawBoxAscii = (
       pinsRow += formatCell(pinStr, cellWidth)
       connectorsRow += formatCell("│", cellWidth)
     }
-    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + connectorsRow)
     output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + pinsRow)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + connectorsRow)
     output.push(" ".repeat(SIDE_PADDING_WIDTH + 1) + labelsRow)
   }
 

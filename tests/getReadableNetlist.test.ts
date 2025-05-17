@@ -52,13 +52,13 @@ test("getReadableNetlist", () => {
       - Box ID: passive1
         Type: L:0 R:0 T:1 B:1
                                 L7       
-                                2        
                                 │        
+                                2        
                         ┌────────────────┐
                         │    passive1    │                
                         └────────────────┘
-                                │        
                                 1        
+                                │        
                                ...       
 
     Nets:
