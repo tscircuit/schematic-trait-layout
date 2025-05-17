@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { circuit } from "lib/builder"
+import { circuit } from "lib/builder/legacy-circuit"
 
 test.skip("bifurcate2", () => {
   const C = circuit()

@@ -1,4 +1,4 @@
-import { circuit } from "lib/builder"
+import { circuit } from "lib/builder/legacy-circuit"
 
 /**
  * ```

@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { circuit } from "lib/builder"
+import { circuit } from "lib/builder/legacy-circuit"
 import { areNetlistsCompatible } from "lib/scoring/areNetlistsCompatible"
 
 test("areNetlistsCompatible2: identical netlists using chip builder", () => {

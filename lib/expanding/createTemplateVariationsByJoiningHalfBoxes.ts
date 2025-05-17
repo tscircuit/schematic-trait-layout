@@ -1,4 +1,4 @@
-import type { CircuitBuilder } from "lib/builder"
+import type { CircuitBuilder } from "lib/builder/legacy-circuit"
 import { mergeCircuits } from "./mergeCircuits"
 
 /**

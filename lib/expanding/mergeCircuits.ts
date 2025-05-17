@@ -1,4 +1,8 @@
-import type { CircuitBuilder, BoxPinLayoutEntry, Side } from "lib/builder"
+import type {
+  CircuitBuilder,
+  BoxPinLayoutEntry,
+  Side,
+} from "lib/builder/legacy-circuit"
 import type { PortReference } from "lib/input-types"
 
 export const mergeCircuits = (opts: {
@@ -54,7 +58,11 @@ export const mergeCircuits = (opts: {
     // Merged Left from C2's Left
     const c2LeftLayout = chip2LayoutOriginal.find((e: any) => e.side === "left")
     if (c2LeftLayout) {
-      newBoxLayout.push({ side: "left", count: c2LeftLayout.count, startGlobalPin: currentMergedPinCounter })
+      newBoxLayout.push({
+        side: "left",
+        count: c2LeftLayout.count,
+        startGlobalPin: currentMergedPinCounter,
+      })
       for (let i = 0; i < c2LeftLayout.count; i++) {
         const originalPinOnChip2 = c2LeftLayout.startGlobalPin + i
         pinMapChip2ToMerged[originalPinOnChip2] = currentMergedPinCounter + i
@@ -66,26 +74,42 @@ export const mergeCircuits = (opts: {
     }
 
     // Merged Right from C1's Right
-    const c1RightLayout = chip1LayoutOriginal.find((e: any) => e.side === "right")
+    const c1RightLayout = chip1LayoutOriginal.find(
+      (e: any) => e.side === "right",
+    )
     if (c1RightLayout) {
-      newBoxLayout.push({ side: "right", count: c1RightLayout.count, startGlobalPin: currentMergedPinCounter })
+      newBoxLayout.push({
+        side: "right",
+        count: c1RightLayout.count,
+        startGlobalPin: currentMergedPinCounter,
+      })
       for (let i = 0; i < c1RightLayout.count; i++) {
         const originalPinOnChip1 = c1RightLayout.startGlobalPin + i
-        pinMapChip1ToMerged[originalPinOnChip1] = currentMergedPinCounter + (c1RightLayout.count - 1 - i) // Reversed
+        pinMapChip1ToMerged[originalPinOnChip1] =
+          currentMergedPinCounter + (c1RightLayout.count - 1 - i) // Reversed
       }
       mergedChipBox.rightPinCount = c1RightLayout.count
       currentMergedPinCounter += c1RightLayout.count
     } else {
       mergedChipBox.rightPinCount = 0 // Should not happen if c1HasRightPins is true and layout exists
     }
-  // Strategy 2: C1 provides left, C2 provides right (e.g., mergeCircuits2.test.ts)
-  // This strategy applies if C1 has only left pins (for L/R merge) and C2 has only right pins.
-  } else if (c1HasLeftPins && !c1HasRightPins && c2HasRightPins && !c2HasLeftPins) {
+    // Strategy 2: C1 provides left, C2 provides right (e.g., mergeCircuits2.test.ts)
+    // This strategy applies if C1 has only left pins (for L/R merge) and C2 has only right pins.
+  } else if (
+    c1HasLeftPins &&
+    !c1HasRightPins &&
+    c2HasRightPins &&
+    !c2HasLeftPins
+  ) {
     console.log("mergeCircuits: Applying Strategy 2 (C1-Left, C2-Right)")
     // Merged Left from C1's Left
     const c1LeftLayout = chip1LayoutOriginal.find((e: any) => e.side === "left")
     if (c1LeftLayout) {
-      newBoxLayout.push({ side: "left", count: c1LeftLayout.count, startGlobalPin: currentMergedPinCounter })
+      newBoxLayout.push({
+        side: "left",
+        count: c1LeftLayout.count,
+        startGlobalPin: currentMergedPinCounter,
+      })
       for (let i = 0; i < c1LeftLayout.count; i++) {
         const originalPinOnChip1 = c1LeftLayout.startGlobalPin + i
         pinMapChip1ToMerged[originalPinOnChip1] = currentMergedPinCounter + i
@@ -97,12 +121,19 @@ export const mergeCircuits = (opts: {
     }
 
     // Merged Right from C2's Right
-    const c2RightLayout = chip2LayoutOriginal.find((e: any) => e.side === "right")
+    const c2RightLayout = chip2LayoutOriginal.find(
+      (e: any) => e.side === "right",
+    )
     if (c2RightLayout) {
-      newBoxLayout.push({ side: "right", count: c2RightLayout.count, startGlobalPin: currentMergedPinCounter })
+      newBoxLayout.push({
+        side: "right",
+        count: c2RightLayout.count,
+        startGlobalPin: currentMergedPinCounter,
+      })
       for (let i = 0; i < c2RightLayout.count; i++) {
         const originalPinOnChip2 = c2RightLayout.startGlobalPin + i
-        pinMapChip2ToMerged[originalPinOnChip2] = currentMergedPinCounter + (c2RightLayout.count - 1 - i) // Reversed
+        pinMapChip2ToMerged[originalPinOnChip2] =
+          currentMergedPinCounter + (c2RightLayout.count - 1 - i) // Reversed
       }
       mergedChipBox.rightPinCount = c2RightLayout.count
       currentMergedPinCounter += c2RightLayout.count
@@ -112,9 +143,11 @@ export const mergeCircuits = (opts: {
   } else {
     // Fallback: No specific L/R strategy matched or ambiguous (e.g., chips have pins on multiple sides).
     // Defaulting to 0 left/right pins for the merged chip. Top/bottom from C1 will still be processed.
-    mergedChipBox.leftPinCount = 0;
-    mergedChipBox.rightPinCount = 0;
-    console.warn(`mergeCircuits: No specific left/right pin strategy matched or ambiguous configuration. C1 L/R pins: ${c1HasLeftPins}/${c1HasRightPins}, C2 L/R pins: ${c2HasLeftPins}/${c2HasRightPins}. Defaulting to 0 left/right pins for merged chip.`);
+    mergedChipBox.leftPinCount = 0
+    mergedChipBox.rightPinCount = 0
+    console.warn(
+      `mergeCircuits: No specific left/right pin strategy matched or ambiguous configuration. C1 L/R pins: ${c1HasLeftPins}/${c1HasRightPins}, C2 L/R pins: ${c2HasLeftPins}/${c2HasRightPins}. Defaulting to 0 left/right pins for merged chip.`,
+    )
   }
 
   // Top pins from chip1 (consistent for both strategies)
@@ -154,7 +187,6 @@ export const mergeCircuits = (opts: {
   } else {
     mergedChipBox.bottomPinCount = 0
   }
-
   ;(mergedCircuit as any).boxPinLayouts[circuit1ChipId] = newBoxLayout
 
   // Update connections in mergedCircuit (originally from C1) that refer to circuit1ChipId

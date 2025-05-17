@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import circuit, { CircuitBuilder } from "lib/builder"
+import circuit, { CircuitBuilder } from "lib/builder/legacy-circuit"
 import { mergeCircuits } from "lib/expanding/mergeCircuits"
 
 test("mergeCircuits2", () => {
