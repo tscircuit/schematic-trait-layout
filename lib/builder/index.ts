@@ -6,6 +6,7 @@ import type {
   PortReference,
 } from "../input-types"
 import Debug from "debug"
+import { getReadableNetlist } from "./getReadableNetlist"
 
 const debug = Debug("mash")
 
@@ -721,7 +722,11 @@ export class CircuitBuilder {
 
   /** Final netlist (deep‑copied) */
   getNetlist(): InputNetlist {
-    return JSON.parse(JSON.stringify(this.netlistComponents))
+    return structuredClone(this.netlistComponents)
+  }
+
+  getReadableNetlist(): string {
+    return getReadableNetlist(this.getNetlist())
   }
 
   /** Flips the circuit horizontally (X-axis inversion). Modifies the instance in place. */
