@@ -15,3 +15,16 @@ export type PortReference =
   | {
       /* relevant for .intersect(), .connect() and .fromMark() */ lineId: string
     }
+
+export interface NetLabel {
+  labelId: string
+  x: number
+  y: number
+  fromRef: PortReference
+}
+
+export interface ConnectionPoint {
+  ref: PortReference
+  x: number
+  y: number
+}

@@ -1,4 +1,5 @@
 import type { PortReference } from "../input-types"
+import type { CircuitBuilder } from "./CircuitBuilder"
 
 export interface PinConnectionState {
   x: number
@@ -22,44 +23,66 @@ export class PinBuilder {
     public readonly pinNumber: number,
   ) {}
 
-  private get circuit(): any {
+  private get circuit(): CircuitBuilder {
     // TODO: Replace with proper CircuitBuilder type
     // biome-ignore lint/complexity/useLiteralKeys: Accessing private member
     return this.chip["circuit"]
   }
 
-  resetConnectionPoint(): void {
-    // TODO: Implement resetConnectionPoint
-    this.lastConnected = { boxId: this.chip.chipId, pinNumber: this.pinNumber }
-    this.circuit.associateCoordinateWithNetItem(
-      this.x,
-      this.y,
-      this.lastConnected,
-    )
-  }
-
   line(dx: number, dy: number): this {
-    // TODO: Implement line method
+    this.lastDx = dx
+    this.lastDy = dy
+
+    // this.circuit.lines.push(...)
+
     return this
   }
 
-  passive(): this {
-    // TODO: Implement passive method
-    return this
+  get ref(): PortReference {
+    return {
+      boxId: this.chip.chipId,
+      pinNumber: this.pinNumber,
+    }
   }
 
-  label(text?: string): this {
-    // TODO: Implement label method
-    return this
+  passive(): PinBuilder {
+    const orientation: "horizontal" | "vertical" =
+      this.lastDx === 0 ? "vertical" : "horizontal"
+    const passiveChip = this.circuit.chip().at(this.x, this.y)
+    if (orientation === "horizontal") {
+      passiveChip.leftside(1).rightside(1)
+    } else {
+      passiveChip.topside(1).bottomside(1)
+    }
+    const firstPinToConnect = orientation === "horizontal" ? 1 : 2
+    const secondPinToConnect = orientation === "horizontal" ? 2 : 1
+
+    const normDx = Math.sign(this.lastDx)
+    const normDy = Math.sign(this.lastDy)
+
+    passiveChip.pin(firstPinToConnect).line(-normDx, -normDy).connect()
+    return passiveChip.pin(secondPinToConnect).line(normDx, normDy).connect()
+  }
+
+  label(text?: string): void {
+    // TODO
   }
 
   intersect(): this {
-    // TODO: Implement intersect method
+    this.circuit.connectionPoints.push({
+      ref: this.ref,
+      showAsIntersection: true,
+    })
+    // TODO: Implement intersect method (this is the same as connect)
     return this
   }
 
   connect(): this {
-    // TODO: Implement connect method
+    this.circuit.connectionPoints.push({
+      ref: this.ref,
+      x: this.x,
+      y: this.y,
+    })
     return this
   }
 
