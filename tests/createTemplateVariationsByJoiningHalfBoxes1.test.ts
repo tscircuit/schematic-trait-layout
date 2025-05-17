@@ -33,6 +33,15 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
 
   const T1_flipped = T1.clone().flipX()
 
+  expect(`\n${T1_flipped.toString()}\n`).toMatchInlineSnapshot(`
+    "
+    ┌───┐
+    │  1├─L
+    │  2├─L
+    └───┘
+    "
+  `)
+
   const variations = createTemplateVariationsByJoiningHalfBoxes(T1, [
     T2,
     T1_flipped,
@@ -48,10 +57,10 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
   `)
   expect(`\n${variations[1]!.toString()}\n`).toMatchInlineSnapshot(`
     "
-    ┌───┬───┐
-    │ L1┼1L │
-    │ L2┼2L │
-    └───┴───┘
+      ┌───┐
+    L─┤1 4├─L
+    L─┤2 3├─L
+      └───┘
     "
   `)
 })
