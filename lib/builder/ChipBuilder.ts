@@ -1,4 +1,4 @@
-import type { Side } from "./legacy-circuit"
+import type { Side } from "."
 import { PinBuilder } from "./PinBuilder"
 import type { CircuitBuilder } from "./CircuitBuilder"
 

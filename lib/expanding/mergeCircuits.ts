@@ -1,8 +1,4 @@
-import type {
-  CircuitBuilder,
-  BoxPinLayoutEntry,
-  Side,
-} from "lib/builder/legacy-circuit"
+import type { CircuitBuilder, BoxPinLayoutEntry, Side } from "lib/builder"
 import type { PortReference } from "lib/input-types"
 
 export const mergeCircuits = (opts: {

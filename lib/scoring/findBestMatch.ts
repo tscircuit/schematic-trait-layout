@@ -1,5 +1,5 @@
 import type { InputNetlist } from "../input-types"
-import type { CircuitBuilder } from "../builder/legacy-circuit"
+import type { CircuitBuilder } from "../builder"
 import * as templates from "../../templates"
 import { areNetlistsCompatible } from "./areNetlistsCompatible"
 

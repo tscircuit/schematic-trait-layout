@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { circuit } from "lib/builder/legacy-circuit"
+import { circuit } from "lib/builder"
 import { findBestMatch } from "lib/scoring/findBestMatch"
 import type { InputNetlist } from "lib/input-types"
 

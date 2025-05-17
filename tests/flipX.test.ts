@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { circuit } from "lib/builder/legacy-circuit"
+import { circuit } from "lib/builder"
 
 test("flipX should flip the circuit horizontally", () => {
   const c = circuit()
