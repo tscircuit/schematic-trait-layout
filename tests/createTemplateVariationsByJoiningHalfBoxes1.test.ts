@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test"
 import { circuit } from "lib/builder"
-import { createTemplateVariationsByJoiningHalfBoxes } from "lib/expanding/createTemplateVariantionsByJoiningHalfBoxes"
+import { createTemplateVariationsByJoiningHalfBoxes } from "lib/expanding/createTemplateVariationsByJoiningHalfBoxes"
 
 test("createTemplateVariationsByJoiningHalfBoxes1", () => {
   const T1 = circuit()
