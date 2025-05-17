@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test"
 import circuit from "lib/builder/legacy-circuit"
-import { getReadableNetlist } from "lib/builder/getReadableNetlist"
+import { getReadableNetlist } from "lib/netlist/getReadableNetlist"
 
 test("getReadableNetlist", () => {
   const C = circuit()

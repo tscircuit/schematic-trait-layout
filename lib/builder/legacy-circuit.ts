@@ -6,7 +6,7 @@ import type {
   PortReference,
 } from "../input-types"
 import Debug from "debug"
-import { getReadableNetlist } from "./getReadableNetlist"
+import { getReadableNetlist } from "../netlist/getReadableNetlist"
 
 const debug = Debug("mash")
 
