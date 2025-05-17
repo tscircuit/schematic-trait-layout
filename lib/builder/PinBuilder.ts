@@ -30,11 +30,13 @@ export class PinBuilder {
   }
 
   line(dx: number, dy: number): this {
+    const start = { x: this.x, y: this.y, ref: this.ref }
+    this.x += dx
+    this.y += dy
+    const end = { x: this.x, y: this.y, ref: this.ref }
+    this.circuit.lines.push({ start, end })
     this.lastDx = dx
     this.lastDy = dy
-
-    // this.circuit.lines.push(...)
-
     return this
   }
 
@@ -65,7 +67,15 @@ export class PinBuilder {
   }
 
   label(text?: string): void {
-    // TODO
+    const id = text ?? `L${this.circuit.generateAutoLabel()}`
+    this.circuit.netLabels.push({
+      labelId: id,
+      x: this.x,
+      y: this.y,
+      fromRef: this.ref,
+    })
+    // Optionally, overlay label on grid if available
+    // this.circuit.getGrid().putOverlay(this.x, this.y, id)
   }
 
   intersect(): this {
@@ -86,8 +96,18 @@ export class PinBuilder {
     return this
   }
 
+  intersect(): this {
+    this.circuit.connectionPoints.push({
+      ref: this.ref,
+      x: this.x,
+      y: this.y,
+      showAsIntersection: true,
+    })
+    return this
+  }
+
   mark(name: string): this {
-    // TODO: Implement mark method
+    this.chip.addMark(name, this)
     return this
   }
 

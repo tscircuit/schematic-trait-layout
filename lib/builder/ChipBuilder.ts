@@ -2,78 +2,117 @@ import type { Side } from "."
 import { PinBuilder } from "./PinBuilder"
 import type { CircuitBuilder } from "./CircuitBuilder"
 
-// Moved Side and SIDES_CCW to module scope for broader use
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
 
 export class ChipBuilder {
+  public x = 0
+  public y = 0
+  public leftPins: PinBuilder[] = []
+  public rightPins: PinBuilder[] = []
+  public topPins: PinBuilder[] = []
+  public bottomPins: PinBuilder[] = []
+  public leftPinCount = 0
+  public rightPinCount = 0
+  public topPinCount = 0
+  public bottomPinCount = 0
   private pinMap: Record<string, PinBuilder> = {}
   private marks: Record<string, { pinBuilder: PinBuilder; state: any }> = {}
 
   constructor(
-    private readonly circuit: CircuitBuilder,
+    public readonly circuit: CircuitBuilder,
     public readonly chipId: string,
   ) {}
 
-  /**
-   * Place the chip at the given coordinates in the circuit grid.
-   * This is the top-left corner of the chip's body.
-   */
   at(x: number, y: number): this {
-    // TODO: Implement placing the chip at the specified coordinates
+    this.x = x
+    this.y = y
     return this
   }
 
-  /**
-   * Add pins to the left side of the chip.
-   */
+  private makePin(globalPinNumber: number, offsetX: number, offsetY: number): PinBuilder {
+    const pb = new PinBuilder(this, globalPinNumber)
+    pb.x = this.x + offsetX
+    pb.y = this.y + offsetY
+    this.pinMap[String(globalPinNumber)] = pb
+    return pb
+  }
+
   leftside(count: number): this {
-    // TODO: Implement adding pins to the left side
+    this.leftPinCount = count
+    for (let i = 0; i < count; ++i) {
+      // left side: top to bottom, global pin number increases
+      const globalPinNumber = this.leftPins.length + 1
+      const pb = this.makePin(globalPinNumber, 0, i + 1)
+      this.leftPins.push(pb)
+    }
     return this
   }
 
-  /**
-   * Add pins to the right side of the chip.
-   */
   rightside(count: number): this {
-    // TODO: Implement adding pins to the right side
+    this.rightPinCount = count
+    for (let i = 0; i < count; ++i) {
+      // right side: bottom to top, global pin number increases
+      const globalPinNumber = this.leftPinCount + this.bottomPinCount + this.rightPins.length + 1
+      const pb = this.makePin(globalPinNumber, 4, count - i)
+      this.rightPins.push(pb)
+    }
     return this
   }
 
-  /**
-   * Add pins to the top side of the chip.
-   */
   topside(count: number): this {
-    // TODO: Implement adding pins to the top side
+    this.topPinCount = count
+    for (let i = 0; i < count; ++i) {
+      // top side: left to right, global pin number increases
+      const globalPinNumber = this.leftPinCount + this.bottomPinCount + this.rightPinCount + this.topPins.length + 1
+      const pb = this.makePin(globalPinNumber, i + 1, 0)
+      this.topPins.push(pb)
+    }
     return this
   }
 
-  /**
-   * Add pins to the bottom side of the chip.
-   */
   bottomside(count: number): this {
-    // TODO: Implement adding pins to the bottom side
+    this.bottomPinCount = count
+    for (let i = 0; i < count; ++i) {
+      // bottom side: right to left, global pin number increases
+      const globalPinNumber = this.leftPinCount + this.bottomPins.length + 1
+      const pb = this.makePin(globalPinNumber, count - i, this.getHeight() - 1)
+      this.bottomPins.push(pb)
+    }
     return this
   }
 
-  /**
-   * Get a pin by its side and index.
-   */
+  // Aliases for test compatibility
+  leftpins = this.leftside
+  rightpins = this.rightside
+  topside = this.topside
+  bottomside = this.bottomside
+
+  getHeight(): number {
+    return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
+  }
+
   pin(pinNumber: number): PinBuilder {
-    // TODO: Implement getting a pin by side and index
+    // Find the pin in the four side arrays
+    if (this.pinMap[String(pinNumber)]) return this.pinMap[String(pinNumber)]
+    // fallback: try to find by order
+    let n = pinNumber
+    if (n <= this.leftPins.length) return this.leftPins[n - 1]
+    n -= this.leftPins.length
+    if (n <= this.bottomPins.length) return this.bottomPins[n - 1]
+    n -= this.bottomPins.length
+    if (n <= this.rightPins.length) return this.rightPins[n - 1]
+    n -= this.rightPins.length
+    if (n <= this.topPins.length) return this.topPins[n - 1]
+    throw new Error(`Pin number ${pinNumber} not found`)
   }
 
-  /**
-   * Add a mark at the current position of the pin builder.
-   */
   addMark(name: string, pinBuilder: PinBuilder): void {
-    // TODO: Implement adding a mark
+    this.marks[name] = { pinBuilder, state: pinBuilder.getMarkableState() }
   }
 
-  /**
-   * Continue routing from a previously marked position.
-   */
   fromMark(name: string): PinBuilder {
-    // TODO: Implement continuing from a mark
-    return this.marks[name].pinBuilder
+    const { pinBuilder, state } = this.marks[name]
+    pinBuilder.applyMarkableState(state)
+    return pinBuilder
   }
 }
