@@ -1,25 +1,55 @@
-import type { InputNetlist, Box, Connection } from "lib/input-types"
+import type { InputNetlist, Box, Connection, PortReference } from "lib/input-types"
 
-// Helper function to find a simple net connection for a pin
-const getConnectedNet = (
+// Helper function to determine the label for a pin connection
+const getPinConnectionLabel = (
   boxId: string,
   pinNumber: number,
   connections: ReadonlyArray<Connection>,
 ): string | null => {
-  for (const conn of connections) {
-    if (conn.connectedPorts.length === 2) {
-      const boxPort = conn.connectedPorts.find(
-        (p) => "boxId" in p && p.boxId === boxId && p.pinNumber === pinNumber,
-      )
-      const netPort = conn.connectedPorts.find((p) => "netId" in p)
+  const relevantConnections = connections.filter(conn =>
+    conn.connectedPorts.some(
+      p => "boxId" in p && p.boxId === boxId && p.pinNumber === pinNumber,
+    )
+  );
 
-      if (boxPort && netPort && "netId" in netPort) {
-        return netPort.netId
-      }
+  if (relevantConnections.length === 0) {
+    return null; // No connection
+  }
+
+  // A pin should ideally be part of only one connection object due to merging logic in the builder.
+  // If it appears in multiple connection objects (e.g. if merging failed or was bypassed),
+  // or if the single connection it's in is complex (connects to multiple other things),
+  // we simplify the label to "...".
+  if (relevantConnections.length > 1) {
+    return "...";
+  }
+
+  const connection = relevantConnections[0];
+  const otherPorts = connection.connectedPorts.filter(p => {
+    if ("boxId" in p && typeof p.boxId === 'string' && typeof p.pinNumber === 'number') { // Type guard for PortReference
+      return !(p.boxId === boxId && p.pinNumber === pinNumber);
+    }
+    return true; // Keep netIds or other types of ports
+  });
+
+  if (otherPorts.length === 0) {
+    // This case (a pin connected only to itself within a connection object) should ideally not occur.
+    return null;
+  }
+
+  if (otherPorts.length === 1) {
+    const otherPort = otherPorts[0];
+    if ("boxId" in otherPort && typeof otherPort.boxId === 'string' && typeof otherPort.pinNumber === 'number') {
+      return `${otherPort.boxId}.${otherPort.pinNumber}`;
+    }
+    if ("netId" in otherPort && typeof otherPort.netId === 'string') {
+      return otherPort.netId;
     }
   }
-  return null
-}
+
+  // If connected to more than one other port, or if the port types are mixed/unexpected.
+  return "...";
+};
 
 // Helper function to generate ASCII art for a single box
 const drawBoxAscii = (
@@ -65,17 +95,17 @@ const drawBoxAscii = (
 
     let leftDecorator = ""
     if (currentLeftPinNumber > 0) {
-      const netId = getConnectedNet(boxId, currentLeftPinNumber, connections)
-      if (netId) {
-        leftDecorator = `${netId} ── `
+      const label = getPinConnectionLabel(boxId, currentLeftPinNumber, connections)
+      if (label) {
+        leftDecorator = `${label} ── `
       }
     }
 
     let rightDecorator = ""
     if (currentRightPinNumber > 0) {
-      const netId = getConnectedNet(boxId, currentRightPinNumber, connections)
-      if (netId) {
-        rightDecorator = ` ── ${netId}`
+      const label = getPinConnectionLabel(boxId, currentRightPinNumber, connections)
+      if (label) {
+        rightDecorator = ` ── ${label}`
       }
     }
 

@@ -35,17 +35,17 @@ test("getReadableNetlist", () => {
     "Boxes:
       - Box ID: chip0
         Type: L:3 R:3 T:0 B:0
-                ┌────────────────┐
-        L3 ──  1│                │ 4  ── L2        
-               2│     chip0      │ 5                
-        L4 ──  3│                │ 6  ── L1        
-                └────────────────┘
+                        ┌────────────────┐
+                L3 ──  1│                │4  ── L2        
+                       2│     chip0      │5  ── chip1.1   
+                L4 ──  3│                │6  ── L1        
+                        └────────────────┘
       - Box ID: chip1
         Type: L:2 R:2 T:0 B:0
-                ┌────────────────┐
-               1│     chip1      │ 3                
-        L5 ──  2│                │ 4  ── L6        
-                └────────────────┘
+                        ┌────────────────┐
+           chip0.5 ──  1│     chip1      │3               
+                L5 ──  2│                │4  ── L6        
+                        └────────────────┘
 
     Nets:
       - Net ID: L1
@@ -77,5 +77,5 @@ test("getReadableNetlist", () => {
       - Connection 7:
         - Box Pin: chip1, Pin 4
         - Net: L6"
-  `)
+    `)
 })
