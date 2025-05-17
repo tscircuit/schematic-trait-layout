@@ -13,7 +13,7 @@ const debug = Debug("mash")
 type Edge = "left" | "right" | "up" | "down"
 
 // Interfaces for storing and restoring pin state for mark/fromMark
-interface BoxPinLayoutEntry {
+export interface BoxPinLayoutEntry {
   side: Side
   count: number
   startGlobalPin: number
@@ -149,8 +149,7 @@ export class CircuitBuilder {
     connections: Connection[]
   } = { boxes: [], nets: [], connections: [] }
 
-  // --- CLONE: deep but shallow-array/map copy ---
-  private _clone(): CircuitBuilder {
+  clone(): CircuitBuilder {
     const copy = circuit()
 
     // numeric counters
@@ -448,8 +447,8 @@ export class CircuitBuilder {
    * keeps the chip's left-hand pins, the second keeps its right-hand pins.
    */
   bifurcateX(chipId: string): [CircuitBuilder, CircuitBuilder] {
-    const left = this._clone()
-    const right = this._clone()
+    const left = this.clone()
+    const right = this.clone()
 
     // remove right-hand pins from the “left” clone
     this._pruneChipSide(chipId, left, false /* keep-left */)
@@ -730,7 +729,7 @@ export class CircuitBuilder {
   }
 
   /** Flips the circuit horizontally (X-axis inversion). Modifies the instance in place. */
-  flipX(): void {
+  flipX() {
     const pinMapsByBoxId: Record<string, Record<number, number>> = {}
 
     // 1. Flip Netlist Boxes and Create Pin Mappings
@@ -863,12 +862,13 @@ export class CircuitBuilder {
         }
       }
     }
+    return this
   }
 }
 
 // Moved Side and SIDES_CCW to module scope for broader use
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
-type Side = (typeof SIDES_CCW)[number]
+export type Side = (typeof SIDES_CCW)[number]
 
 /***** ChipBuilder ************************************************************/
 export class ChipBuilder {

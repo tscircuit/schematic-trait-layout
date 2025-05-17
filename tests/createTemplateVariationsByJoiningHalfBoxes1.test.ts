@@ -31,14 +31,27 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
     "
   `)
 
-  const variations = createTemplateVariationsByJoiningHalfBoxes(T1, [T2])
-  expect(variations.length).toBe(1)
+  const T1_flipped = T1.clone().flipX()
+
+  const variations = createTemplateVariationsByJoiningHalfBoxes(T1, [
+    T2,
+    T1_flipped,
+  ])
+  expect(variations.length).toBe(2)
   expect(`\n${variations[0]!.toString()}\n`).toMatchInlineSnapshot(`
     "
       ┌───┐
     L─┤1 4├─┐
     L─┤2 3│ │
       └───┘ L
+    "
+  `)
+  expect(`\n${variations[1]!.toString()}\n`).toMatchInlineSnapshot(`
+    "
+    ┌───┬───┐
+    │ L1┼1L │
+    │ L2┼2L │
+    └───┴───┘
     "
   `)
 })

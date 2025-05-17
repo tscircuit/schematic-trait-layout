@@ -1,8 +1,4 @@
-import type {
-  CircuitBuilder,
-  BoxPinLayoutEntry,
-  Side,
-} from "lib/builder"
+import type { CircuitBuilder, BoxPinLayoutEntry, Side } from "lib/builder"
 import type { PortReference } from "lib/input-types"
 
 export const mergeCircuits = (opts: {
@@ -15,7 +11,7 @@ export const mergeCircuits = (opts: {
 
   // 1. Create the mergedCircuit, starting as a shallow clone of circuit1.
   //    We cast to 'any' to access the private _clone method.
-  const mergedCircuit = (circuit1 as any)._clone()
+  const mergedCircuit = circuit1.clone()
 
   // 2. Get data for the chips to be merged
   const chip1BoxOriginal = circuit1.netlistComponents.boxes.find(
@@ -80,21 +76,33 @@ export const mergeCircuits = (opts: {
   // Add top/bottom layouts from chip1 if they exist
   const chip1TopPinsLayout = chip1Layout.find((e: any) => e.side === "top")
   if (chip1TopPinsLayout) {
-    newBoxLayout.push({ ...chip1TopPinsLayout, startGlobalPin: currentMergedPinCounter })
+    newBoxLayout.push({
+      ...chip1TopPinsLayout,
+      startGlobalPin: currentMergedPinCounter,
+    })
     currentMergedPinCounter += chip1TopPinsLayout.count
   }
-  const chip1BottomPinsLayout = chip1Layout.find((e: any) => e.side === "bottom")
+  const chip1BottomPinsLayout = chip1Layout.find(
+    (e: any) => e.side === "bottom",
+  )
   if (chip1BottomPinsLayout) {
-    newBoxLayout.push({ ...chip1BottomPinsLayout, startGlobalPin: currentMergedPinCounter })
+    newBoxLayout.push({
+      ...chip1BottomPinsLayout,
+      startGlobalPin: currentMergedPinCounter,
+    })
     currentMergedPinCounter += chip1BottomPinsLayout.count
   }
-
-
   ;(mergedCircuit as any).boxPinLayouts[circuit1ChipId] = newBoxLayout
 
   // 4. Determine coordinate offset for circuit2 elements
-  const originC1 = (circuit1 as any).chipOrigins.get(circuit1ChipId) ?? { x: 0, y: 0 }
-  const originC2 = (circuit2 as any).chipOrigins.get(circuit2ChipId) ?? { x: 0, y: 0 }
+  const originC1 = (circuit1 as any).chipOrigins.get(circuit1ChipId) ?? {
+    x: 0,
+    y: 0,
+  }
+  const originC2 = (circuit2 as any).chipOrigins.get(circuit2ChipId) ?? {
+    x: 0,
+    y: 0,
+  }
   const offsetX = originC1.x - originC2.x
   const offsetY = originC1.y - originC2.y
 
@@ -102,7 +110,11 @@ export const mergeCircuits = (opts: {
   // 5a. Other Boxes (not circuit2ChipId)
   for (const boxC2 of circuit2.netlistComponents.boxes) {
     if (boxC2.boxId === circuit2ChipId) continue
-    if (!mergedCircuit.netlistComponents.boxes.find((b) => b.boxId === boxC2.boxId)) {
+    if (
+      !mergedCircuit.netlistComponents.boxes.find(
+        (b) => b.boxId === boxC2.boxId,
+      )
+    ) {
       mergedCircuit.netlistComponents.boxes.push(structuredClone(boxC2))
       const boxC2Origin = (circuit2 as any).chipOrigins.get(boxC2.boxId)
       if (boxC2Origin) {
@@ -121,7 +133,9 @@ export const mergeCircuits = (opts: {
 
   // 5b. Nets
   for (const netC2 of circuit2.netlistComponents.nets) {
-    if (!mergedCircuit.netlistComponents.nets.find((n) => n.netId === netC2.netId)) {
+    if (
+      !mergedCircuit.netlistComponents.nets.find((n) => n.netId === netC2.netId)
+    ) {
       mergedCircuit.netlistComponents.nets.push(structuredClone(netC2))
     }
   }
@@ -142,18 +156,28 @@ export const mergeCircuits = (opts: {
     // Skip overlay characters that are part of chip2's body, as it will be redrawn
     // This is a heuristic: check if the coordinate is within chip2's bounding box
     // A more robust check would involve knowing exact body coordinates.
-    const c2Origin = (circuit2 as any).chipOrigins.get(circuit2ChipId) ?? { x:0, y:0 }
+    const c2Origin = (circuit2 as any).chipOrigins.get(circuit2ChipId) ?? {
+      x: 0,
+      y: 0,
+    }
     const c2Dims = (circuit2 as any)._calculateChipVisualDimensions({
-        left: chip2BoxOriginal.leftPinCount, right: chip2BoxOriginal.rightPinCount,
-        top: chip2BoxOriginal.topPinCount, bottom: chip2BoxOriginal.bottomPinCount
-    });
-    const originalX = Number(xStr);
-    const originalY = Number(yStr);
+      left: chip2BoxOriginal.leftPinCount,
+      right: chip2BoxOriginal.rightPinCount,
+      top: chip2BoxOriginal.topPinCount,
+      bottom: chip2BoxOriginal.bottomPinCount,
+    })
+    const originalX = Number(xStr)
+    const originalY = Number(yStr)
 
-    if (originalX >= c2Origin.x && originalX < c2Origin.x + c2Dims.bodyWidth &&
-        originalY >= c2Origin.y && originalY < c2Origin.y + c2Dims.bodyHeight &&
-        char.match(/^[\d┌┐└┘─│┼]$/)) { // Basic check for chip body/pin number chars
-        continue;
+    if (
+      originalX >= c2Origin.x &&
+      originalX < c2Origin.x + c2Dims.bodyWidth &&
+      originalY >= c2Origin.y &&
+      originalY < c2Origin.y + c2Dims.bodyHeight &&
+      char.match(/^[\d┌┐└┘─│┼]$/)
+    ) {
+      // Basic check for chip body/pin number chars
+      continue
     }
 
     const x = originalX + offsetX
@@ -177,9 +201,9 @@ export const mergeCircuits = (opts: {
 
     const existingItem = (mergedCircuit as any).coordinateToNetItem.get(newKey)
     if (existingItem) {
-      (mergedCircuit as any).connectItems(existingItem, newPortRef)
+      ;(mergedCircuit as any).connectItems(existingItem, newPortRef)
     } else {
-      (mergedCircuit as any).coordinateToNetItem.set(newKey, newPortRef)
+      ;(mergedCircuit as any).coordinateToNetItem.set(newKey, newPortRef)
     }
   }
 
@@ -205,37 +229,42 @@ export const mergeCircuits = (opts: {
 
     if (remappedPorts.length >= 2) {
       for (let i = 0; i < remappedPorts.length - 1; i++) {
-        (mergedCircuit as any).connectItems(remappedPorts[i], remappedPorts[i + 1])
+        ;(mergedCircuit as any).connectItems(
+          remappedPorts[i],
+          remappedPorts[i + 1],
+        )
       }
     }
   }
 
   // 7. Redraw the merged chip body and pin numbers
-  const mergedChipOrigin = (mergedCircuit as any).chipOrigins.get(circuit1ChipId) ?? { x: 0, y: 0 }
+  const mergedChipOrigin = (mergedCircuit as any).chipOrigins.get(
+    circuit1ChipId,
+  ) ?? { x: 0, y: 0 }
   const pinCounts = {
     left: mergedChipBox.leftPinCount,
     right: mergedChipBox.rightPinCount,
     top: mergedChipBox.topPinCount,
     bottom: mergedChipBox.bottomPinCount,
   }
-  const { bodyWidth, bodyHeight } = (mergedCircuit as any)._calculateChipVisualDimensions(pinCounts)
+  const { bodyWidth, bodyHeight } = (
+    mergedCircuit as any
+  )._calculateChipVisualDimensions(pinCounts)
 
   // Clear existing overlay for the chip's area before redrawing.
   // This is a simple rectangular clear; a more precise clear would be better.
   for (let i = 0; i < bodyWidth; i++) {
     for (let j = 0; j < bodyHeight; j++) {
-        const key = `${mergedChipOrigin.x + i},${mergedChipOrigin.y + j}`;
-        if ((mergedCircuit.grid as any).overlay.has(key)) {
-            const char = (mergedCircuit.grid as any).overlay.get(key);
-            // Only delete if it's likely part of an old chip body/pin number
-             if (char.match(/^[\d┌┐└┘─│┼]$/)) {
-                (mergedCircuit.grid as any).overlay.delete(key);
-            }
+      const key = `${mergedChipOrigin.x + i},${mergedChipOrigin.y + j}`
+      if ((mergedCircuit.grid as any).overlay.has(key)) {
+        const char = (mergedCircuit.grid as any).overlay.get(key)
+        // Only delete if it's likely part of an old chip body/pin number
+        if (char.match(/^[\d┌┐└┘─│┼]$/)) {
+          ;(mergedCircuit.grid as any).overlay.delete(key)
         }
+      }
     }
   }
-
-
   ;(mergedCircuit as any)._drawChipOutlineAndPinNumbers(
     circuit1ChipId,
     mergedChipOrigin.x,
