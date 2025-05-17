@@ -1,9 +1,36 @@
-import type { InputNetlist, Box } from "lib/input-types"
+import type { InputNetlist, Box, Connection } from "lib/input-types"
+
+// Helper function to find a simple net connection for a pin
+const getConnectedNet = (
+  boxId: string,
+  pinNumber: number,
+  connections: ReadonlyArray<Connection>,
+): string | null => {
+  for (const conn of connections) {
+    if (conn.connectedPorts.length === 2) {
+      const boxPort = conn.connectedPorts.find(
+        (p) => "boxId" in p && p.boxId === boxId && p.pinNumber === pinNumber,
+      )
+      const netPort = conn.connectedPorts.find((p) => "netId" in p)
+
+      if (boxPort && netPort && "netId" in netPort) {
+        return netPort.netId
+      }
+    }
+  }
+  return null
+}
 
 // Helper function to generate ASCII art for a single box
-const drawBoxAscii = (box: Box): string[] => {
+const drawBoxAscii = (
+  box: Box,
+  connections: ReadonlyArray<Connection>,
+): string[] => {
   const output: string[] = []
   const { boxId, leftPinCount, rightPinCount, topPinCount, bottomPinCount } = box
+
+  const BOX_INNER_WIDTH = 16
+  const SIDE_PADDING_WIDTH = 16
 
   output.push(
     `Type: L:${leftPinCount} R:${rightPinCount} T:${topPinCount} B:${bottomPinCount}`,
@@ -16,19 +43,41 @@ const drawBoxAscii = (box: Box): string[] => {
 
   const bodyHeight = Math.max(lp, rp, 1) // Min height of 1 for the box name
 
-  const maxBoxIdDisplayLength = 15
+  // Max length for boxId *inside* the box, allowing for " name " or " truncatedN… "
+  const maxDisplayableBoxIdLength = BOX_INNER_WIDTH - 2
   let displayBoxId = boxId
-  if (boxId.length > maxBoxIdDisplayLength) {
-    displayBoxId = `${boxId.substring(0, maxBoxIdDisplayLength - 1)}…`
+  if (boxId.length > maxDisplayableBoxIdLength) {
+    // Truncate to maxDisplayableBoxIdLength - 1 to make space for the ellipsis
+    displayBoxId = `${boxId.substring(0, maxDisplayableBoxIdLength - 1)}…`
   }
+  // If boxId is shorter, it will be padded with spaces later when creating lineContent.
 
-  const innerWidth = Math.max(displayBoxId.length + 2, 5) // +2 for padding, min width 5
+  const innerWidth = BOX_INNER_WIDTH // Fixed inner width
 
-  output.push(`┌${"─".repeat(innerWidth)}┐`)
+  output.push(`${" ".repeat(SIDE_PADDING_WIDTH)}┌${"─".repeat(innerWidth)}┐`)
 
   for (let i = 0; i < bodyHeight; i++) {
-    const leftPinLabel = i < lp ? (i + 1).toString() : ""
-    const rightPinLabel = i < rp ? (lp + i + 1).toString() : ""
+    const currentLeftPinNumber = i < lp ? i + 1 : 0
+    const currentRightPinNumber = i < rp ? lp + i + 1 : 0
+
+    const leftPinLabel = currentLeftPinNumber > 0 ? currentLeftPinNumber.toString() : ""
+    const rightPinLabel = currentRightPinNumber > 0 ? currentRightPinNumber.toString() : ""
+
+    let leftDecorator = ""
+    if (currentLeftPinNumber > 0) {
+      const netId = getConnectedNet(boxId, currentLeftPinNumber, connections)
+      if (netId) {
+        leftDecorator = `${netId} ── `
+      }
+    }
+
+    let rightDecorator = ""
+    if (currentRightPinNumber > 0) {
+      const netId = getConnectedNet(boxId, currentRightPinNumber, connections)
+      if (netId) {
+        rightDecorator = ` ── ${netId}`
+      }
+    }
 
     let lineContent = ""
     if (i === Math.floor((bodyHeight - 1) / 2)) {
@@ -38,20 +87,29 @@ const drawBoxAscii = (box: Box): string[] => {
     } else {
       lineContent = " ".repeat(innerWidth)
     }
-    // Ensure consistent spacing for pin labels
-    const leftPart = leftPinLabel.padStart(2)
-    const rightPart = rightPinLabel.padEnd(2)
-    output.push(`${leftPart} │${lineContent}│ ${rightPart}`)
+    // Prepare parts for left and right of the box
+    const leftPinDisplay = leftPinLabel.padStart(2) // e.g., " 1" or "10"
+    const rightPinDisplay = rightPinLabel.padEnd(2)  // e.g., "4 " or "10"
+
+    const leftPart = `${leftDecorator}${leftPinDisplay}` // e.g., "L1 ──  1" or "  1"
+    const rightPart = `${rightPinDisplay}${rightDecorator}` // e.g., "4  ── L2" or "4 "
+
+    const paddedLeftFull = leftPart.padStart(SIDE_PADDING_WIDTH)
+    const paddedRightFull = rightPart.padEnd(SIDE_PADDING_WIDTH)
+
+    output.push(
+      `${paddedLeftFull}│${lineContent}│${paddedRightFull}`,
+    )
   }
 
-  output.push(`└${"─".repeat(innerWidth)}┘`)
+  output.push(`${" ".repeat(SIDE_PADDING_WIDTH)}└${"─".repeat(innerWidth)}┘`)
 
   if (tp > 0) {
     const startPin = lp + rp + 1
     const topPinsStr = Array.from({ length: tp }, (_, k) => startPin + k).join(
       ", ",
     )
-    output.push(`Top Pins: ${topPinsStr}`)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH) + `Top Pins: ${topPinsStr}`)
   }
   if (bp > 0) {
     const startPin = lp + rp + tp + 1
@@ -59,7 +117,7 @@ const drawBoxAscii = (box: Box): string[] => {
       { length: bp },
       (_, k) => startPin + k,
     ).join(", ")
-    output.push(`Bottom Pins: ${bottomPinsStr}`)
+    output.push(" ".repeat(SIDE_PADDING_WIDTH) + `Bottom Pins: ${bottomPinsStr}`)
   }
 
   return output
@@ -79,7 +137,7 @@ export const getReadableNetlist = (netlist: InputNetlist): string => {
   } else {
     for (const box of netlist.boxes) {
       lines.push(`  - Box ID: ${box.boxId}`)
-      const boxArtLines = drawBoxAscii(box)
+      const boxArtLines = drawBoxAscii(box, netlist.connections)
       for (const artLine of boxArtLines) {
         lines.push(`    ${artLine}`) // Indent box art
       }
