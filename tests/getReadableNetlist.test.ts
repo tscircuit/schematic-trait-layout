@@ -19,6 +19,18 @@ test("getReadableNetlist", () => {
   U2.pin(2).line(-2, 0).line(0, -1).label()
   U2.pin(4).line(2, 0).line(0, 4).label()
 
+  expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
+    "
+               L       L
+       ┌───┐   │       │
+    L──┤1 6├───┘       │
+       │2 5├──┐  ┌───┐ │
+     ┌─┤3 4├┐ └──┤1 4├─┘
+     │ └───┘│  ┌─┤2 3│
+     L      L  L └───┘
+    "
+  `)
+
   expect(getReadableNetlist(C.getNetlist())).toMatchInlineSnapshot(`
     "Boxes:
       - Box ID: chip0, Pins: L:3 R:3 T:0 B:0
