@@ -85,35 +85,11 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
-              "pinNumber": 6,
-            },
-            {
-              "boxId": "passive1",
-              "pinNumber": 1,
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
               "boxId": "passive1",
               "pinNumber": 2,
             },
             {
               "netId": "L2",
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip0",
-              "pinNumber": 5,
-            },
-            {
-              "boxId": "passive2",
-              "pinNumber": 1,
             },
           ],
         },
@@ -131,35 +107,11 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
-              "pinNumber": 4,
-            },
-            {
-              "boxId": "passive3",
-              "pinNumber": 2,
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
               "boxId": "passive3",
               "pinNumber": 1,
             },
             {
               "netId": "L4",
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip0",
-              "pinNumber": 3,
-            },
-            {
-              "boxId": "passive4",
-              "pinNumber": 2,
             },
           ],
         },
@@ -183,9 +135,53 @@ test("template2", () => {
             {
               "netId": "L6",
             },
+          ],
+        },
+        {
+          "connectedPorts": [
             {
               "boxId": "chip0",
+              "pinNumber": 6,
+            },
+            {
+              "boxId": "passive1",
               "pinNumber": 1,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 5,
+            },
+            {
+              "boxId": "passive2",
+              "pinNumber": 1,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 4,
+            },
+            {
+              "boxId": "passive3",
+              "pinNumber": 2,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 3,
+            },
+            {
+              "boxId": "passive4",
+              "pinNumber": 2,
             },
           ],
         },

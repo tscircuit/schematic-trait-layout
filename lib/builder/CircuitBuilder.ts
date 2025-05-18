@@ -91,7 +91,6 @@ export class CircuitBuilder {
     }
     for (const line of this.lines) {
       if (!isSamePortRef(line.start.ref, line.end.ref)) {
-        console.log("lineref", line.start.ref, line.end.ref)
         nb.connect(line.start.ref, line.end.ref)
       }
     }

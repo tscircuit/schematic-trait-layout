@@ -1,6 +1,7 @@
 import type { Side } from "."
 import { PinBuilder } from "./PinBuilder"
 import type { CircuitBuilder } from "./CircuitBuilder"
+import { getPinSideIndex } from "./getPinSideIndex"
 
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
 
@@ -45,13 +46,14 @@ export class ChipBuilder {
     offsetY,
   }: MakePinParams): PinBuilder {
     const pb = new PinBuilder(this, ccwPinNumber)
-    pb.x = this.x + offsetX
-    pb.y = this.y + offsetY
     this.pinMap[`${side}${indexOnSide}`] = pb
     return pb
   }
 
   leftpins(count: number): this {
+    if (this.pinPositionsAreSet) {
+      throw new Error("Pin positions are already set, cannot add new pins")
+    }
     this.leftPinCount = count
     // Pins are created and stored in this.leftPins in visual top-to-bottom order.
     // Pin 1 (if on the left side) is the topmost.
@@ -76,6 +78,9 @@ export class ChipBuilder {
   }
 
   rightpins(count: number): this {
+    if (this.pinPositionsAreSet) {
+      throw new Error("Pin positions are already set, cannot add new pins")
+    }
     this.rightPinCount = count
     for (let i = 0; i < count; ++i) {
       // right side: pins are numbered bottom-to-top.
@@ -95,6 +100,9 @@ export class ChipBuilder {
   }
 
   toppins(count: number): this {
+    if (this.pinPositionsAreSet) {
+      throw new Error("Pin positions are already set, cannot add new pins")
+    }
     this.topPinCount = count
     for (let i = 0; i < count; ++i) {
       // top side: left to right, ccwPinNumber increases
@@ -113,6 +121,9 @@ export class ChipBuilder {
   }
 
   bottompins(count: number): this {
+    if (this.pinPositionsAreSet) {
+      throw new Error("Pin positions are already set, cannot add new pins")
+    }
     this.bottomPinCount = count
     for (let i = 0; i < count; ++i) {
       // bottom side: right to left, ccwPinNumber increases
@@ -129,29 +140,83 @@ export class ChipBuilder {
     return this
   }
 
+  getWidth(): number {
+    if (this.isPassive()) {
+      return 1
+    }
+    // Temporary, eventually need to handle top and bottom pin counts
+    return 4
+  }
+
+  isPassive(): boolean {
+    return (
+      this.totalPinCount === 2 &&
+      ((this.topPinCount === 1 && this.bottomPinCount === 1) ||
+        (this.leftPinCount === 1 && this.rightPinCount === 1))
+    )
+  }
+
   getHeight(): number {
-    if (
-      this.leftPinCount === 0 &&
-      this.rightPinCount === 0 &&
-      this.topPinCount === 1 &&
-      this.bottomPinCount === 1
-    ) {
+    if (this.isPassive()) {
       return 1
     }
     return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
   }
 
-  pin(pinNumber: number): PinBuilder {
-    // Find the pin by its 1-based ccwPinNumber by checking sides in order: Left, Bottom, Right, Top.
+  get totalPinCount(): number {
+    return (
+      this.leftPinCount +
+      this.rightPinCount +
+      this.topPinCount +
+      this.bottomPinCount
+    )
+  }
+
+  setPinPositions(): void {
+    if (this.isPassive()) {
+      const pb1 = this._getPin(1)
+      const pb2 = this._getPin(2)
+      pb1.x = this.x
+      pb1.y = this.y
+      pb2.x = this.x
+      pb2.y = this.y
+      return
+    }
+
+    for (let pn = 1; pn <= this.totalPinCount; pn++) {
+      const pb = this._getPin(pn)
+      const { side, indexFromTop, indexFromLeft } = getPinSideIndex(pn, this)
+      if (side === "left" || side === "right") {
+        pb.x = this.x + (side === "left" ? 0 : this.getWidth())
+        pb.y = this.y + this.getHeight() - 2 - indexFromTop!
+      } else {
+        pb.x = this.x + indexFromLeft!
+        pb.y = this.y + (side === "bottom" ? 0 : this.getHeight())
+      }
+    }
+    this.pinPositionsAreSet = true
+  }
+
+  pinPositionsAreSet = false
+
+  private _getPin(pinNumber: number): PinBuilder {
     let n = pinNumber
-    if (n <= this.leftPins.length) return this.leftPins[n - 1]
+    if (n <= this.leftPins.length) return this.leftPins[n - 1]!
     n -= this.leftPins.length
-    if (n <= this.bottomPins.length) return this.bottomPins[n - 1]
+    if (n <= this.bottomPins.length) return this.bottomPins[n - 1]!
     n -= this.bottomPins.length
-    if (n <= this.rightPins.length) return this.rightPins[n - 1]
+    if (n <= this.rightPins.length) return this.rightPins[n - 1]!
     n -= this.rightPins.length
-    if (n <= this.topPins.length) return this.topPins[n - 1]
+    if (n <= this.topPins.length) return this.topPins[n - 1]!
     throw new Error(`Pin number ${pinNumber} not found`)
+  }
+
+  pin(pinNumber: number): PinBuilder {
+    if (!this.pinPositionsAreSet) {
+      this.setPinPositions()
+    }
+    // Find the pin by its 1-based ccwPinNumber by checking sides in order: Left, Bottom, Right, Top
+    return this._getPin(pinNumber)
   }
 
   addMark(name: string, pinBuilder: PinBuilder): void {

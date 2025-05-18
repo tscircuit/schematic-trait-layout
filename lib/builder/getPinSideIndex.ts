@@ -6,26 +6,26 @@ import { SIDES_CCW } from "./circuit-types"
  *
  * Examples:
  * ```
- * getPinSideIndex(1, { leftSideCount: 2, rightSideCount: 2 })
+ * getPinSideIndex(1, { leftPinCount: 2, rightPinCount: 2 })
  * // Returns: { side: "left", indexOnSide: 0 }
  *
- * getPinSideIndex(2, { leftSideCount: 2, rightSideCount: 2 })
+ * getPinSideIndex(2, { leftPinCount: 2, rightPinCount: 2 })
  * // Returns: { side: "left", indexOnSide: 1 }
  *
- * getPinSideIndex(3, { leftSideCount: 2, rightSideCount: 2 })
+ * getPinSideIndex(3, { leftPinCount: 2, rightPinCount: 2 })
  * // Returns: { side: "right", indexOnSide: 0 }
  *
- * getPinSideIndex(4, { leftSideCount: 2, rightSideCount: 2 })
+ * getPinSideIndex(4, { leftPinCount: 2, rightPinCount: 2 })
  * // Returns: { side: "right", indexOnSide: 1 }
  * ```
  */
 export const getPinSideIndex = (
   pinNumber: number,
   chipDimensions: {
-    leftSideCount?: number
-    rightSideCount?: number
-    topSideCount?: number
-    bottomSideCount?: number
+    leftPinCount?: number
+    rightPinCount?: number
+    topPinCount?: number
+    bottomPinCount?: number
   },
 ): {
   side: Side
@@ -38,7 +38,7 @@ export const getPinSideIndex = (
   for (let i = 0; i < pinNumber; ) {
     const currentSide = SIDES_CCW[currentSideIndex]
     const currentSideDimensions =
-      chipDimensions[`${currentSide}SideCount` as keyof typeof chipDimensions]
+      chipDimensions[`${currentSide}PinCount` as keyof typeof chipDimensions]
 
     if (currentSideDimensions === undefined || currentSideDimensions === 0) {
       currentSideIndex++
@@ -60,13 +60,13 @@ export const getPinSideIndex = (
         result.indexFromTop = currentIndexOnSide
       } else if (currentSide === "right") {
         result.indexFromTop =
-          chipDimensions.rightSideCount! - currentIndexOnSide - 1
+          chipDimensions.rightPinCount! - currentIndexOnSide - 1
       }
       if (currentSide === "bottom") {
         result.indexFromLeft = currentIndexOnSide
       } else if (currentSide === "top") {
         result.indexFromLeft =
-          chipDimensions.topSideCount! - currentIndexOnSide - 1
+          chipDimensions.topPinCount! - currentIndexOnSide - 1
       }
       return result
     }
