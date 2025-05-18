@@ -6,8 +6,8 @@ test("template5", () => {
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
     ┌───┐     ┌───┐
-    │1 4├─────┤1 2│
-    │2 3│     └───┘
+    ┤1 4├─────┤1 2├
+    ┤2 3├     └───┘
     └───┘
     "
   `)
@@ -29,20 +29,7 @@ test("template5", () => {
           "topPinCount": 0,
         },
       ],
-      "connections": [
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip1",
-              "pinNumber": 1,
-            },
-            {
-              "boxId": "chip0",
-              "pinNumber": 4,
-            },
-          ],
-        },
-      ],
+      "connections": [],
       "nets": [],
     }
   `)

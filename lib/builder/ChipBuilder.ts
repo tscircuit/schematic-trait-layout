@@ -30,6 +30,7 @@ export class ChipBuilder {
   constructor(
     public readonly circuit: CircuitBuilder,
     public readonly chipId: string,
+    public readonly isPassive: boolean = false,
   ) {}
 
   at(x: number, y: number): this {
@@ -141,23 +142,15 @@ export class ChipBuilder {
   }
 
   getWidth(): number {
-    if (this.isPassive()) {
+    if (this.isPassive) {
       return 1
     }
     // Temporary, eventually need to handle top and bottom pin counts
     return 4
   }
 
-  isPassive(): boolean {
-    return (
-      this.totalPinCount === 2 &&
-      ((this.topPinCount === 1 && this.bottomPinCount === 1) ||
-        (this.leftPinCount === 1 && this.rightPinCount === 1))
-    )
-  }
-
   getHeight(): number {
-    if (this.isPassive()) {
+    if (this.isPassive) {
       return 1
     }
     return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
@@ -173,7 +166,7 @@ export class ChipBuilder {
   }
 
   setPinPositions(): void {
-    if (this.isPassive()) {
+    if (this.isPassive) {
       const pb1 = this._getPin(1)
       const pb2 = this._getPin(2)
       pb1.x = this.x

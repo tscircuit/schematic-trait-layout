@@ -5,25 +5,7 @@ export const getGridFromCircuit = (circuit: CircuitBuilder): Grid => {
   const g = new Grid()
   // 1. Draw every chip
   for (const chip of circuit.chips) {
-    const totalPins =
-      chip.leftPinCount +
-      chip.rightPinCount +
-      chip.topPinCount +
-      chip.bottomPinCount
-    const isHorizontalPassive =
-      chip.leftPinCount === 1 &&
-      chip.rightPinCount === 1 &&
-      chip.topPinCount === 0 &&
-      chip.bottomPinCount === 0
-    const isVerticalPassive =
-      chip.topPinCount === 1 &&
-      chip.bottomPinCount === 1 &&
-      chip.leftPinCount === 0 &&
-      chip.rightPinCount === 0
-    const isTwoPinPassive =
-      totalPins === 2 && (isHorizontalPassive || isVerticalPassive)
-
-    if (isTwoPinPassive) {
+    if (chip.isPassive) {
       g.putOverlay(chip.x, chip.y, "P")
       continue
     }
