@@ -1,4 +1,5 @@
 import type { PortReference } from "../input-types"
+import type { Line } from "./circuit-types"
 import type { CircuitBuilder } from "./CircuitBuilder"
 
 export interface PinConnectionState {
@@ -15,6 +16,7 @@ export class PinBuilder {
   y = 0
 
   private lastConnected: PortReference | null = null
+  private lastCreatedLine: Line | null = null
   private lastDx = 0
   private lastDy = 0
 
@@ -34,9 +36,11 @@ export class PinBuilder {
     this.x += dx
     this.y += dy
     const end = { x: this.x, y: this.y, ref: this.ref }
-    this.circuit.lines.push({ start, end })
+    const line = { start, end }
+    this.circuit.lines.push(line)
     this.lastDx = dx
     this.lastDy = dy
+    this.lastCreatedLine = line
     return this
   }
 
@@ -114,17 +118,24 @@ export class PinBuilder {
       pin2_passive_builder.lastDy = normDy
     }
 
-    // 2. Add connection points between end of entry segment and passive's input pin
-    this.circuit.connectionPoints.push({
-      ref: incomingRefOriginal, // Refers to the entity this PinBuilder chain started from/last explicit line ended with.
-      x: entryConnectX,
-      y: entryConnectY,
-    })
-    this.circuit.connectionPoints.push({
-      ref: pin1_passive_ref, // Refers to the passive component's entry pin.
-      x: entryConnectX,
-      y: entryConnectY,
-    })
+    console.log(passive.topPins[0].y, passive.bottomPins[0].y)
+
+    // if (this.lastCreatedLine) {
+    //   console.log("lastCreatedLine", this.lastCreatedLine, pin1_passive_ref)
+    //   this.lastCreatedLine.end.ref = pin1_passive_ref
+    // }
+
+    // // 2. Add connection points between end of entry segment and passive's input pin
+    // this.circuit.connectionPoints.push({
+    //   ref: incomingRefOriginal, // Refers to the entity this PinBuilder chain started from/last explicit line ended with.
+    //   x: entryConnectX,
+    //   y: entryConnectY,
+    // })
+    // this.circuit.connectionPoints.push({
+    //   ref: pin1_passive_ref, // Refers to the passive component's entry pin.
+    //   x: entryConnectX,
+    //   y: entryConnectY,
+    // })
 
     // 3. Draw exit segment (1 unit) using pin2_passive_builder's line method.
     // This updates pin2_passive_builder.x, .y to the end of its 1-unit exit segment.

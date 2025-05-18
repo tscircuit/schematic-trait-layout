@@ -6,6 +6,7 @@ import type { Line, NetLabel, ConnectionPoint } from "./circuit-types"
 import { flipXCircuit } from "./flipCircuit"
 import { getGridFromCircuit } from "./getGridFromCircuit"
 import { NetlistBuilder } from "../netlist/NetlistBuilder"
+import { isSamePortRef } from "./isSamePortRef"
 
 export class CircuitBuilder {
   chips: ChipBuilder[] = []
@@ -88,20 +89,26 @@ export class CircuitBuilder {
       nb.addNet({ netId: label.labelId })
       nb.connect(label.fromRef, { netId: label.labelId })
     }
-    // d. Group connectionPoints by x,y
-    const groups: Record<string, ConnectionPoint[]> = {}
-    for (const cp of this.connectionPoints) {
-      const key = `${cp.x},${cp.y}`
-      if (!groups[key]) groups[key] = []
-      groups[key].push(cp)
-    }
-    for (const group of Object.values(groups)) {
-      for (let i = 0; i < group.length; ++i) {
-        for (let j = i + 1; j < group.length; ++j) {
-          nb.connect(group[i].ref, group[j].ref)
-        }
+    for (const line of this.lines) {
+      if (!isSamePortRef(line.start.ref, line.end.ref)) {
+        console.log("lineref", line.start.ref, line.end.ref)
+        nb.connect(line.start.ref, line.end.ref)
       }
     }
+    // d. Group connectionPoints by x,y
+    // const groups: Record<string, ConnectionPoint[]> = {}
+    // for (const cp of this.connectionPoints) {
+    //   const key = `${cp.x},${cp.y}`
+    //   if (!groups[key]) groups[key] = []
+    //   groups[key].push(cp)
+    // }
+    // for (const group of Object.values(groups)) {
+    //   for (let i = 0; i < group.length; ++i) {
+    //     for (let j = i + 1; j < group.length; ++j) {
+    //       nb.connect(group[i].ref, group[j].ref)
+    //     }
+    //   }
+    // }
     // e. Return netlist
     return nb.getNetlist()
   }
