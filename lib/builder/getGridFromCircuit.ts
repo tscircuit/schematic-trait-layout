@@ -84,8 +84,10 @@ export const getGridFromCircuit = (circuit: CircuitBuilder): Grid => {
   }
   // 2. Draw labels
   for (const label of circuit.netLabels) {
-    for (let i = 0; i < label.labelId.length; ++i) {
-      g.putOverlay(label.x + i, label.y, label.labelId[i])
+    if (label.labelId.length > 0) {
+      // Render only the first character of the label as an abbreviation.
+      const abbreviatedChar = label.labelId[0];
+      g.putOverlay(label.x, label.y, abbreviatedChar);
     }
   }
   // 3. Draw traces

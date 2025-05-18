@@ -39,10 +39,17 @@ export class ChipBuilder {
 
   leftside(count: number): this {
     this.leftPinCount = count
+    // Pins are created and stored in this.leftPins in visual top-to-bottom order.
+    // Pin 1 (if on the left side) is the topmost.
+    // OffsetY needs to be higher for topmost pins.
+    // If count = 2:
+    //   i=0 (topmost pin, e.g. Pin 1): globalPinNumber=1. offsetY should be 2 (or count).
+    //   i=1 (next pin down, e.g. Pin 2): globalPinNumber=2. offsetY should be 1.
     for (let i = 0; i < count; ++i) {
-      // left side: top to bottom, global pin number increases
-      const globalPinNumber = this.leftPins.length + 1
-      const pb = this.makePin(globalPinNumber, 0, i + 1)
+      // i is the 0-indexed visual position from the top of the left side.
+      const globalPinNumber = this.leftPins.length + 1 // Assuming left pins are numbered first.
+      const offsetY = count - i // Higher 'y' for pins closer to the top.
+      const pb = this.makePin(globalPinNumber, 0, offsetY)
       this.leftPins.push(pb)
     }
     return this
