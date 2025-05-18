@@ -5,7 +5,7 @@ import { ChipBuilder } from "./ChipBuilder"
 import type { Line, NetLabel, ConnectionPoint } from "./circuit-types"
 import { flipXCircuit } from "./flipCircuit"
 import { getGridFromCircuit } from "./getGridFromCircuit"
-import { NetlistBuilder } from "../netlist/getReadableNetlist"
+import { NetlistBuilder } from "../netlist/NetlistBuilder"
 
 export class CircuitBuilder {
   chips: ChipBuilder[] = []
