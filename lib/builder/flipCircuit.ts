@@ -24,10 +24,14 @@ export const flipXCircuit = (circuit: CircuitBuilder): CircuitBuilder => {
   // Flip chips
   for (const chip of circuit.chips) {
     chip.x = mid - (chip.x + 4)
-    // Swap left/right pins and reverse order
-    const tmp = chip.leftPins
-    chip.leftPins = chip.rightPins.slice().reverse()
-    chip.rightPins = tmp.slice().reverse()
+    // Swap left/right pins while preserving correct CCW numbering
+    // – right-side pins (stored bottom→top) move to the left **unchanged**
+    // – left-side pins (stored top→bottom) move to the right **reversed**
+    const oldLeftPins = chip.leftPins
+    const oldRightPins = chip.rightPins
+
+    chip.leftPins  = oldRightPins.slice()          // keep order bottom→top
+    chip.rightPins = oldLeftPins.slice().reverse() // convert to bottom→top
     // Swap counts
     const tmpCount = chip.leftPinCount
     chip.leftPinCount = chip.rightPinCount
