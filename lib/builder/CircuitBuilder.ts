@@ -59,6 +59,13 @@ export class CircuitBuilder {
     return c
   }
 
+  passive(): ChipBuilder {
+    const id = `passive${this.chips.length}`
+    const c = new ChipBuilder(this, id)
+    this.chips.push(c)
+    return c
+  }
+
   toString(): string {
     return getGridFromCircuit(this).toString()
   }
