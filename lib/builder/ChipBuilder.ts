@@ -4,6 +4,14 @@ import type { CircuitBuilder } from "./CircuitBuilder"
 
 const SIDES_CCW = ["left", "bottom", "right", "top"] as const
 
+interface MakePinParams {
+  side: Side
+  indexOnSide: number
+  ccwPinNumber: number
+  offsetX: number
+  offsetY: number
+}
+
 export class ChipBuilder {
   public x = 0
   public y = 0
@@ -29,11 +37,17 @@ export class ChipBuilder {
     return this
   }
 
-  private makePin(globalPinNumber: number, offsetX: number, offsetY: number): PinBuilder {
-    const pb = new PinBuilder(this, globalPinNumber)
+  private makePin({
+    side,
+    indexOnSide,
+    ccwPinNumber,
+    offsetX,
+    offsetY,
+  }: MakePinParams): PinBuilder {
+    const pb = new PinBuilder(this, ccwPinNumber)
     pb.x = this.x + offsetX
     pb.y = this.y + offsetY
-    this.pinMap[String(globalPinNumber)] = pb
+    this.pinMap[`${side}${indexOnSide}`] = pb
     return pb
   }
 
@@ -43,13 +57,19 @@ export class ChipBuilder {
     // Pin 1 (if on the left side) is the topmost.
     // OffsetY needs to be higher for topmost pins.
     // If count = 2:
-    //   i=0 (topmost pin, e.g. Pin 1): globalPinNumber=1. offsetY should be 2 (or count).
-    //   i=1 (next pin down, e.g. Pin 2): globalPinNumber=2. offsetY should be 1.
+    //   i=0 (topmost pin, e.g. Pin 1): ccwPinNumber=1. offsetY should be 2 (or count).
+    //   i=1 (next pin down, e.g. Pin 2): ccwPinNumber=2. offsetY should be 1.
     for (let i = 0; i < count; ++i) {
       // i is the 0-indexed visual position from the top of the left side.
-      const globalPinNumber = this.leftPins.length + 1 // Assuming left pins are numbered first.
+      const ccwPinNumber = i + 1
       const offsetY = count - i // Higher 'y' for pins closer to the top.
-      const pb = this.makePin(globalPinNumber, 0, offsetY)
+      const pb = this.makePin({
+        side: "left",
+        indexOnSide: i,
+        ccwPinNumber,
+        offsetX: 0,
+        offsetY,
+      })
       this.leftPins.push(pb)
     }
     return this
@@ -61,8 +81,14 @@ export class ChipBuilder {
       // right side: pins are numbered bottom-to-top.
       // i = 0 corresponds to the bottom-most pin on this side.
       // offsetY should be i + 1 (1 for bottom-most, up to 'count' for top-most).
-      const globalPinNumber = this.leftPinCount + this.bottomPinCount + this.rightPins.length + 1
-      const pb = this.makePin(globalPinNumber, 4, i + 1)
+      const ccwPinNumber = this.leftPinCount + this.bottomPinCount + i + 1
+      const pb = this.makePin({
+        side: "right",
+        indexOnSide: i,
+        ccwPinNumber,
+        offsetX: 4,
+        offsetY: i + 1,
+      })
       this.rightPins.push(pb)
     }
     return this
@@ -71,9 +97,16 @@ export class ChipBuilder {
   topside(count: number): this {
     this.topPinCount = count
     for (let i = 0; i < count; ++i) {
-      // top side: left to right, global pin number increases
-      const globalPinNumber = this.leftPinCount + this.bottomPinCount + this.rightPinCount + this.topPins.length + 1
-      const pb = this.makePin(globalPinNumber, i + 1, 0)
+      // top side: left to right, ccwPinNumber increases
+      const ccwPinNumber =
+        this.leftPinCount + this.bottomPinCount + this.rightPinCount + i + 1
+      const pb = this.makePin({
+        side: "top",
+        indexOnSide: i,
+        ccwPinNumber,
+        offsetX: i + 1,
+        offsetY: 0,
+      })
       this.topPins.push(pb)
     }
     return this
@@ -82,9 +115,15 @@ export class ChipBuilder {
   bottomside(count: number): this {
     this.bottomPinCount = count
     for (let i = 0; i < count; ++i) {
-      // bottom side: right to left, global pin number increases
-      const globalPinNumber = this.leftPinCount + this.bottomPins.length + 1
-      const pb = this.makePin(globalPinNumber, count - i, this.getHeight() - 1)
+      // bottom side: right to left, ccwPinNumber increases
+      const ccwPinNumber = this.leftPinCount + i + 1
+      const pb = this.makePin({
+        side: "bottom",
+        indexOnSide: i,
+        ccwPinNumber,
+        offsetX: count - i,
+        offsetY: this.getHeight() - 1,
+      })
       this.bottomPins.push(pb)
     }
     return this
@@ -101,9 +140,7 @@ export class ChipBuilder {
   }
 
   pin(pinNumber: number): PinBuilder {
-    // Find the pin in the four side arrays
-    if (this.pinMap[String(pinNumber)]) return this.pinMap[String(pinNumber)]
-    // fallback: try to find by order
+    // Find the pin by its 1-based ccwPinNumber by checking sides in order: Left, Bottom, Right, Top.
     let n = pinNumber
     if (n <= this.leftPins.length) return this.leftPins[n - 1]
     n -= this.leftPins.length
