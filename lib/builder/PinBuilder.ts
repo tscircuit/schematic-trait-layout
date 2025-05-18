@@ -58,7 +58,6 @@ export class PinBuilder {
 
     const passive = this.circuit.passive() // Create new passive chip
 
-    console.log("passive", this.x, this.y)
     passive.at(this.x, this.y)
 
     if (entryDirection === "horizontal") {

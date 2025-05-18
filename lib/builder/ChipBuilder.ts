@@ -121,8 +121,8 @@ export class ChipBuilder {
         side: "bottom",
         indexOnSide: i,
         ccwPinNumber,
-        offsetX: count - i,
-        offsetY: -this.getHeight() - 1,
+        offsetX: i,
+        offsetY: 0,
       })
       this.bottomPins.push(pb)
     }
@@ -130,6 +130,14 @@ export class ChipBuilder {
   }
 
   getHeight(): number {
+    if (
+      this.leftPinCount === 0 &&
+      this.rightPinCount === 0 &&
+      this.topPinCount === 1 &&
+      this.bottomPinCount === 1
+    ) {
+      return 1
+    }
     return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
   }
 
