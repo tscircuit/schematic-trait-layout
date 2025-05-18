@@ -135,6 +135,10 @@ test("template2", () => {
             {
               "netId": "L6",
             },
+            {
+              "boxId": "chip0",
+              "pinNumber": 1,
+            },
           ],
         },
         {

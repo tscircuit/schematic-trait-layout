@@ -29,7 +29,20 @@ test("template5", () => {
           "topPinCount": 0,
         },
       ],
-      "connections": [],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip1",
+              "pinNumber": 1,
+            },
+            {
+              "boxId": "chip0",
+              "pinNumber": 4,
+            },
+          ],
+        },
+      ],
       "nets": [],
     }
   `)

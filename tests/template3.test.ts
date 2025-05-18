@@ -54,6 +54,10 @@ test("template3", () => {
               "boxId": "passive1",
               "pinNumber": 2,
             },
+            {
+              "boxId": "passive2",
+              "pinNumber": 1,
+            },
           ],
         },
         {
@@ -161,6 +165,10 @@ test("template3", () => {
             {
               "boxIndex": 0,
               "pinNumber": 3,
+            },
+            {
+              "boxIndex": 1,
+              "pinNumber": 1,
             },
             {
               "boxIndex": 2,
