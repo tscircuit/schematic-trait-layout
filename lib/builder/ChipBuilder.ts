@@ -58,9 +58,11 @@ export class ChipBuilder {
   rightside(count: number): this {
     this.rightPinCount = count
     for (let i = 0; i < count; ++i) {
-      // right side: bottom to top, global pin number increases
+      // right side: pins are numbered bottom-to-top.
+      // i = 0 corresponds to the bottom-most pin on this side.
+      // offsetY should be i + 1 (1 for bottom-most, up to 'count' for top-most).
       const globalPinNumber = this.leftPinCount + this.bottomPinCount + this.rightPins.length + 1
-      const pb = this.makePin(globalPinNumber, 4, count - i)
+      const pb = this.makePin(globalPinNumber, 4, i + 1)
       this.rightPins.push(pb)
     }
     return this
