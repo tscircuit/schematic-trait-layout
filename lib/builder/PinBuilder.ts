@@ -118,7 +118,7 @@ export class PinBuilder {
       pin2_passive_builder.lastDy = normDy
     }
 
-    console.log(passive.topPins[0].y, passive.bottomPins[0].y)
+    console.log(passive.topPins[0]!.y, passive.bottomPins[0]!.y)
 
     // if (this.lastCreatedLine) {
     //   console.log("lastCreatedLine", this.lastCreatedLine, pin1_passive_ref)
