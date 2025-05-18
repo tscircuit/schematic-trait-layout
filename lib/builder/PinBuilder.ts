@@ -62,7 +62,7 @@ export class PinBuilder {
     const entryConnectX = this.x // Coords where passive's input pin will connect
     const entryConnectY = this.y
 
-    const pc = this.circuit.passive() // Create new passive chip
+    const passive = this.circuit.passive() // Create new passive chip
 
     let pc_target_x: number
     let pc_target_y: number
@@ -76,18 +76,18 @@ export class PinBuilder {
       if (lineCameFromLeft) {
         pc_target_x = entryConnectX
         pc_target_y = entryConnectY - 1
-        pc.at(pc_target_x, pc_target_y)
-        pc.leftpins(1).rightpins(1)
-        pin1_passive_ref = pc.leftPins[0].ref
-        pin2_passive_builder = pc.rightPins[0]
+        passive.at(pc_target_x, pc_target_y)
+        passive.leftpins(1).rightpins(1)
+        pin1_passive_ref = passive.leftPins[0]!.ref
+        pin2_passive_builder = passive.rightPins[0]!
       } else {
         // normDx < 0, came from right
         pc_target_x = entryConnectX - 4
         pc_target_y = entryConnectY - 1
-        pc.at(pc_target_x, pc_target_y)
-        pc.leftpins(1).rightpins(1)
-        pin1_passive_ref = pc.rightPins[0].ref
-        pin2_passive_builder = pc.leftPins[0]
+        passive.at(pc_target_x, pc_target_y)
+        passive.leftpins(1).rightpins(1)
+        pin1_passive_ref = passive.rightPins[0]!.ref
+        pin2_passive_builder = passive.leftPins[0]!
       }
       pin2_passive_builder.lastDx = normDx
       pin2_passive_builder.lastDy = 0
@@ -97,18 +97,18 @@ export class PinBuilder {
       if (lineCameFromBelow) {
         pc_target_x = entryConnectX - 1
         pc_target_y = entryConnectY - 2
-        pc.at(pc_target_x, pc_target_y)
-        pc.toppins(1).bottompins(1)
-        pin1_passive_ref = pc.bottomPins[0].ref
-        pin2_passive_builder = pc.topPins[0]
+        passive.at(pc_target_x, pc_target_y)
+        passive.toppins(1).bottompins(1)
+        pin1_passive_ref = passive.bottomPins[0]!.ref
+        pin2_passive_builder = passive.topPins[0]!
       } else {
         // normDy < 0, came from above
         pc_target_x = entryConnectX - 1
         pc_target_y = entryConnectY // Top pin of pc is at pc.y
-        pc.at(pc_target_x, pc_target_y)
-        pc.toppins(1).bottompins(1)
-        pin1_passive_ref = pc.topPins[0].ref
-        pin2_passive_builder = pc.bottomPins[0]
+        passive.at(pc_target_x, pc_target_y)
+        passive.toppins(1).bottompins(1)
+        pin1_passive_ref = passive.topPins[0]!.ref
+        pin2_passive_builder = passive.bottomPins[0]!
       }
       pin2_passive_builder.lastDx = 0
       pin2_passive_builder.lastDy = normDy
