@@ -24,16 +24,7 @@ export const getGridFromCircuit = (circuit: CircuitBuilder): Grid => {
       totalPins === 2 && (isHorizontalPassive || isVerticalPassive)
 
     if (isTwoPinPassive) {
-      if (isHorizontalPassive) {
-        // Horizontal passive: chip body is 5 wide (pins at x, x+4), 3 tall (pin at y+1).
-        // Place 'P' at visual center: (chip.x + 2, chip.y + 1)
-        g.putOverlay(chip.x + 2, chip.y + 1, "P")
-      } else {
-        // Vertical passive
-        // Vertical passive: chip body is 3 wide (pin at x+1), 3 tall (pins at y, y+2).
-        // Place 'P' at visual center: (chip.x + 1, chip.y + 1)
-        g.putOverlay(chip.x + 1, chip.y + 1, "P")
-      }
+      g.putOverlay(chip.x, chip.y, "P")
       continue
     }
     // width = 5, height = max(leftPins.length, rightPins.length, 1) + 2

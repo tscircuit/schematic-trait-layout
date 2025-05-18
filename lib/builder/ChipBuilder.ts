@@ -86,7 +86,7 @@ export class ChipBuilder {
         side: "right",
         indexOnSide: i,
         ccwPinNumber,
-        offsetX: 4,
+        offsetX: this.rightPinCount === 1 ? 1 : 4,
         offsetY: i + 1,
       })
       this.rightPins.push(pb)
@@ -122,7 +122,7 @@ export class ChipBuilder {
         indexOnSide: i,
         ccwPinNumber,
         offsetX: count - i,
-        offsetY: this.getHeight() - 1,
+        offsetY: -this.getHeight() - 1,
       })
       this.bottomPins.push(pb)
     }

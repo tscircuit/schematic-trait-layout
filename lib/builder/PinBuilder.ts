@@ -54,96 +54,27 @@ export class PinBuilder {
   passive(): PinBuilder {
     const incomingRefOriginal = this.ref
 
-    const normDx = Math.sign(this.lastDx)
-    const normDy = Math.sign(this.lastDy)
-
-    // 1. Draw entry segment (1 unit) from current position, if lastDx/lastDy are non-zero
-    // This updates this.x, this.y to the end of this 1-unit segment.
-    if (normDx !== 0 || normDy !== 0) {
-      this.line(normDx, normDy)
-    }
-
-    const entryConnectX = this.x // Coords where passive's input pin will connect
-    const entryConnectY = this.y
+    const entryDirection = this.lastDx === 0 ? "vertical" : "horizontal"
 
     const passive = this.circuit.passive() // Create new passive chip
 
-    let pc_target_x: number
-    let pc_target_y: number
-    let pin1_passive_ref: PortReference // Pin of passive chip that connects to entryConnectX,Y
-    let pin2_passive_builder: PinBuilder // PinBuilder for the other pin of passive chip (outgoing)
+    console.log("passive", this.x, this.y)
+    passive.at(this.x, this.y)
 
-    const incomingDirectionHorizontal = normDx !== 0
-
-    if (incomingDirectionHorizontal) {
-      const lineCameFromLeft = normDx > 0
-      if (lineCameFromLeft) {
-        pc_target_x = entryConnectX
-        pc_target_y = entryConnectY - 1
-        passive.at(pc_target_x, pc_target_y)
-        passive.leftpins(1).rightpins(1)
-        pin1_passive_ref = passive.leftPins[0]!.ref
-        pin2_passive_builder = passive.rightPins[0]!
-      } else {
-        // normDx < 0, came from right
-        pc_target_x = entryConnectX - 4
-        pc_target_y = entryConnectY - 1
-        passive.at(pc_target_x, pc_target_y)
-        passive.leftpins(1).rightpins(1)
-        pin1_passive_ref = passive.rightPins[0]!.ref
-        pin2_passive_builder = passive.leftPins[0]!
-      }
-      pin2_passive_builder.lastDx = normDx
-      pin2_passive_builder.lastDy = 0
+    if (entryDirection === "horizontal") {
+      passive.leftpins(1).rightpins(1)
     } else {
-      // Incoming direction vertical (normDy !== 0)
-      const lineCameFromBelow = normDy > 0
-      if (lineCameFromBelow) {
-        pc_target_x = entryConnectX - 1
-        pc_target_y = entryConnectY - 2
-        passive.at(pc_target_x, pc_target_y)
-        passive.toppins(1).bottompins(1)
-        pin1_passive_ref = passive.bottomPins[0]!.ref
-        pin2_passive_builder = passive.topPins[0]!
-      } else {
-        // normDy < 0, came from above
-        pc_target_x = entryConnectX - 1
-        pc_target_y = entryConnectY // Top pin of pc is at pc.y
-        passive.at(pc_target_x, pc_target_y)
-        passive.toppins(1).bottompins(1)
-        pin1_passive_ref = passive.topPins[0]!.ref
-        pin2_passive_builder = passive.bottomPins[0]!
-      }
-      pin2_passive_builder.lastDx = 0
-      pin2_passive_builder.lastDy = normDy
+      passive.bottompins(1).toppins(1)
     }
 
-    console.log(passive.topPins[0]!.y, passive.bottomPins[0]!.y)
+    const entryPin =
+      entryDirection === "horizontal" ? passive.pin(1) : passive.pin(2)
+    const exitPin =
+      entryDirection === "horizontal" ? passive.pin(2) : passive.pin(1)
 
-    // if (this.lastCreatedLine) {
-    //   console.log("lastCreatedLine", this.lastCreatedLine, pin1_passive_ref)
-    //   this.lastCreatedLine.end.ref = pin1_passive_ref
-    // }
+    this.lastCreatedLine!.end.ref = entryPin.ref
 
-    // // 2. Add connection points between end of entry segment and passive's input pin
-    // this.circuit.connectionPoints.push({
-    //   ref: incomingRefOriginal, // Refers to the entity this PinBuilder chain started from/last explicit line ended with.
-    //   x: entryConnectX,
-    //   y: entryConnectY,
-    // })
-    // this.circuit.connectionPoints.push({
-    //   ref: pin1_passive_ref, // Refers to the passive component's entry pin.
-    //   x: entryConnectX,
-    //   y: entryConnectY,
-    // })
-
-    // 3. Draw exit segment (1 unit) using pin2_passive_builder's line method.
-    // This updates pin2_passive_builder.x, .y to the end of its 1-unit exit segment.
-    if (normDx !== 0 || normDy !== 0) {
-      pin2_passive_builder.line(normDx, normDy)
-    }
-
-    return pin2_passive_builder // Ready for further chaining from end of exit segment.
+    return exitPin
   }
 
   label(text?: string): void {
