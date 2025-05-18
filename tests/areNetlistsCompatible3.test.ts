@@ -32,7 +32,7 @@ test("areNetlistsCompatible with template4", () => {
     ┌───┐
     │  3├────┬──L
     │  2├─L  │
-    │  1│    P
+    │  1├    P
     └───┘    │
              L
     "
