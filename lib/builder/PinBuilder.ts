@@ -48,89 +48,88 @@ export class PinBuilder {
   }
 
   passive(): PinBuilder {
-    const incomingX = this.x;
-    const incomingY = this.y;
-    const incomingRef = this.ref;
+    const incomingRefOriginal = this.ref;
+
+    const normDx = Math.sign(this.lastDx);
+    const normDy = Math.sign(this.lastDy);
+
+    // 1. Draw entry segment (1 unit) from current position, if lastDx/lastDy are non-zero
+    // This updates this.x, this.y to the end of this 1-unit segment.
+    if (normDx !== 0 || normDy !== 0) {
+      this.line(normDx, normDy);
+    }
+    
+    const entryConnectX = this.x; // Coords where passive's input pin will connect
+    const entryConnectY = this.y;
 
     const pc = this.circuit.chip(); // Create new passive chip
 
     let pc_target_x: number;
     let pc_target_y: number;
-    let pin1_passive_ref: PortReference; // Pin of passive chip that connects to incoming line
+    let pin1_passive_ref: PortReference; // Pin of passive chip that connects to entryConnectX,Y
     let pin2_passive_builder: PinBuilder; // PinBuilder for the other pin of passive chip (outgoing)
 
-    const incomingDirectionHorizontal = this.lastDx !== 0;
+    const incomingDirectionHorizontal = normDx !== 0;
 
     if (incomingDirectionHorizontal) {
-      // Incoming line is horizontal. Passive component will be horizontal.
-      // Pin order for horizontal passive (left/right pins): Pin 1 is Left, Pin 2 is Right.
-      const lineCameFromLeft = this.lastDx > 0; // e.g. ----> current_pos (ends at incomingX,Y)
-
-      if (lineCameFromLeft) { // Connect to left pin of passive (Pin 1), output is right pin (Pin 2)
-        // Left pin of pc is at (pc_target_x + 0, pc_target_y + 1)
-        // We want this to be (incomingX, incomingY).
-        pc_target_x = incomingX;
-        pc_target_y = incomingY - 1;
-        pc.at(pc_target_x, pc_target_y);
-        pc.leftside(1).rightside(1); // Defines pc.leftPins, pc.rightPins with correct coords
-        pin1_passive_ref = pc.leftPins[0].ref; // pc.leftPins[0] is Pin 1
-        pin2_passive_builder = pc.rightPins[0]; // pc.rightPins[0] is Pin 2
-      } else { // Line came from right. Connect to right pin of passive (Pin 2), output is left pin (Pin 1)
-        // Right pin of pc is at (pc_target_x + 4, pc_target_y + 1)
-        // We want this to be (incomingX, incomingY).
-        pc_target_x = incomingX - 4;
-        pc_target_y = incomingY - 1;
+      const lineCameFromLeft = normDx > 0;
+      if (lineCameFromLeft) {
+        pc_target_x = entryConnectX;
+        pc_target_y = entryConnectY - 1;
         pc.at(pc_target_x, pc_target_y);
         pc.leftside(1).rightside(1);
-        pin1_passive_ref = pc.rightPins[0].ref; // pc.rightPins[0] is Pin 2
-        pin2_passive_builder = pc.leftPins[0]; // pc.leftPins[0] is Pin 1
-      }
-      pin2_passive_builder.lastDx = this.lastDx; // Continue in same horizontal direction
-      pin2_passive_builder.lastDy = 0;
-    } else { // Incoming line is vertical. Passive component will be vertical.
-      // Pin order for vertical passive (bottom/top pins): Pin 1 is Bottom, Pin 2 is Top.
-      const lineCameFromBelow = this.lastDy > 0; // e.g. current_pos is visually above previous point
-
-      if (lineCameFromBelow) { // Connect to bottom pin of passive (Pin 1), output is top pin (Pin 2)
-        // Bottom pin of pc is at (pc_target_x + 1, pc_target_y + 2) [height is 3]
-        // We want this to be (incomingX, incomingY).
-        pc_target_x = incomingX - 1;
-        pc_target_y = incomingY - 2;
+        pin1_passive_ref = pc.leftPins[0].ref;
+        pin2_passive_builder = pc.rightPins[0];
+      } else { // normDx < 0, came from right
+        pc_target_x = entryConnectX - 4;
+        pc_target_y = entryConnectY - 1;
         pc.at(pc_target_x, pc_target_y);
-        pc.topside(1).bottomside(1); // Defines pc.topPins, pc.bottomPins with correct coords
-        pin1_passive_ref = pc.bottomPins[0].ref; // pc.bottomPins[0] is Pin 1
-        pin2_passive_builder = pc.topPins[0];    // pc.topPins[0] is Pin 2
-      } else { // Line came from above. Connect to top pin of passive (Pin 2), output is bottom pin (Pin 1)
-        // Top pin of pc is at (pc_target_x + 1, pc_target_y + 0)
-        // We want this to be (incomingX, incomingY).
-        pc_target_x = incomingX - 1;
-        pc_target_y = incomingY;
+        pc.leftside(1).rightside(1);
+        pin1_passive_ref = pc.rightPins[0].ref;
+        pin2_passive_builder = pc.leftPins[0];
+      }
+      pin2_passive_builder.lastDx = normDx;
+      pin2_passive_builder.lastDy = 0;
+    } else { // Incoming direction vertical (normDy !== 0)
+      const lineCameFromBelow = normDy > 0;
+      if (lineCameFromBelow) {
+        pc_target_x = entryConnectX - 1;
+        pc_target_y = entryConnectY - 2;
         pc.at(pc_target_x, pc_target_y);
         pc.topside(1).bottomside(1);
-        pin1_passive_ref = pc.topPins[0].ref;    // pc.topPins[0] is Pin 2
-        pin2_passive_builder = pc.bottomPins[0]; // pc.bottomPins[0] is Pin 1
+        pin1_passive_ref = pc.bottomPins[0].ref;
+        pin2_passive_builder = pc.topPins[0];
+      } else { // normDy < 0, came from above
+        pc_target_x = entryConnectX - 1;
+        pc_target_y = entryConnectY; // Top pin of pc is at pc.y
+        pc.at(pc_target_x, pc_target_y);
+        pc.topside(1).bottomside(1);
+        pin1_passive_ref = pc.topPins[0].ref;
+        pin2_passive_builder = pc.bottomPins[0];
       }
       pin2_passive_builder.lastDx = 0;
-      pin2_passive_builder.lastDy = this.lastDy; // Continue in same vertical direction
+      pin2_passive_builder.lastDy = normDy;
     }
 
-    // Connect incoming line to pin1_passive_ref of passive chip
+    // 2. Add connection points between end of entry segment and passive's input pin
     this.circuit.connectionPoints.push({
-      ref: incomingRef,
-      x: incomingX,
-      y: incomingY,
+      ref: incomingRefOriginal, // Refers to the entity this PinBuilder chain started from/last explicit line ended with.
+      x: entryConnectX,
+      y: entryConnectY,
     });
-    // Ensure pin1_passive_ref's associated PinBuilder has its x,y at incomingX, incomingY
-    // This should be true due to how pc.at() was calculated.
     this.circuit.connectionPoints.push({
-      ref: pin1_passive_ref,
-      x: incomingX,
-      y: incomingY,
+      ref: pin1_passive_ref,    // Refers to the passive component's entry pin.
+      x: entryConnectX,
+      y: entryConnectY,
     });
 
-    // The returned PinBuilder (pin2_passive_builder) is now the active one.
-    // Its x,y are its grid coords. lastDx, lastDy are set.
-    return pin2_passive_builder;
+    // 3. Draw exit segment (1 unit) using pin2_passive_builder's line method.
+    // This updates pin2_passive_builder.x, .y to the end of its 1-unit exit segment.
+    if (normDx !== 0 || normDy !== 0) {
+      pin2_passive_builder.line(normDx, normDy);
+    }
+
+    return pin2_passive_builder; // Ready for further chaining from end of exit segment.
   }
 
   label(text?: string): void {
