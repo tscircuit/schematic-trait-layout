@@ -173,49 +173,52 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
     "
   `)
 
+  expect(inputCircuit.getReadableNetlist()).toMatchInlineSnapshot(`
+    "Boxes:
+
+
+                      ┌────────────────┐
+                      │     chip0      │2               
+                      │                │1               
+                      └────────────────┘
+
+    Complex Connections (more than 2 points):
+      (none)"
+  `)
+
+  expect(templateCircuit.getReadableNetlist()).toMatchInlineSnapshot(`
+    "Boxes:
+
+
+                      ┌────────────────┐
+                      │     chip0      │2               
+                      │                │1  ── A         
+                      └────────────────┘
+
+    Complex Connections (more than 2 points):
+      (none)"
+  `)
+
+  expect(inputCircuit.getNetlist()).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0",
+          "leftPinCount": 0,
+          "rightPinCount": 2,
+          "topPinCount": 0,
+        },
+      ],
+      "connections": [],
+      "nets": [],
+    }
+  `)
+
   expect(
     areNetlistsCompatible(
       inputCircuit.getNetlist(),
       templateCircuit.getNetlist(),
     ),
   ).toBe(true)
-})
-
-test.skip("areNetlistsCompatible2: complex compatible case with passives", () => {
-  const inputCircuit = circuit()
-  const inputChip = inputCircuit.chip().rightpins(2)
-  inputChip.pin(1).line(2, 0).passive().mark("p1_passive_out")
-  inputChip.pin(2).line(2, 0).intersect().label("A")
-
-  const templateCircuit = circuit()
-  const templateChip = templateCircuit.chip().leftpins(1).rightpins(2) // template main chip has more pins
-  templateChip.pin(1).line(-2, 0).intersect().label("B") // chip0.R2 to passive0.P2 and N1
-  templateChip.pin(2).line(2, 0).passive().mark("tp1_passive_out") // chip0.R1 to passive0.P1, passive0.P2 is tp1_passive_out
-  templateChip.pin(3).line(2, 0).label("C") // chip0.L1 to ExtraNet (pin 3 is left pin 1)
-
-  expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
-    "
-    Input:
-    ┌───┐
-    │  2├─A
-    │  1├─P
-    └───┘
-    "
-  `)
-  expect(`\nTemplate:\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
-    "
-    Template:
-      ┌───┐
-    B─┤1 3├─C
-      │  2├─P
-      └───┘
-    "
-  `)
-
-  expect(
-    areNetlistsCompatible(
-      inputCircuit.getNetlist(),
-      templateCircuit.getNetlist(),
-    ),
-  ).toBe(false)
 })
