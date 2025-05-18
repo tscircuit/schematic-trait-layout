@@ -149,7 +149,7 @@ export const mergeCircuits = ({
     side: Side,
   ) => {
     for (let i = 0; i < source.length; ++i) {
-      const src = source[i]
+      const src = source[i]!
       const newIndex = targetArr.length // append beneath existing pins
       const newPinNumber = getPinNumberByCounts(side, newIndex, mergedCounts)
       const npb = new PinBuilder(chip1, newPinNumber)
