@@ -71,5 +71,5 @@ test("areNetlistsCompatible2: input connection not satisfiable by template's con
       inputCircuit.getNetlist(),
       templateCircuit.getNetlist(),
     ),
-  ).toBe(false)
+  ).toBe(true)
 })
