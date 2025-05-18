@@ -22,5 +22,15 @@ test("clone", () => {
 
   const C2 = C.clone()
 
-  expect(`\n${C2.toString()}\n`).toMatchInlineSnapshot()
+  expect(`\n${C2.toString()}\n`).toMatchInlineSnapshot(`
+    "
+            L
+    ┌───┐   │
+    ┤1 6├───┤
+    ┤2 5├   │
+    ┤3 4├   P
+    └───┘   │
+            L
+    "
+  `)
 })

@@ -16,36 +16,52 @@ export class CircuitBuilder {
   private autoLabelCounter = 1
   private _grid: any = null
 
+  /* ------------------------------------------------------------------ *
+   * Deep-clone without JSON.stringify (avoids cyclic-structure error)  *
+   * ------------------------------------------------------------------ */
   clone(): CircuitBuilder {
-    // Deep copy via JSON serialization
-    const json = JSON.stringify(this, (key, value) => {
-      // Remove circular references
-      if (key === "circuit") return undefined
-      return value
-    })
-    const obj = JSON.parse(json)
     const clone = new CircuitBuilder()
-    // Restore chips
-    clone.chips = []
-    for (const chip of obj.chips) {
-      const chipBuilder = new ChipBuilder(clone, chip.chipId)
-      chipBuilder.x = chip.x
-      chipBuilder.y = chip.y
-      chipBuilder.leftPins = []
-      chipBuilder.rightPins = []
-      chipBuilder.topPins = []
-      chipBuilder.bottomPins = []
-      chipBuilder.leftPinCount = chip.leftPinCount
-      chipBuilder.rightPinCount = chip.rightPinCount
-      chipBuilder.topPinCount = chip.topPinCount
-      chipBuilder.bottomPinCount = chip.bottomPinCount
-      // Pins will be rebuilt as needed
-      clone.chips.push(chipBuilder)
-    }
-    clone.netLabels = JSON.parse(JSON.stringify(this.netLabels))
-    clone.lines = JSON.parse(JSON.stringify(this.lines))
-    clone.connectionPoints = JSON.parse(JSON.stringify(this.connectionPoints))
+
+    /* 1.  basic scalar state */
     clone.autoLabelCounter = this.autoLabelCounter
+
+    /* 2.  chips ------------------------------------------------------- */
+    for (const chip of this.chips) {
+      const c = new ChipBuilder(clone, chip.chipId, chip.isPassive)
+
+      // location and pin counts
+      c.x = chip.x
+      c.y = chip.y
+      c.leftPinCount   = chip.leftPinCount
+      c.rightPinCount  = chip.rightPinCount
+      c.topPinCount    = chip.topPinCount
+      c.bottomPinCount = chip.bottomPinCount
+      c.pinPositionsAreSet = chip.pinPositionsAreSet
+
+      // Create lightweight pin stubs – grid rendering needs only pinNumber
+      const mkPins = (count: number, first: number) =>
+        Array.from({ length: count }, (_, i) => ({ pinNumber: first + i })) as any
+
+      /* order must match original builder semantics                    */
+      c.leftPins   = mkPins(c.leftPinCount, 1)
+      c.bottomPins = mkPins(c.bottomPinCount, c.leftPinCount + 1)
+      c.rightPins  = mkPins(
+        c.rightPinCount,
+        c.leftPinCount + c.bottomPinCount + 1,
+      )
+      c.topPins    = mkPins(
+        c.topPinCount,
+        c.leftPinCount + c.bottomPinCount + c.rightPinCount + 1,
+      )
+
+      clone.chips.push(c)
+    }
+
+    /* 3.  simple collections (no cycles inside) ---------------------- */
+    clone.lines            = structuredClone(this.lines)
+    clone.netLabels        = structuredClone(this.netLabels)
+    clone.connectionPoints = structuredClone(this.connectionPoints)
+
     return clone
   }
 
