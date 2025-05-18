@@ -1,4 +1,4 @@
-import { CircuitBuilder, ChipBuilder } from "lib/builder"
+import { CircuitBuilder, ChipBuilder, PinBuilder } from "lib/builder"
 import type { Line, ConnectionPoint, NetLabel } from "lib/builder/circuit-types"
 
 type Side = "left" | "bottom" | "right" | "top"
@@ -14,6 +14,24 @@ const getSideAndIndex = (
   if (pin <= counts.right) return { side: "right", index: pin - 1 }
   pin -= counts.right
   return { side: "top", index: pin - 1 }
+}
+
+// --- New helper: getPinNumberByCounts ---
+const getPinNumberByCounts = (
+  side: Side,
+  index: number,
+  counts: { left: number; bottom: number; right: number; top: number },
+): number => {
+  switch (side) {
+    case "left":
+      return index + 1
+    case "bottom":
+      return counts.left + index + 1
+    case "right":
+      return counts.left + counts.bottom + index + 1
+    case "top":
+      return counts.left + counts.bottom + counts.right + index + 1
+  }
 }
 
 const calcNewPinNumber = (
@@ -98,6 +116,54 @@ export const mergeCircuits = ({
     top: chip1.topPinCount,
   }
 
+  /* 3a.  Build a map from every OLD pin-number of chip1 ➜ its NEW number */
+  const oldToNew = new Map<number, number>()
+  const totalOldPins =
+    chip1Orig.left + chip1Orig.bottom + chip1Orig.right + chip1Orig.top
+
+  for (let oldPin = 1; oldPin <= totalOldPins; ++oldPin) {
+    const { side, index } = getSideAndIndex(oldPin, chip1Orig)
+    const newPin = getPinNumberByCounts(side, index, mergedCounts)
+    oldToNew.set(oldPin, newPin)
+  }
+
+  /* 3b.  Renumber existing PinBuilder instances of chip1 */
+  const patchPinArray = (arr: PinBuilder[]) => {
+    for (const pb of arr) {
+      const np = oldToNew.get(pb.pinNumber)
+      if (np && np !== pb.pinNumber) {
+        ;(pb as any).pinNumber = np // override readonly
+      }
+    }
+  }
+  patchPinArray(chip1.leftPins)
+  patchPinArray(chip1.bottomPins)
+  patchPinArray(chip1.rightPins)
+  patchPinArray(chip1.topPins)
+
+  /* 3c.  Copy PinBuilder objects from chip2 onto chip1 (they become the
+   *      “new” pins that were just added).  */
+  const copyPins = (
+    source: PinBuilder[],
+    targetArr: PinBuilder[],
+    side: Side,
+  ) => {
+    for (let i = 0; i < source.length; ++i) {
+      const src = source[i]
+      const newIndex = targetArr.length // append beneath existing pins
+      const newPinNumber = getPinNumberByCounts(side, newIndex, mergedCounts)
+      const npb = new PinBuilder(chip1, newPinNumber)
+      npb.x = src.x
+      npb.y = src.y
+      targetArr.push(npb)
+    }
+  }
+
+  copyPins(chip2.leftPins, chip1.leftPins, "left")
+  copyPins(chip2.bottomPins, chip1.bottomPins, "bottom")
+  copyPins(chip2.rightPins, chip1.rightPins, "right")
+  copyPins(chip2.topPins, chip1.topPins, "top")
+
   /* 4.  Bring every *other* chip from circuit2 into merged        */
   for (const chip of circuit2.chips) {
     if (chip.chipId === circuit2ChipId) continue
@@ -121,8 +187,9 @@ export const mergeCircuits = ({
     top: chip2.topPinCount,
   }
 
-  const translateRef = (r: any) =>
-    translatePortRef(
+  const translateRef = (r: any): any => {
+    /* a. refs that belonged to chip2 are redirected (existing logic) */
+    const redirected = translatePortRef(
       r,
       chip2Counts,
       chip1Orig,
@@ -130,6 +197,28 @@ export const mergeCircuits = ({
       circuit2ChipId,
       circuit1ChipId,
     )
+    /* b. refs that were already on chip1 need pin-number patching    */
+    if (
+      "boxId" in redirected &&
+      redirected.boxId === circuit1ChipId &&
+      oldToNew.has(redirected.pinNumber)
+    ) {
+      return { ...redirected, pinNumber: oldToNew.get(redirected.pinNumber)! }
+    }
+    return redirected
+  }
+
+  /* 3d.  Update all existing refs inside merged (original circuit1) */
+  for (const l of merged.lines) {
+    l.start.ref = translateRef(l.start.ref)
+    l.end.ref = translateRef(l.end.ref)
+  }
+  for (const p of merged.connectionPoints) {
+    p.ref = translateRef(p.ref)
+  }
+  for (const nl of merged.netLabels) {
+    nl.fromRef = translateRef(nl.fromRef)
+  }
 
   for (const l of circuit2.lines) {
     const copy: Line = {
