@@ -51,7 +51,7 @@ export class ChipBuilder {
     return pb
   }
 
-  leftside(count: number): this {
+  leftpins(count: number): this {
     this.leftPinCount = count
     // Pins are created and stored in this.leftPins in visual top-to-bottom order.
     // Pin 1 (if on the left side) is the topmost.
@@ -75,7 +75,7 @@ export class ChipBuilder {
     return this
   }
 
-  rightside(count: number): this {
+  rightpins(count: number): this {
     this.rightPinCount = count
     for (let i = 0; i < count; ++i) {
       // right side: pins are numbered bottom-to-top.
@@ -94,7 +94,7 @@ export class ChipBuilder {
     return this
   }
 
-  topside(count: number): this {
+  toppins(count: number): this {
     this.topPinCount = count
     for (let i = 0; i < count; ++i) {
       // top side: left to right, ccwPinNumber increases
@@ -112,7 +112,7 @@ export class ChipBuilder {
     return this
   }
 
-  bottomside(count: number): this {
+  bottompins(count: number): this {
     this.bottomPinCount = count
     for (let i = 0; i < count; ++i) {
       // bottom side: right to left, ccwPinNumber increases
@@ -128,12 +128,6 @@ export class ChipBuilder {
     }
     return this
   }
-
-  // Aliases for test compatibility
-  leftpins = this.leftside
-  rightpins = this.rightside
-  topside = this.topside
-  bottomside = this.bottomside
 
   getHeight(): number {
     return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
