@@ -1,8 +1,14 @@
 import { test, expect } from "bun:test"
-import sample1 from "../templates/template1"
+import { circuit } from "lib/builder"
 
-test("sample1", () => {
-  const C = sample1()
+test("template1", () => {
+  const C = circuit()
+  const U1 = C.chip().leftpins(2).rightpins(2)
+  U1.pin(1).line(-8, 0).line(0, -2).passive().line(0, -2).label()
+  U1.pin(2).line(-3, 0).line(0, -2).label()
+  U1.pin(3).line(4, 0).label()
+  U1.pin(4).line(4, 0).label()
+
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
             ┌───┐
@@ -32,18 +38,6 @@ test("sample1", () => {
         },
       ],
       "connections": [
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip0",
-              "pinNumber": 1,
-            },
-            {
-              "boxId": "passive1",
-              "pinNumber": 2,
-            },
-          ],
-        },
         {
           "connectedPorts": [
             {
@@ -85,6 +79,18 @@ test("sample1", () => {
             },
             {
               "netId": "L4",
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0",
+              "pinNumber": 1,
+            },
+            {
+              "boxId": "passive1",
+              "pinNumber": 2,
             },
           ],
         },

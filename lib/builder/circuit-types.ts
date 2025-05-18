@@ -12,9 +12,9 @@ export type { Side }
 export type PortReference =
   | { boxId: string; pinNumber: number }
   | { netId: string }
-  | {
-      /* relevant for .intersect(), .connect() and .fromMark() */ lineId: string
-    }
+// | {
+//     /* relevant for .intersect(), .connect() and .fromMark() */ lineId: string
+//   }
 
 export interface NetLabel {
   labelId: string
@@ -27,4 +27,5 @@ export interface ConnectionPoint {
   ref: PortReference
   x: number
   y: number
+  showAsIntersection?: boolean
 }

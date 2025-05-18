@@ -277,3 +277,5 @@ export const getReadableNetlist = (netlist: InputNetlist): string => {
 
   return lines.join("\n")
 }
+
+export { NetlistBuilder } from "./NetlistBuilder"

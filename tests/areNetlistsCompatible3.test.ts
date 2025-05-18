@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test"
 import template4 from "../templates/template4"
-import { circuit } from "lib/builder/legacy-circuit"
+import { circuit } from "lib/builder"
 import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 import { areNetlistsCompatible } from "lib/scoring/areNetlistsCompatible"
 
@@ -32,7 +32,7 @@ test("areNetlistsCompatible with template4", () => {
     ┌───┐
     │  3├────┬──L
     │  2├─L  │
-    │  1│    P
+    │  1├    P
     └───┘    │
              L
     "

@@ -1,4 +1,5 @@
 import type { PortReference } from "../input-types"
+import type { Line } from "./circuit-types"
 import type { CircuitBuilder } from "./CircuitBuilder"
 
 export interface PinConnectionState {
@@ -15,6 +16,7 @@ export class PinBuilder {
   y = 0
 
   private lastConnected: PortReference | null = null
+  private lastCreatedLine: Line | null = null
   private lastDx = 0
   private lastDy = 0
 
@@ -30,11 +32,15 @@ export class PinBuilder {
   }
 
   line(dx: number, dy: number): this {
+    const start = { x: this.x, y: this.y, ref: this.ref }
+    this.x += dx
+    this.y += dy
+    const end = { x: this.x, y: this.y, ref: this.ref }
+    const line = { start, end }
+    this.circuit.lines.push(line)
     this.lastDx = dx
     this.lastDy = dy
-
-    // this.circuit.lines.push(...)
-
+    this.lastCreatedLine = line
     return this
   }
 
@@ -46,35 +52,40 @@ export class PinBuilder {
   }
 
   passive(): PinBuilder {
-    const orientation: "horizontal" | "vertical" =
-      this.lastDx === 0 ? "vertical" : "horizontal"
-    const passiveChip = this.circuit.chip().at(this.x, this.y)
-    if (orientation === "horizontal") {
-      passiveChip.leftside(1).rightside(1)
+    const incomingRefOriginal = this.ref
+
+    const entryDirection = this.lastDx === 0 ? "vertical" : "horizontal"
+
+    const passive = this.circuit.passive() // Create new passive chip
+
+    passive.at(this.x, this.y)
+
+    if (entryDirection === "horizontal") {
+      passive.leftpins(1).rightpins(1)
     } else {
-      passiveChip.topside(1).bottomside(1)
+      passive.bottompins(1).toppins(1)
     }
-    const firstPinToConnect = orientation === "horizontal" ? 1 : 2
-    const secondPinToConnect = orientation === "horizontal" ? 2 : 1
 
-    const normDx = Math.sign(this.lastDx)
-    const normDy = Math.sign(this.lastDy)
+    const entryPin =
+      entryDirection === "horizontal" ? passive.pin(1) : passive.pin(2)
+    const exitPin =
+      entryDirection === "horizontal" ? passive.pin(2) : passive.pin(1)
 
-    passiveChip.pin(firstPinToConnect).line(-normDx, -normDy).connect()
-    return passiveChip.pin(secondPinToConnect).line(normDx, normDy).connect()
+    this.lastCreatedLine!.end.ref = entryPin.ref
+
+    return exitPin
   }
 
   label(text?: string): void {
-    // TODO
-  }
-
-  intersect(): this {
-    this.circuit.connectionPoints.push({
-      ref: this.ref,
-      showAsIntersection: true,
+    const id = text ?? `L${this.circuit.generateAutoLabel()}`
+    this.circuit.netLabels.push({
+      labelId: id,
+      x: this.x,
+      y: this.y,
+      fromRef: this.ref,
     })
-    // TODO: Implement intersect method (this is the same as connect)
-    return this
+    // Optionally, overlay label on grid if available
+    // this.circuit.getGrid().putOverlay(this.x, this.y, id)
   }
 
   connect(): this {
@@ -86,8 +97,18 @@ export class PinBuilder {
     return this
   }
 
+  intersect(): this {
+    this.circuit.connectionPoints.push({
+      ref: this.ref,
+      x: this.x,
+      y: this.y,
+      showAsIntersection: true,
+    })
+    return this
+  }
+
   mark(name: string): this {
-    // TODO: Implement mark method
+    this.chip.addMark(name, this)
     return this
   }
 

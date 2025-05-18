@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { circuit } from "lib/builder/legacy-circuit"
+import { circuit } from "lib/builder"
 
 test("bifurcate1", () => {
   const C = circuit()
@@ -19,7 +19,7 @@ test("bifurcate1", () => {
                L
        ┌───┐   │
     L──┤1 6├───┤
-       │2 5├─L │
+       ┤2 5├─L │
      ┌─┤3 4├┐  P
      │ └───┘│  │
      L      L  L

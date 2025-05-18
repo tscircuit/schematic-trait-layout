@@ -29,9 +29,12 @@
         "noExplicitAny": "off"
       },
       "complexity": {
-        "noForEach": "info"
+        "noForEach": "error",
+        "useLiteralKeys": "off"
       },
       "style": {
+        "useSingleVarDeclarator": "error",
+        "noParameterAssign": "off",
         "noUselessElse": "off",
         "noNonNullAssertion": "off",
         "useNumberNamespace": "off",

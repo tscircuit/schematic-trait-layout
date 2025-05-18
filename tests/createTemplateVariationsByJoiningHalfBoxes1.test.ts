@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { circuit } from "lib/builder/legacy-circuit"
+import { circuit } from "lib/builder"
 import { createTemplateVariationsByJoiningHalfBoxes } from "lib/expanding/createTemplateVariationsByJoiningHalfBoxes"
 
 test.skip("createTemplateVariationsByJoiningHalfBoxes1", () => {

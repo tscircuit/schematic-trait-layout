@@ -1,3 +1,5 @@
+import type { Edge } from "./circuit-types"
+
 export const EDGE_MASKS = {
   left: 1,
   right: 2,
