@@ -2,7 +2,7 @@ import type { InputNetlist, Box, Net, Connection } from "../input-types"
 import { getReadableNetlist } from "../netlist/getReadableNetlist"
 import { bifurcateXCircuit } from "./bifurcateXCircuit"
 import { ChipBuilder } from "./ChipBuilder"
-import type { Line, NetLabel, ConnectionPoint } from "./circuit-types"
+import type { Line, NetLabel, ConnectionPoint, PortReference } from "./circuit-types"
 import { flipXCircuit } from "./flipCircuit"
 import { getGridFromCircuit } from "./getGridFromCircuit"
 import { NetlistBuilder } from "../netlist/NetlistBuilder"
@@ -92,6 +92,78 @@ export class CircuitBuilder {
     for (const line of this.lines) {
       if (!isSamePortRef(line.start.ref, line.end.ref)) {
         nb.connect(line.start.ref, line.end.ref)
+      }
+    }
+
+    /* ------------------------------------------------------------------
+     * d. Handle intersections / connectionPoints
+     * ------------------------------------------------------------------ */
+
+    // Helper to register a port under a coordinate key "x,y"
+    const addToCoordMap = (
+      map: Map<string, PortReference[]>,
+      key: string,
+      ref: PortReference,
+    ) => {
+      const arr = map.get(key) ?? []
+      arr.push(ref)
+      map.set(key, arr)
+    }
+
+    // Collect ports that share the same physical coordinate
+    const portsByCoord = new Map<string, PortReference[]>()
+
+    // 1. connectionPoints (added by .connect() / .intersect())
+    for (const cp of this.connectionPoints) {
+      addToCoordMap(portsByCoord, `${cp.x},${cp.y}`, cp.ref)
+    }
+
+    // We only want to auto-join things at coordinates that contain at least
+    // one explicit ConnectionPoint (either .connect() or .intersect()).
+    const coordsWithCP = new Set<string>()
+    for (const cp of this.connectionPoints) {
+      coordsWithCP.add(`${cp.x},${cp.y}`)
+    }
+
+    // 2. line end-points
+    for (const line of this.lines) {
+      addToCoordMap(portsByCoord, `${line.start.x},${line.start.y}`, line.start.ref)
+      addToCoordMap(portsByCoord, `${line.end.x},${line.end.y}`, line.end.ref)
+    }
+
+    // 3. connect every pair of ports that sit on a coordinate that has a CP
+    for (const [key, refs] of portsByCoord.entries()) {
+      if (!coordsWithCP.has(key)) continue   // ← skip coords without CP
+      for (let i = 0; i < refs.length; ++i) {
+        for (let j = i + 1; j < refs.length; ++j) {
+          nb.connect(refs[i]!, refs[j]!)
+        }
+      }
+    }
+
+    // 4. Handle .intersect() points that fall on the *body* of a line
+    const isCoordOnSegment = (x: number, y: number, line: Line): boolean => {
+      if (line.start.x === line.end.x) {
+        // vertical
+        if (x !== line.start.x) return false
+        const yMin = Math.min(line.start.y, line.end.y)
+        const yMax = Math.max(line.start.y, line.end.y)
+        return y >= yMin && y <= yMax
+      } else if (line.start.y === line.end.y) {
+        // horizontal
+        if (y !== line.start.y) return false
+        const xMin = Math.min(line.start.x, line.end.x)
+        const xMax = Math.max(line.start.x, line.end.x)
+        return x >= xMin && x <= xMax
+      }
+      return false // (diagonals not supported)
+    }
+
+    for (const cp of this.connectionPoints) {
+      for (const line of this.lines) {
+        if (isCoordOnSegment(cp.x, cp.y, line)) {
+          nb.connect(cp.ref, line.start.ref) // line.start.ref === line.end.ref
+        }
       }
     }
 
