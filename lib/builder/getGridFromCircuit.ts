@@ -59,10 +59,6 @@ export const getGridFromCircuit = (circuit: CircuitBuilder): Grid => {
         mid2 = "┐"
       } else {
         // Pin rows
-        mid0 = "│"
-        // mid1 will be populated with pin numbers or spaces
-        mid2 = "│"
-
         const pinSlotDisplayIndex = r - 1
         // const numPinSlots = height - 2 // Not strictly needed here anymore
 
@@ -74,6 +70,10 @@ export const getGridFromCircuit = (circuit: CircuitBuilder): Grid => {
           pinSlotDisplayIndex < chip.rightPinCount
             ? chip.rightPins[pinSlotDisplayIndex]
             : undefined
+
+        mid0 = leftPinData ? "┤" : "│"
+        // mid1 will be populated with pin numbers or spaces
+        mid2 = rightPinData ? "├" : "│"
 
         const lpStr = leftPinData ? String(leftPinData.pinNumber) : null
         const rpStr = rightPinData ? String(rightPinData.pinNumber) : null
