@@ -13,6 +13,7 @@
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
     "debug": "^4.4.1",
+    "schematic-symbols": "^0.0.139",
     "tscircuit": "^0.0.470"
   },
   "peerDependencies": {
