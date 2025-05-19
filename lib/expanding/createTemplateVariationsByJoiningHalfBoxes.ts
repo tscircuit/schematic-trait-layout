@@ -75,29 +75,7 @@ interface HalfBoxInfo {
 // Helper function to find left/right half-boxes in a given circuit
 function findHalfBoxes(circuit: CircuitBuilder): HalfBoxInfo[] {
   const halfBoxes: HalfBoxInfo[] = []
-  if (!circuit.netlistComponents || !circuit.netlistComponents.boxes) {
-    return halfBoxes
-  }
 
-  for (const box of circuit.netlistComponents.boxes) {
-    const isLeftHalf = box.leftPinCount > 0 && box.rightPinCount === 0
-    const isRightHalf = box.rightPinCount > 0 && box.leftPinCount === 0
-
-    if (isLeftHalf) {
-      halfBoxes.push({
-        boxId: box.boxId,
-        pinCount: box.leftPinCount,
-        sideWithPins: "left",
-        circuit,
-      })
-    } else if (isRightHalf) {
-      halfBoxes.push({
-        boxId: box.boxId,
-        pinCount: box.rightPinCount,
-        sideWithPins: "right",
-        circuit,
-      })
-    }
-  }
+  // TODO
   return halfBoxes
 }

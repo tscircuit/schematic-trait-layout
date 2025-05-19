@@ -2,7 +2,7 @@ import { test, expect } from "bun:test"
 import { circuit } from "lib/builder"
 import { createTemplateVariationsByJoiningHalfBoxes } from "lib/expanding/createTemplateVariationsByJoiningHalfBoxes"
 
-test.skip("createTemplateVariationsByJoiningHalfBoxes1", () => {
+test("createTemplateVariationsByJoiningHalfBoxes1", () => {
   const T1 = circuit()
 
   const T1_U1 = T1.chip().leftpins(2)
@@ -26,7 +26,7 @@ test.skip("createTemplateVariationsByJoiningHalfBoxes1", () => {
     "
     ┌───┐
     │  2├─┐
-    │  1│ │
+    │  1├ │
     └───┘ L
     "
   `)
@@ -51,7 +51,7 @@ test.skip("createTemplateVariationsByJoiningHalfBoxes1", () => {
     "
       ┌───┐
     L─┤1 4├─┐
-    L─┤2 3│ │
+    L─┤2 3├ │
       └───┘ L
     "
   `)
