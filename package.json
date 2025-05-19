@@ -12,7 +12,8 @@
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
-    "debug": "^4.4.1"
+    "debug": "^4.4.1",
+    "tscircuit": "^0.0.470"
   },
   "peerDependencies": {
     "typescript": "^5"
