@@ -4,20 +4,24 @@ import { test, expect } from "bun:test"
 
 test("tscircuit1", async () => {
   const circuitJson: any[] = await runTscircuitCode(`
-    import { sel } from "tscircuit"
+import { sel } from "tscircuit"
 
-    export default () => (
-      <board routingDisabled>
-        <chip name="U1" footprint="soic4" />
-        <resistor name="R1" resistance="1k" footprint="0402" />
-        <trace from={sel.U1.pin1} to={sel.R1.pin1} />
-      </board>
-    )
+export default () => (
+  <board routingDisabled>
+    <chip name="U1" footprint="soic4" />
+    <resistor name="R1" resistance="1k" schX={-2} schRotation="180deg" footprint="0402" />
+    
+    <trace from={sel.U1.pin1} to={sel.R1.pin1} />
+    <trace from={sel.U1.pin3} to="net.GND" />
+    <trace from={sel.R1.pin2} to={sel.net.GND} />
+  </board>
+)
   `)
 
   expect([
     ...cju(circuitJson).schematic_component.list(),
     ...cju(circuitJson).schematic_port.list(),
+    ...cju(circuitJson).schematic_net_label.list(),
     ...cju(circuitJson).source_component.list(),
     ...cju(circuitJson).source_trace.list(),
     ...cju(circuitJson).source_port.list(),
@@ -44,7 +48,7 @@ test("tscircuit1", async () => {
       },
       {
         "center": {
-          "x": 0,
+          "x": -2,
           "y": 0,
         },
         "schematic_component_id": "schematic_component_1",
@@ -54,7 +58,7 @@ test("tscircuit1", async () => {
         },
         "source_component_id": "source_component_1",
         "symbol_display_value": "1kΩ",
-        "symbol_name": "boxresistor_right",
+        "symbol_name": "boxresistor_left",
         "type": "schematic_component",
       },
       {
@@ -123,7 +127,7 @@ test("tscircuit1", async () => {
       },
       {
         "center": {
-          "x": -0.5337907000000003,
+          "x": -2.5337907,
           "y": 0.045805199999999324,
         },
         "display_pin_label": "pos",
@@ -139,7 +143,7 @@ test("tscircuit1", async () => {
       },
       {
         "center": {
-          "x": 0.5687907000000003,
+          "x": -1.4312092999999995,
           "y": 0.04525870000000065,
         },
         "display_pin_label": "neg",
@@ -152,6 +156,36 @@ test("tscircuit1", async () => {
         "source_port_id": "source_port_5",
         "true_ccw_index": undefined,
         "type": "schematic_port",
+      },
+      {
+        "anchor_position": {
+          "x": 0.6000000000000001,
+          "y": -0.1,
+        },
+        "anchor_side": "left",
+        "center": {
+          "x": 0.6000000000000001,
+          "y": -0.1,
+        },
+        "schematic_net_label_id": "schematic_net_label_0",
+        "source_net_id": "source_net_0",
+        "text": "GND",
+        "type": "schematic_net_label",
+      },
+      {
+        "anchor_position": {
+          "x": -1.4312092999999995,
+          "y": 0.04525870000000065,
+        },
+        "anchor_side": "left",
+        "center": {
+          "x": -1.4312092999999995,
+          "y": 0.04525870000000065,
+        },
+        "schematic_net_label_id": "schematic_net_label_1",
+        "source_net_id": "source_net_0",
+        "text": "GND",
+        "type": "schematic_net_label",
       },
       {
         "ftype": "simple_chip",
@@ -188,7 +222,37 @@ test("tscircuit1", async () => {
         "max_length": undefined,
         "min_trace_thickness": undefined,
         "source_trace_id": "source_trace_0",
-        "subcircuit_connectivity_map_key": "unnamedsubcircuit47_connectivity_net0",
+        "subcircuit_connectivity_map_key": "unnamedsubcircuit49_connectivity_net0",
+        "subcircuit_id": "subcircuit_source_group_0",
+        "type": "source_trace",
+      },
+      {
+        "connected_source_net_ids": [
+          "source_net_0",
+        ],
+        "connected_source_port_ids": [
+          "source_port_2",
+        ],
+        "display_name": ".U1 > .pin3 to net.GND",
+        "max_length": undefined,
+        "min_trace_thickness": undefined,
+        "source_trace_id": "source_trace_1",
+        "subcircuit_connectivity_map_key": "unnamedsubcircuit49_connectivity_net1",
+        "subcircuit_id": "subcircuit_source_group_0",
+        "type": "source_trace",
+      },
+      {
+        "connected_source_net_ids": [
+          "source_net_0",
+        ],
+        "connected_source_port_ids": [
+          "source_port_5",
+        ],
+        "display_name": ".R1 > .pin2 to net.GND",
+        "max_length": undefined,
+        "min_trace_thickness": undefined,
+        "source_trace_id": "source_trace_2",
+        "subcircuit_connectivity_map_key": "unnamedsubcircuit49_connectivity_net1",
         "subcircuit_id": "subcircuit_source_group_0",
         "type": "source_trace",
       },
@@ -269,6 +333,13 @@ test("tscircuit1", async () => {
         "source_port_id": "source_port_5",
         "subcircuit_id": "subcircuit_source_group_0",
         "type": "source_port",
+      },
+      {
+        "member_source_group_ids": [],
+        "name": "GND",
+        "source_net_id": "source_net_0",
+        "subcircuit_id": "subcircuit_source_group_0",
+        "type": "source_net",
       },
     ]
   `)
