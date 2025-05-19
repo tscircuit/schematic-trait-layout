@@ -3,6 +3,8 @@ import { cju } from "@tscircuit/circuit-json-util"
 import { test, expect } from "bun:test"
 import { convertCircuitJsonToInputNetlist } from "lib/circuit-json/convertCircuitJsonToInputNetlist"
 import { getReadableNetlist } from "lib/netlist/getReadableNetlist"
+import { CircuitBuilder } from "lib/builder"
+import { applyCircuitLayoutToCircuitJson } from "lib/circuit-json/applyCircuitLayoutToCircuitJson"
 
 test("tscircuit1", async () => {
   const circuitJson: any[] = await runTscircuitCode(`
@@ -20,15 +22,51 @@ export default () => (
 )
   `)
 
-  // expect([
-  //   ...cju(circuitJson).schematic_component.list(),
-  //   ...cju(circuitJson).schematic_port.list(),
-  //   ...cju(circuitJson).schematic_net_label.list(),
-  //   ...cju(circuitJson).source_component.list(),
-  //   ...cju(circuitJson).source_trace.list(),
-  //   ...cju(circuitJson).source_port.list(),
-  //   ...cju(circuitJson).source_net.list(),
-  // ]).toMatchInlineSnapshot()
+  expect([
+    ...cju(circuitJson).schematic_component.list(),
+    // ...cju(circuitJson).schematic_port.list(),
+    // ...cju(circuitJson).schematic_net_label.list(),
+    // ...cju(circuitJson).source_component.list(),
+    // ...cju(circuitJson).source_trace.list(),
+    // ...cju(circuitJson).source_port.list(),
+    // ...cju(circuitJson).source_net.list(),
+  ]).toMatchInlineSnapshot(`
+    [
+      {
+        "center": {
+          "x": 0,
+          "y": 0,
+        },
+        "pin_spacing": 0.2,
+        "pin_styles": undefined,
+        "port_arrangement": undefined,
+        "port_labels": {},
+        "rotation": 0,
+        "schematic_component_id": "schematic_component_0",
+        "size": {
+          "height": 0.6000000000000001,
+          "width": 0.4,
+        },
+        "source_component_id": "source_component_0",
+        "type": "schematic_component",
+      },
+      {
+        "center": {
+          "x": -2,
+          "y": 0,
+        },
+        "schematic_component_id": "schematic_component_1",
+        "size": {
+          "height": 0.468910699999999,
+          "width": 1.0583332999999997,
+        },
+        "source_component_id": "source_component_1",
+        "symbol_display_value": "1kΩ",
+        "symbol_name": "boxresistor_left",
+        "type": "schematic_component",
+      },
+    ]
+  `)
 
   expect(convertCircuitJsonToInputNetlist(circuitJson)).toMatchInlineSnapshot(`
     {
@@ -111,4 +149,14 @@ export default () => (
     Complex Connections (more than 2 points):
       (none)"
   `)
+
+  const C = new CircuitBuilder()
+  const U1 = C.chip().leftpins(2).rightpins(2)
+
+  U1.pin(1).line(-2, 0).passive().line(-1, 0).line(0, -1).label()
+  U1.pin(3).line(2, 0).label()
+
+  const newCircuitJson = applyCircuitLayoutToCircuitJson(circuitJson, C)
+
+  expect(cju(newCircuitJson).schematic_component.list()).toMatchInlineSnapshot()
 })
