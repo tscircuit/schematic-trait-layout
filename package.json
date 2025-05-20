@@ -12,6 +12,8 @@
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
+    "bun-match-svg": "^0.0.11",
+    "circuit-to-svg": "^0.0.128",
     "debug": "^4.4.1",
     "schematic-symbols": "^0.0.139",
     "tscircuit": "^0.0.470"

@@ -5,6 +5,7 @@ import { convertCircuitJsonToInputNetlist } from "lib/circuit-json/convertCircui
 import { getReadableNetlist } from "lib/netlist/getReadableNetlist"
 import { CircuitBuilder } from "lib/builder"
 import { applyCircuitLayoutToCircuitJson } from "lib/circuit-json/applyCircuitLayoutToCircuitJson"
+import { convertCircuitJsonToSchematicSvg } from "circuit-to-svg"
 
 test("tscircuit1", async () => {
   const circuitJson: any[] = await runTscircuitCode(`
@@ -199,4 +200,13 @@ export default () => (
       },
     ]
   `)
+
+  expect(convertCircuitJsonToSchematicSvg(circuitJson)).toMatchSvgSnapshot(
+    import.meta.path,
+    "tscircuit1-original",
+  )
+  expect(convertCircuitJsonToSchematicSvg(newCircuitJson)).toMatchSvgSnapshot(
+    import.meta.path,
+    "tscircuit1-layout",
+  )
 })
