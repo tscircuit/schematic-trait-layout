@@ -36,7 +36,6 @@ export const applyCircuitLayoutToCircuitJson = (
     const schematicPorts = cju(cj).schematic_port.list({
       schematic_component_id: schematicComponent.schematic_component_id,
     })
-    console.log(sourceComponent.name, schematicPorts)
     // Find the schematic box index
     const boxIndex = cjNorm.transform.boxIdToBoxIndex[sourceComponent.name]!
 
@@ -50,6 +49,21 @@ export const applyCircuitLayoutToCircuitJson = (
       x: layoutChip.x + layoutChip.getWidth() / 2,
       y: layoutChip.y + layoutChip.getHeight() / 2,
     }
+
+    console.table(
+      schematicPorts.map((p) => {
+        const layoutPort = layoutChip.pin(p.pin_number!)
+        return {
+          name: sourceComponent.name,
+          layoutChipId: layoutChip.chipId,
+          pin_number: p.pin_number,
+          og_x: p.center.x.toFixed(1),
+          og_y: p.center.y.toFixed(1),
+          layout_x: layoutPort.x.toFixed(1),
+          layout_y: layoutPort.y.toFixed(1),
+        }
+      }),
+    )
 
     for (const schematicPort of schematicPorts) {
       const { pin_number } = schematicPort
