@@ -102,8 +102,6 @@ export const applyCircuitLayoutToCircuitJson = (
 
   console.log({ netIndexToLayoutNetId })
 
-  const netNameHelpers = prepareNetNameHelpers(cj)
-
   /* ------------------------------------------------------------------ *
    *  Re-position schematic_net_label items to the coordinates of the
    *  corresponding CircuitBuilder.netLabels (layout).
