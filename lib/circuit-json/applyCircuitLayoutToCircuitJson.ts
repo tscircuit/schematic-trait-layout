@@ -33,6 +33,10 @@ export const applyCircuitLayoutToCircuitJson = (
     const sourceComponent = cju(cj).source_component.get(
       schematicComponent.source_component_id,
     )!
+    const schematicPorts = cju(cj).schematic_port.list({
+      schematic_component_id: schematicComponent.schematic_component_id,
+    })
+    console.log(sourceComponent.name, schematicPorts)
     // Find the schematic box index
     const boxIndex = cjNorm.transform.boxIdToBoxIndex[sourceComponent.name]!
 
@@ -40,10 +44,20 @@ export const applyCircuitLayoutToCircuitJson = (
     const layoutBoxId = layoutBoxIndexToBoxId.get(boxIndex)!
 
     const layoutChip = layout.chips.find((c) => c.chipId === layoutBoxId)!
+    console.log(layoutChip.chipId)
 
     schematicComponent.center = {
       x: layoutChip.x + layoutChip.getWidth() / 2,
       y: layoutChip.y + layoutChip.getHeight() / 2,
+    }
+
+    for (const schematicPort of schematicPorts) {
+      const { pin_number } = schematicPort
+      const layoutPort = layoutChip.pin(pin_number!)
+      schematicPort.center = {
+        x: layoutPort.x,
+        y: layoutPort.y,
+      }
     }
 
     // TODO Change schematic_component.symbol_name for passives to match the

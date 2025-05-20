@@ -7,6 +7,110 @@ interface NormalizationTransform {
 }
 
 /**
+ * Depth‑first traversal starting from the box with the most pins.
+ * Returns {boxId → searchIter} where the root is 0.
+ *
+ * The algorithm strictly visits **each box once** to avoid the runaway
+ * growth / infinite‑loop behaviour that can happen if we keep pushing
+ * pins for boxes we've already explored.
+ */
+const computeSearchIters = (netlist: InputNetlist): Record<string, number> => {
+  /* ---------- helpers ---------- */
+  const pinsOfBox = (boxId: string): number[] => {
+    const pins = new Set<number>()
+    netlist.connections.forEach((c) => {
+      c.connectedPorts.forEach((p) => {
+        if ("boxId" in p && p.boxId === boxId) pins.add(p.pinNumber)
+      })
+    })
+    return Array.from(pins).sort((a, b) => a - b) // CCW ⇒ ascending
+  }
+
+  // Pre‑index every pin → the connection(s) it appears in for O(1) access
+  const connsByPin = new Map<string, typeof netlist.connections>()
+  netlist.connections.forEach((conn) => {
+    conn.connectedPorts.forEach((p) => {
+      if ("boxId" in p) {
+        const key = `${p.boxId}|${p.pinNumber}`
+        if (!connsByPin.has(key)) connsByPin.set(key, [])
+        connsByPin.get(key)!.push(conn)
+      }
+    })
+  })
+
+  /* ---------- pick the root ---------- */
+  let rootBoxId = ""
+  let maxPinCount = -1
+  netlist.boxes.forEach((b) => {
+    const count =
+      (b.leftPinCount ?? 0) +
+      (b.rightPinCount ?? 0) +
+      (b.topPinCount ?? 0) +
+      (b.bottomPinCount ?? 0)
+    if (count > maxPinCount || (count === maxPinCount && b.boxId < rootBoxId)) {
+      rootBoxId = b.boxId
+      maxPinCount = count
+    }
+  })
+
+  /* ---------- DFS ---------- */
+  const searchIter: Record<string, number> = { [rootBoxId]: 0 }
+  const visitedBoxes = new Set<string>([rootBoxId])
+  const processedPinKeys = new Set<string>() // avoid re‑processing a pin
+  let iter = 1
+
+  // Stack of candidate pins (LIFO). Push pins for a box **once** when we first visit it.
+  const stack: { boxId: string; pinNumber: number }[] = []
+  const pushPinsOf = (boxId: string) => {
+    pinsOfBox(boxId)
+      .slice() // clone
+      .reverse() // so smallest pin pops first
+      .forEach((pin) => stack.push({ boxId, pinNumber: pin }))
+  }
+
+  pushPinsOf(rootBoxId)
+
+  while (stack.length) {
+    const { boxId, pinNumber } = stack.pop()!
+    const pinKey = `${boxId}|${pinNumber}`
+    if (processedPinKeys.has(pinKey)) continue // already expanded this pin
+    processedPinKeys.add(pinKey)
+
+    const neighbouringBoxes: [string, number][] = [] // [boxId, theirPin]
+
+    const pinConns = connsByPin.get(pinKey) ?? []
+    pinConns.forEach((conn) => {
+      conn.connectedPorts.forEach((p) => {
+        if ("boxId" in p && p.boxId !== boxId) {
+          neighbouringBoxes.push([p.boxId, p.pinNumber])
+        }
+      })
+    })
+
+    // Keep smallest pin per neighbour, then order by that pin
+    const smallestPin: Record<string, number> = {}
+    neighbouringBoxes.forEach(([nbrId, nbrPin]) => {
+      smallestPin[nbrId] =
+        smallestPin[nbrId] === undefined
+          ? nbrPin
+          : Math.min(smallestPin[nbrId], nbrPin)
+    })
+
+    Object.entries(smallestPin)
+      .sort((a, b) => a[1] - b[1])
+      .forEach(([nbrId]) => {
+        if (!visitedBoxes.has(nbrId)) {
+          searchIter[nbrId] = iter++
+          visitedBoxes.add(nbrId)
+          pushPinsOf(nbrId) // **only once per new box**
+        }
+      })
+  }
+
+  return searchIter
+}
+
+/**
  * A normalized netlist allows netlists to be compared for similarity,
  * superficial differences from ids are removed and items are sorted so that
  * two functionally identical netlists will have the same normalized representation
@@ -22,137 +126,68 @@ export const normalizeNetlist = (
     netIdToNetIndex: {},
   }
 
-  const mainChipId = "chip0"; // Assumed convention for the main chip
-  const orderedBoxIds: string[] = [];
-  const orderedNetIds: string[] = [];
+  /* ---------- box ordering via DFS ---------- */
+  const iterMap = computeSearchIters(netlist)
+  const finalSortedBoxIds = netlist.boxes
+    .map((b) => b.boxId)
+    .sort((a, b) => {
+      const ai = iterMap[a] ?? Number.MAX_SAFE_INTEGER
+      const bi = iterMap[b] ?? Number.MAX_SAFE_INTEGER
+      return ai !== bi ? ai - bi : a.localeCompare(b)
+    })
 
-  // Precompute sets of existing IDs for efficient lookups
-  const existingBoxIds = new Set(netlist.boxes.map(b => b.boxId));
-  const existingNetIds = new Set(netlist.nets.map(n => n.netId));
+  // ───────── populate transforms ─────────
+  finalSortedBoxIds.forEach((id, idx) => (transform.boxIdToBoxIndex[id] = idx))
 
-  // Check if the main chip exists in the provided netlist boxes
-  if (existingBoxIds.has(mainChipId)) {
-    orderedBoxIds.push(mainChipId);
-
-    let maxPinNumber = 0;
-    // Determine the highest pin number used by the main chip in connections
-    for (const connection of netlist.connections) {
-      for (const port of connection.connectedPorts) {
-        if ("boxId" in port && port.boxId === mainChipId) {
-          maxPinNumber = Math.max(maxPinNumber, port.pinNumber);
-        }
+  const normalizedBoxes: NormalizedNetlist["boxes"] = finalSortedBoxIds.map(
+    (id) => {
+      const box = netlist.boxes.find((b) => b.boxId === id)!
+      return {
+        boxIndex: transform.boxIdToBoxIndex[id]!,
+        leftPinCount: box.leftPinCount,
+        rightPinCount: box.rightPinCount,
+        topPinCount: box.topPinCount,
+        bottomPinCount: box.bottomPinCount,
       }
-    }
+    },
+  )
 
-    // Iterate through main chip pins by number to establish order
-    for (let pinNum = 1; pinNum <= maxPinNumber; pinNum++) {
-      for (const connection of netlist.connections) {
-        // Check if this connection involves the current main chip pin
-        const mainChipPinInConnection = connection.connectedPorts.find(
-          p => "boxId" in p && p.boxId === mainChipId && p.pinNumber === pinNum
-        );
+  /* ---------- nets (unchanged) ---------- */
+  const finalSortedNetIds = netlist.nets
+    .map((n) => n.netId)
+    .sort((a, b) => a.localeCompare(b))
+  finalSortedNetIds.forEach(
+    (nid, idx) => (transform.netIdToNetIndex[nid] = idx),
+  )
 
-        if (mainChipPinInConnection) {
-          // If so, process all ports in this connection
-          for (const port of connection.connectedPorts) {
-            if ("boxId" in port) {
-              // If it's a box port and not the main chip itself
-              if (port.boxId !== mainChipId && !orderedBoxIds.includes(port.boxId)) {
-                // Add to ordered list if it's an existing box
-                if (existingBoxIds.has(port.boxId)) {
-                  orderedBoxIds.push(port.boxId);
-                }
-              }
-            } else { // It's a net port
-              if (!orderedNetIds.includes(port.netId)) {
-                // Add to ordered list if it's an existing net
-                if (existingNetIds.has(port.netId)) {
-                  orderedNetIds.push(port.netId);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Add any remaining boxes not found through main chip pin iteration, sorted by ID
-  const remainingBoxIds = Array.from(existingBoxIds)
-    .filter(id => !orderedBoxIds.includes(id))
-    .sort((a, b) => a.localeCompare(b));
-  const finalSortedBoxIds = [...orderedBoxIds, ...remainingBoxIds];
-
-  // Populate boxIdToBoxIndex transform and create the sortedBoxes array
-  finalSortedBoxIds.forEach((boxId, index) => {
-    transform.boxIdToBoxIndex[boxId] = index;
-  });
-  const sortedBoxes = finalSortedBoxIds.map(boxId => {
-    const box = netlist.boxes.find(b => b.boxId === boxId);
-    // This error should ideally not be reached if logic is correct and netlist is consistent
-    if (!box) throw new Error(`Box ID ${boxId} not found in netlist.boxes.`);
-    return box;
-  });
-
-  const normalizedBoxes: NormalizedNetlist["boxes"] = sortedBoxes.map(
-    (box) => ({
-      boxIndex: transform.boxIdToBoxIndex[box.boxId]!,
-      leftPinCount: box.leftPinCount,
-      rightPinCount: box.rightPinCount,
-      topPinCount: box.topPinCount,
-      bottomPinCount: box.bottomPinCount,
+  const normalizedNets: NormalizedNetlist["nets"] = finalSortedNetIds.map(
+    (nid) => ({
+      netIndex: transform.netIdToNetIndex[nid]!,
     }),
-  );
+  )
 
-  // Add any remaining nets not found through main chip pin iteration, sorted by ID
-  const remainingNetIds = Array.from(existingNetIds)
-    .filter(id => !orderedNetIds.includes(id))
-    .sort((a, b) => a.localeCompare(b));
-  const finalSortedNetIds = [...orderedNetIds, ...remainingNetIds];
-
-  // Populate netIdToNetIndex transform and create the sortedNets array
-  finalSortedNetIds.forEach((netId, index) => {
-    transform.netIdToNetIndex[netId] = index;
-  });
-  const sortedNets = finalSortedNetIds.map(netId => {
-    const net = netlist.nets.find(n => n.netId === netId);
-    // This error should ideally not be reached
-    if (!net) throw new Error(`Net ID ${netId} not found in netlist.nets.`);
-    return net;
-  });
-
-  const normalizedNets: NormalizedNetlist["nets"] = sortedNets.map((net) => ({
-    netIndex: transform.netIdToNetIndex[net.netId]!,
-  }));
-
+  /* ---------- connections (unchanged) ---------- */
   const normalizedConnections: NormalizedNetlist["connections"] =
-    netlist.connections.map((connection) => {
-      const connectedPorts = connection.connectedPorts
-        .map((port) => {
-          if ("boxId" in port) {
+    netlist.connections.map((c) => {
+      const connectedPorts = c.connectedPorts
+        .map((p) => {
+          if ("boxId" in p) {
             return {
-              boxIndex: transform.boxIdToBoxIndex[port.boxId]!,
-              pinNumber: port.pinNumber,
+              boxIndex: transform.boxIdToBoxIndex[p.boxId]!,
+              pinNumber: p.pinNumber,
             }
           }
-          return { netIndex: transform.netIdToNetIndex[port.netId]! }
+          return { netIndex: transform.netIdToNetIndex[p.netId]! }
         })
         .sort((a, b) => {
           const aIsBox = "boxIndex" in a
           const bIsBox = "boxIndex" in b
-
-          if (aIsBox && !bIsBox) return -1 // boxes first
-          if (!aIsBox && bIsBox) return 1 // then nets
-
+          if (aIsBox && !bIsBox) return -1
+          if (!aIsBox && bIsBox) return 1
           if (aIsBox && bIsBox) {
-            // Both are boxes, sort by boxIndex then pinNumber
-            if (a.boxIndex !== b.boxIndex) {
-              return a.boxIndex! - b.boxIndex!
-            }
+            if (a.boxIndex !== b.boxIndex) return a.boxIndex! - b.boxIndex!
             return a.pinNumber! - b.pinNumber!
           }
-          // Both are nets, sort by netIndex
-          // Type assertion needed as TS doesn't automatically infer both are NetPorts here
           return (
             (a as { netIndex: number }).netIndex -
             (b as { netIndex: number }).netIndex
@@ -161,20 +196,15 @@ export const normalizeNetlist = (
       return { connectedPorts }
     })
 
-  // Sort connections for canonical representation
-  // Create a string representation for each connection's sorted ports for stable sorting
+  // Ensure deterministic ordering of connections
   normalizedConnections.sort((a, b) => {
-    const aStr = a.connectedPorts
-      .map((p) =>
-        "boxIndex" in p ? `b${p.boxIndex}p${p.pinNumber}` : `n${p.netIndex}`,
-      )
-      .join(",")
-    const bStr = b.connectedPorts
-      .map((p) =>
-        "boxIndex" in p ? `b${p.boxIndex}p${p.pinNumber}` : `n${p.netIndex}`,
-      )
-      .join(",")
-    return aStr.localeCompare(bStr)
+    const sig = (x: typeof a) =>
+      x.connectedPorts
+        .map((p) =>
+          "boxIndex" in p ? `b${p.boxIndex}p${p.pinNumber}` : `n${p.netIndex}`,
+        )
+        .join(",")
+    return sig(a).localeCompare(sig(b))
   })
 
   return {
