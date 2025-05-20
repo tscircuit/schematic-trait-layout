@@ -43,27 +43,32 @@ export const applyCircuitLayoutToCircuitJson = (
     const layoutBoxId = layoutBoxIndexToBoxId.get(boxIndex)!
 
     const layoutChip = layout.chips.find((c) => c.chipId === layoutBoxId)!
-    console.log(layoutChip.chipId)
+
+    let cjChipWidth = layoutChip.getWidth() - 2
+    let cjChipHeight = layoutChip.getHeight() - 2
+
+    if (layoutChip.isPassive) {
+      cjChipWidth = 1
+      cjChipHeight = 1
+    }
+
+    console.table({
+      cjChipWidth,
+      cjChipHeight,
+      layoutChipWidth: layoutChip.getWidth(),
+      layoutChipHeight: layoutChip.getHeight(),
+      layoutChipX: layoutChip.x,
+      layoutChipY: layoutChip.y,
+    })
 
     schematicComponent.center = {
       x: layoutChip.x + layoutChip.getWidth() / 2,
       y: layoutChip.y + layoutChip.getHeight() / 2,
     }
-
-    console.table(
-      schematicPorts.map((p) => {
-        const layoutPort = layoutChip.pin(p.pin_number!)
-        return {
-          name: sourceComponent.name,
-          layoutChipId: layoutChip.chipId,
-          pin_number: p.pin_number,
-          og_x: p.center.x.toFixed(1),
-          og_y: p.center.y.toFixed(1),
-          layout_x: layoutPort.x.toFixed(1),
-          layout_y: layoutPort.y.toFixed(1),
-        }
-      }),
-    )
+    schematicComponent.size = {
+      width: cjChipWidth,
+      height: cjChipHeight,
+    }
 
     for (const schematicPort of schematicPorts) {
       const { pin_number } = schematicPort
@@ -72,7 +77,7 @@ export const applyCircuitLayoutToCircuitJson = (
       const { x: layoutX, y: layoutY } = layoutChip.getPinLocation(pin_number!)
       schematicPort.center = {
         x: layoutX,
-        y: layoutY,
+        y: layoutY + 0.5,
       }
     }
 

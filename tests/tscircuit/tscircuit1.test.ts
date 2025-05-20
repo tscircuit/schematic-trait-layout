@@ -312,8 +312,8 @@ export default () => (
         "rotation": 0,
         "schematic_component_id": "schematic_component_0",
         "size": {
-          "height": 0.6000000000000001,
-          "width": 0.4,
+          "height": 2,
+          "width": 2,
         },
         "source_component_id": "source_component_0",
         "type": "schematic_component",
@@ -325,8 +325,8 @@ export default () => (
         },
         "schematic_component_id": "schematic_component_1",
         "size": {
-          "height": 0.468910699999999,
-          "width": 1.0583332999999997,
+          "height": 1,
+          "width": 1,
         },
         "source_component_id": "source_component_1",
         "symbol_display_value": "1kΩ",
