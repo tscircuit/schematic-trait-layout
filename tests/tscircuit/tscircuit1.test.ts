@@ -283,6 +283,15 @@ export default () => (
   U1.pin(1).line(-2, 0).passive().line(-1, 0).line(0, -1).label()
   U1.pin(3).line(2, 0).label()
 
+  expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
+    "
+       ┌───┐
+    ┌P─┤1 4├
+    L  ┤2 3├─L
+       └───┘
+    "
+  `)
+
   const newCircuitJson = applyCircuitLayoutToCircuitJson(
     circuitJson,
     convertCircuitJsonToInputNetlist(circuitJson),
@@ -293,8 +302,8 @@ export default () => (
     [
       {
         "center": {
-          "x": -1.5,
-          "y": 2.5,
+          "x": 2,
+          "y": 2,
         },
         "pin_spacing": 0.2,
         "pin_styles": undefined,
@@ -311,8 +320,8 @@ export default () => (
       },
       {
         "center": {
-          "x": 2,
-          "y": 2,
+          "x": -1.5,
+          "y": 2.5,
         },
         "schematic_component_id": "schematic_component_1",
         "size": {
@@ -327,12 +336,20 @@ export default () => (
     ]
   `)
 
-  expect(convertCircuitJsonToSchematicSvg(circuitJson)).toMatchSvgSnapshot(
-    import.meta.path,
-    "tscircuit1-original",
-  )
-  expect(convertCircuitJsonToSchematicSvg(newCircuitJson)).toMatchSvgSnapshot(
-    import.meta.path,
-    "tscircuit1-layout",
-  )
+  expect(
+    convertCircuitJsonToSchematicSvg(circuitJson, {
+      grid: {
+        cellSize: 1,
+        labelCells: true,
+      },
+    }),
+  ).toMatchSvgSnapshot(import.meta.path, "tscircuit1-original")
+  expect(
+    convertCircuitJsonToSchematicSvg(newCircuitJson, {
+      grid: {
+        cellSize: 1,
+        labelCells: true,
+      },
+    }),
+  ).toMatchSvgSnapshot(import.meta.path, "tscircuit1-layout")
 })
