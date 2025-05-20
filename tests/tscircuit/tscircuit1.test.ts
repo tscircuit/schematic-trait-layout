@@ -156,7 +156,11 @@ export default () => (
   U1.pin(1).line(-2, 0).passive().line(-1, 0).line(0, -1).label()
   U1.pin(3).line(2, 0).label()
 
-  const newCircuitJson = applyCircuitLayoutToCircuitJson(circuitJson, C)
+  const newCircuitJson = applyCircuitLayoutToCircuitJson(
+    circuitJson,
+    convertCircuitJsonToInputNetlist(circuitJson),
+    C,
+  )
 
   expect(cju(newCircuitJson).schematic_component.list()).toMatchInlineSnapshot()
 })
