@@ -88,5 +88,43 @@ export const applyCircuitLayoutToCircuitJson = (
     // "down", if pin1 is to the left of pin2 the direction is "right"
   }
 
+  const netIndexToLayoutNetId = new Map<number, string>()
+  for (const [netId, netIndex] of Object.entries(
+    layoutNorm.transform.netIdToNetIndex,
+  )) {
+    netIndexToLayoutNetId.set(netIndex, netId)
+  }
+
+  console.log({
+    "layoutNorm.transform": layoutNorm.transform,
+    "cjNorm.transform": cjNorm.transform,
+  })
+
+  console.log({ netIndexToLayoutNetId })
+
+  /* ------------------------------------------------------------------ *
+   *  Re-position schematic_net_label items to the coordinates of the
+   *  corresponding CircuitBuilder.netLabels (layout).
+   *  A match is made via the visible text (e.g. "GND", "L1", …).
+   * ------------------------------------------------------------------ */
+  for (const schemLabel of cju(cj).schematic_net_label.list()) {
+    const sourceNet = cju(cj).source_net.get(schemLabel.source_net_id)!
+    const netIndex = cjNorm.transform.netIdToNetIndex[sourceNet.name]!
+    console.log({ netIndex })
+    const layoutNetId = netIndexToLayoutNetId.get(netIndex)!
+
+    const layoutLabel = layout.netLabels.find(
+      (nl) => nl.labelId === layoutNetId,
+    )
+    console.log({ layoutLabel })
+    if (!layoutLabel) continue // no matching label in layout
+
+    // move both the visual centre and the anchor-point
+    schemLabel.center = { x: layoutLabel.x, y: layoutLabel.y }
+    schemLabel.anchor_position = { x: layoutLabel.x, y: layoutLabel.y }
+    schemLabel.anchor_side = layoutLabel.anchorSide
+    // keep existing anchor_side / other props untouched
+  }
+
   return cj
 }

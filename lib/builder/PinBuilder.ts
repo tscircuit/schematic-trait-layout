@@ -82,6 +82,14 @@ export class PinBuilder {
       labelId: id,
       x: this.x,
       y: this.y,
+      anchorSide:
+        this.lastDx > 0
+          ? "left"
+          : this.lastDx < 0
+            ? "right"
+            : this.lastDy > 0
+              ? "bottom"
+              : "top",
       fromRef: this.ref,
     })
     // Optionally, overlay label on grid if available
