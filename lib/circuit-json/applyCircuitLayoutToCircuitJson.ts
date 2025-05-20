@@ -110,7 +110,6 @@ export const applyCircuitLayoutToCircuitJson = (
   for (const schemLabel of cju(cj).schematic_net_label.list()) {
     const sourceNet = cju(cj).source_net.get(schemLabel.source_net_id)!
     const netIndex = cjNorm.transform.netIdToNetIndex[sourceNet.name]!
-    console.log({ netIndex })
     const layoutNetId = netIndexToLayoutNetId.get(netIndex)!
 
     const layoutLabel = layout.netLabels.find(

@@ -92,51 +92,92 @@ export const convertCircuitJsonToInputNetlist = (
   }
 
   /* ------------------------------------------------------------------ *
-   * 3.  Build helper maps for ports & nets                              *
+   * 3.  Build helper maps for port identification and net base names    *
    * ------------------------------------------------------------------ */
-  const sourcePortIdToBoxPin = new Map<
+  const sourcePortIdToPortInfo = new Map<
     string,
-    { boxId: string; pinNumber: number }
+    { boxId: string; pinNumber: number; portName: string }
   >()
   for (const it of items) {
     if (it.type !== "source_port") continue
     const srcCompId: string = (it as any).source_component_id
     const box = sourceComponentIdToBox.get(srcCompId)
-    if (!box) continue
-    sourcePortIdToBoxPin.set((it as any).source_port_id, {
+    if (!box) continue // Should not happen in well-formed data
+    const pinNumber = (it as any).pin_number
+    if (typeof pinNumber !== "number") continue // Should have a pin number
+
+    sourcePortIdToPortInfo.set((it as any).source_port_id, {
       boxId: box.boxId,
-      pinNumber: (it as any).pin_number,
+      pinNumber: pinNumber,
+      portName: `${box.boxId}.${pinNumber}`,
     })
   }
 
-  const nets: Net[] = []
-  const sourceNetIdToName = new Map<string, string>()
+  const tempSourceNetIdToBaseName = new Map<string, string>()
   for (const it of items) {
     if (it.type !== "source_net") continue
     const name: string = (it as any).name ?? (it as any).source_net_id
-    nets.push({ netId: name })
-    sourceNetIdToName.set((it as any).source_net_id, name)
+    tempSourceNetIdToBaseName.set((it as any).source_net_id, name)
   }
 
   /* ------------------------------------------------------------------ *
-   * 4.  Connections (from source_trace objects)                         *
+   * 4.  Process traces to form connections and composite net IDs        *
    * ------------------------------------------------------------------ */
-  const connections: Connection[] = []
+  const finalNets: Net[] = []
+  const finalConnections: Connection[] = []
+  const finalNetIdSet = new Set<string>() // To track unique compositeNetIds
+
   for (const it of items) {
     if (it.type !== "source_trace") continue
-    const ports: Connection["connectedPorts"] = []
+
+    const tracePortObjectsForConnection: Array<{
+      boxId: string
+      pinNumber: number
+    }> = []
+    const namesForCompositeNetId: string[] = []
+    const sourceNetIdsInTrace: string[] =
+      (it as any).connected_source_net_ids ?? []
 
     for (const pid of (it as any).connected_source_port_ids ?? []) {
-      const bp = sourcePortIdToBoxPin.get(pid)
-      if (bp) ports.push({ boxId: bp.boxId, pinNumber: bp.pinNumber })
-    }
-    for (const nid of (it as any).connected_source_net_ids ?? []) {
-      const netName = sourceNetIdToName.get(nid) ?? nid
-      ports.push({ netId: netName })
+      const portInfo = sourcePortIdToPortInfo.get(pid)
+      if (portInfo) {
+        tracePortObjectsForConnection.push({
+          boxId: portInfo.boxId,
+          pinNumber: portInfo.pinNumber,
+        })
+        namesForCompositeNetId.push(portInfo.portName)
+      }
     }
 
-    /* Only keep connections that touch at least two points              */
-    if (ports.length >= 2) connections.push({ connectedPorts: ports })
+    for (const nid of sourceNetIdsInTrace) {
+      const baseName = tempSourceNetIdToBaseName.get(nid) ?? nid
+      namesForCompositeNetId.push(baseName)
+    }
+
+    const numEffectivePoints =
+      tracePortObjectsForConnection.length +
+      (sourceNetIdsInTrace.length > 0 ? 1 : 0)
+    if (numEffectivePoints < 2) {
+      continue
+    }
+
+    const connectionPortsEntry: Connection["connectedPorts"] = [
+      ...tracePortObjectsForConnection,
+    ]
+
+    if (sourceNetIdsInTrace.length > 0) {
+      namesForCompositeNetId.sort()
+      const compositeNetId = namesForCompositeNetId.join(",")
+
+      connectionPortsEntry.push({ netId: compositeNetId })
+
+      if (!finalNetIdSet.has(compositeNetId)) {
+        finalNets.push({ netId: compositeNetId })
+        finalNetIdSet.add(compositeNetId)
+      }
+    }
+
+    finalConnections.push({ connectedPorts: connectionPortsEntry })
   }
 
   /* ------------------------------------------------------------------ *
@@ -144,7 +185,7 @@ export const convertCircuitJsonToInputNetlist = (
    * ------------------------------------------------------------------ */
   return {
     boxes: Array.from(sourceComponentIdToBox.values()),
-    nets,
-    connections,
+    nets: finalNets,
+    connections: finalConnections,
   }
 }

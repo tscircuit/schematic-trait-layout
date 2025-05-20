@@ -233,7 +233,7 @@ export default () => (
               "pinNumber": 3,
             },
             {
-              "netId": "GND",
+              "netId": "GND,U1.3",
             },
           ],
         },
@@ -244,14 +244,17 @@ export default () => (
               "pinNumber": 2,
             },
             {
-              "netId": "GND",
+              "netId": "GND,R1.2",
             },
           ],
         },
       ],
       "nets": [
         {
-          "netId": "GND",
+          "netId": "GND,U1.3",
+        },
+        {
+          "netId": "GND,R1.2",
         },
       ],
     }
@@ -265,12 +268,12 @@ export default () => (
 
                       ┌────────────────┐
             R1.1 ──  1│       U1       │4               
-                     2│                │3  ── GND       
+                     2│                │3  ── GND,U1.3  
                       └────────────────┘
 
 
                       ┌────────────────┐
-            U1.1 ──  1│       R1       │2  ── GND       
+            U1.1 ──  1│       R1       │2  ── GND,R1.2  
                       └────────────────┘
 
     Complex Connections (more than 2 points):
