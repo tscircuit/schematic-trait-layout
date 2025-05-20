@@ -88,11 +88,18 @@ export const applyCircuitLayoutToCircuitJson = (
     // "down", if pin1 is to the left of pin2 the direction is "right"
   }
 
-  const netIndexToLayoutNetId = new Map<number, string>()
+  // const netIndexToLayoutNetId = new Map<number, string>()
+  // for (const [netId, netIndex] of Object.entries(
+  //   layoutNorm.transform.netIdToNetIndex,
+  // )) {
+  //   netIndexToLayoutNetId.set(netIndex, netId)
+  // }
+
+  const netIndexToCompositeNetId = new Map<number, string>()
   for (const [netId, netIndex] of Object.entries(
-    layoutNorm.transform.netIdToNetIndex,
+    cjNorm.transform.netIdToNetIndex,
   )) {
-    netIndexToLayoutNetId.set(netIndex, netId)
+    netIndexToCompositeNetId.set(netIndex, netId)
   }
 
   console.log({
@@ -100,33 +107,36 @@ export const applyCircuitLayoutToCircuitJson = (
     "cjNorm.transform": cjNorm.transform,
   })
 
-  console.log({ netIndexToLayoutNetId })
+  // Filter all existing schematic_net_label items
+  cj = cj.filter((elm) => elm.type !== "schematic_net_label")
 
-  /* ------------------------------------------------------------------ *
-   *  Re-position schematic_net_label items to the coordinates of the
-   *  corresponding CircuitBuilder.netLabels (layout).
-   *  A match is made via the visible text (e.g. "GND", "L1", …).
-   * ------------------------------------------------------------------ */
-  for (const schLabel of cju(cj).schematic_net_label.list()) {
-    const netIndex =
-      cjNorm.transform.netIdToNetIndex[schLabel.schematic_net_label_id]!
-    const layoutNetId = netIndexToLayoutNetId.get(netIndex)!
+  // Create new schematic_net_label items from layout.netLabels
+  const newSchematicNetLabels: SchematicNetLabel[] = []
+  for (const layoutLabel of layout.netLabels) {
+    const netIndex = layoutNorm.transform.netIdToNetIndex[layoutLabel.labelId]
+    const compositeNetId = netIndexToCompositeNetId.get(netIndex)!
+    const newLabel: SchematicNetLabel = {
+      type: "schematic_net_label",
+      schematic_net_label_id: compositeNetId,
+      source_net_id: layoutLabel.labelId, // Assumes layoutLabel.labelId is the source_net identifier
+      text:
+        compositeNetId.split(",").find((n) => !n.includes(".")) ??
+        compositeNetId, // The text to be displayed
+      center: { x: layoutLabel.x, y: layoutLabel.y },
+      anchor_position: { x: layoutLabel.x, y: layoutLabel.y }, // Typically same as center for labels
+      anchor_side: layoutLabel.anchorSide,
+    }
+    newSchematicNetLabels.push(newLabel)
+  }
 
-    const layoutLabel = layout.netLabels.find(
-      (nl) => nl.labelId === layoutNetId,
-    )
-    console.log({ layoutLabel })
-    if (!layoutLabel) continue // no matching label in layout
-
-    // move both the visual centre and the anchor-point
-    schLabel.center = { x: layoutLabel.x, y: layoutLabel.y }
-    schLabel.anchor_position = { x: layoutLabel.x, y: layoutLabel.y }
-    schLabel.anchor_side = layoutLabel.anchorSide
-    // keep existing anchor_side / other props untouched
+  // Add all newly created labels to the circuitJson array
+  if (newSchematicNetLabels.length > 0) {
+    cj.push(...newSchematicNetLabels)
   }
 
   // Filter all schematic_traces (they won't properly connect after the moving)
   cj = cj.filter((c) => c.type !== "schematic_trace")
+  cj = cj.filter((c) => c.type !== "schematic_text")
 
   return cj
 }
