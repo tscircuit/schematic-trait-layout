@@ -4,8 +4,8 @@ import type { Side } from "lib/input-types"
 
 test("getPinSideIndex", () => {
   const chipDimensions = {
-    leftSideCount: 2,
-    rightSideCount: 2,
+    leftPinCount: 2,
+    rightPinCount: 2,
   }
 
   const results: Record<
@@ -24,22 +24,22 @@ test("getPinSideIndex", () => {
 
   expect(results).toMatchInlineSnapshot(`
     {
-      "getPinSideIndex(1, {\\"leftSideCount\\":2,\\"rightSideCount\\":2})": {
+      "getPinSideIndex(1, {\\"leftPinCount\\":2,\\"rightPinCount\\":2})": {
         "indexFromTop": 0,
         "indexOnSide": 0,
         "side": "left",
       },
-      "getPinSideIndex(2, {\\"leftSideCount\\":2,\\"rightSideCount\\":2})": {
+      "getPinSideIndex(2, {\\"leftPinCount\\":2,\\"rightPinCount\\":2})": {
         "indexFromTop": 1,
         "indexOnSide": 1,
         "side": "left",
       },
-      "getPinSideIndex(3, {\\"leftSideCount\\":2,\\"rightSideCount\\":2})": {
+      "getPinSideIndex(3, {\\"leftPinCount\\":2,\\"rightPinCount\\":2})": {
         "indexFromTop": 1,
         "indexOnSide": 0,
         "side": "right",
       },
-      "getPinSideIndex(4, {\\"leftSideCount\\":2,\\"rightSideCount\\":2})": {
+      "getPinSideIndex(4, {\\"leftPinCount\\":2,\\"rightPinCount\\":2})": {
         "indexFromTop": 0,
         "indexOnSide": 1,
         "side": "right",
