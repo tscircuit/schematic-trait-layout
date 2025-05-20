@@ -2,6 +2,7 @@ import type { CircuitJson } from "circuit-json"
 import type { CircuitBuilder } from "lib/builder"
 import type { InputNetlist } from "lib/input-types"
 import { cju } from "@tscircuit/circuit-json-util"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 /**
  * Re-position/rotate schematic components in the circuit json to match the
  * layout of the circuit builder.
@@ -17,24 +18,40 @@ export const applyCircuitLayoutToCircuitJson = (
   // 2. Filter all schematic_traces (they won't properly connect after the moving)
   cj = cj.filter((c) => c.type !== "schematic_trace")
 
-  // 3. Match up chips in the layout with the circuit json based on the netlist,
-  // keeping in mind that the
-  const cjComponentIdToLayoutChipId = new Map<string, string>()
   const layoutNetlist = layout.getNetlist()
+  const layoutNorm = normalizeNetlist(layoutNetlist)
+  const cjNorm = normalizeNetlist(circuitJsonNetlist)
 
-  // 4. Set schematic_component.center to the layout's chip coordinates
-  for (const schematicComponent of cju(cj).schematic_component.list()) {
-    // TODO
-    // schematicComponent.center = ...
+  const layoutBoxIndexToBoxId = new Map<number, string>()
+  for (const [boxId, boxIndex] of Object.entries(
+    layoutNorm.transform.boxIdToBoxIndex,
+  )) {
+    layoutBoxIndexToBoxId.set(boxIndex, boxId)
   }
 
-  // 5. Move the schematic_port to the new locations
+  for (const schematicComponent of cju(cj).schematic_component.list()) {
+    const sourceComponent = cju(cj).source_component.get(
+      schematicComponent.source_component_id,
+    )!
+    // Find the schematic box index
+    const boxIndex = cjNorm.transform.boxIdToBoxIndex[sourceComponent.name]!
 
-  // 6. Change schematic_component.symbol_name for passives to match the
-  // correct orientation. e.g. "boxresistor_down" -> "boxresistor_right"
-  // The direction "up", "down", "left", "right" can be determined by the
-  // relative position of pin1 and pin2, if pin1 is above pin2 the direction is
-  // "down", if pin1 is to the left of pin2 the direction is "right"
+    // Find the layout boxId
+    const layoutBoxId = layoutBoxIndexToBoxId.get(boxIndex)!
+
+    const layoutChip = layout.chips.find((c) => c.chipId === layoutBoxId)!
+
+    schematicComponent.center = {
+      x: layoutChip.x + layoutChip.getWidth() / 2,
+      y: layoutChip.y + layoutChip.getHeight() / 2,
+    }
+
+    // TODO Change schematic_component.symbol_name for passives to match the
+    // correct orientation. e.g. "boxresistor_down" -> "boxresistor_right"
+    // The direction "up", "down", "left", "right" can be determined by the
+    // relative position of pin1 and pin2, if pin1 is above pin2 the direction is
+    // "down", if pin1 is to the left of pin2 the direction is "right"
+  }
 
   return cj
 }

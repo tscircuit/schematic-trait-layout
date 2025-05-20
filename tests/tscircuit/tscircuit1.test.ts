@@ -162,5 +162,41 @@ export default () => (
     C,
   )
 
-  expect(cju(newCircuitJson).schematic_component.list()).toMatchInlineSnapshot()
+  expect(cju(newCircuitJson).schematic_component.list()).toMatchInlineSnapshot(`
+    [
+      {
+        "center": {
+          "x": -1.5,
+          "y": 2.5,
+        },
+        "pin_spacing": 0.2,
+        "pin_styles": undefined,
+        "port_arrangement": undefined,
+        "port_labels": {},
+        "rotation": 0,
+        "schematic_component_id": "schematic_component_0",
+        "size": {
+          "height": 0.6000000000000001,
+          "width": 0.4,
+        },
+        "source_component_id": "source_component_0",
+        "type": "schematic_component",
+      },
+      {
+        "center": {
+          "x": 2,
+          "y": 2,
+        },
+        "schematic_component_id": "schematic_component_1",
+        "size": {
+          "height": 0.468910699999999,
+          "width": 1.0583332999999997,
+        },
+        "source_component_id": "source_component_1",
+        "symbol_display_value": "1kΩ",
+        "symbol_name": "boxresistor_left",
+        "type": "schematic_component",
+      },
+    ]
+  `)
 })
