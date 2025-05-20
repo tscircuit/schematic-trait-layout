@@ -76,7 +76,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 2,
             },
             {
-              "netIndex": 0,
+              "netIndex": 2,
             },
           ],
         },
@@ -102,7 +102,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "netIndex": 2,
+              "netIndex": 0,
             },
           ],
         },
@@ -147,7 +147,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "netIndex": 0,
+              "netIndex": 3,
             },
           ],
         },
@@ -158,7 +158,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 2,
             },
             {
-              "netIndex": 1,
+              "netIndex": 2,
             },
           ],
         },
@@ -173,7 +173,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 2,
             },
             {
-              "netIndex": 2,
+              "netIndex": 0,
             },
           ],
         },
@@ -184,7 +184,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "netIndex": 3,
+              "netIndex": 1,
             },
           ],
         },

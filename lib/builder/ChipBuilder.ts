@@ -178,14 +178,9 @@ export class ChipBuilder {
 
     for (let pn = 1; pn <= this.totalPinCount; pn++) {
       const pb = this._getPin(pn)
-      const { side, indexFromTop, indexFromLeft } = getPinSideIndex(pn, this)
-      if (side === "left" || side === "right") {
-        pb.x = this.x + (side === "left" ? 0 : this.getWidth())
-        pb.y = this.y + this.getHeight() - 2 - indexFromTop!
-      } else {
-        pb.x = this.x + indexFromLeft!
-        pb.y = this.y + (side === "bottom" ? 0 : this.getHeight())
-      }
+      const pinLocation = this.getPinLocation(pn)
+      pb.x = pinLocation.x
+      pb.y = pinLocation.y
     }
     this.pinPositionsAreSet = true
   }
@@ -210,6 +205,31 @@ export class ChipBuilder {
     }
     // Find the pin by its 1-based ccwPinNumber by checking sides in order: Left, Bottom, Right, Top
     return this._getPin(pinNumber)
+  }
+
+  public getPinLocation(pinNumber: number): { x: number; y: number } {
+    const { side, indexFromTop, indexFromLeft } = getPinSideIndex(
+      pinNumber,
+      this,
+    )
+
+    if (this.isPassive) {
+      // For passive components as currently defined, pins 1 and 2 are at the component's origin.
+      return { x: this.x, y: this.y }
+    }
+
+    let pinX: number
+    let pinY: number
+
+    if (side === "left" || side === "right") {
+      pinX = this.x + (side === "left" ? 0 : this.getWidth())
+      pinY = this.y + this.getHeight() - 2 - indexFromTop!
+    } else {
+      // top or bottom
+      pinX = this.x + indexFromLeft!
+      pinY = this.y + (side === "bottom" ? 0 : this.getHeight())
+    }
+    return { x: pinX, y: pinY }
   }
 
   addMark(name: string, pinBuilder: PinBuilder): void {

@@ -67,10 +67,12 @@ export const applyCircuitLayoutToCircuitJson = (
 
     for (const schematicPort of schematicPorts) {
       const { pin_number } = schematicPort
-      const layoutPort = layoutChip.pin(pin_number!)
+      // Use getPinLocation to get the static position of the pin,
+      // as layoutChip.pin(pin_number!).x/y might have been modified by fluent calls.
+      const { x: layoutX, y: layoutY } = layoutChip.getPinLocation(pin_number!)
       schematicPort.center = {
-        x: layoutPort.x,
-        y: layoutPort.y,
+        x: layoutX,
+        y: layoutY,
       }
     }
 
