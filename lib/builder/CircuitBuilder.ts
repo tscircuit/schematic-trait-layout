@@ -19,6 +19,7 @@ export class CircuitBuilder {
   lines: Line[] = []
   connectionPoints: ConnectionPoint[] = []
   public defaultChipWidth = 4
+  public defaultPinSpacing = 0.2
   private autoLabelCounter = 1
   private _grid: any = null
 
@@ -71,10 +72,6 @@ export class CircuitBuilder {
     clone.connectionPoints = structuredClone(this.connectionPoints)
 
     return clone
-  }
-
-  bifurcateX(chipId: string): [CircuitBuilder, CircuitBuilder] {
-    return bifurcateXCircuit(this, chipId)
   }
 
   chip(): ChipBuilder {

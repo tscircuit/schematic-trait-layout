@@ -294,6 +294,7 @@ export default () => (
 
   const C = new CircuitBuilder()
   C.defaultChipWidth = 2
+  C.defaultPinSpacing = 0.2
   const U1 = C.chip().leftpins(2).rightpins(2)
 
   U1.pin(1).line(-1, 0).passive().line(-1, 0).line(0, -1).label()
