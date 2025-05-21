@@ -87,5 +87,35 @@ test("getPinSubsetNetlist1", () => {
       chipId: "chip0",
       pinNumber: 1,
     }),
-  ).toMatchInlineSnapshot()
+  ).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0.pin1",
+          "leftPinCount": 0,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+      ],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0.pin1",
+              "pinNumber": 1,
+            },
+            {
+              "netId": "L1",
+            },
+          ],
+        },
+      ],
+      "nets": [
+        {
+          "netId": "L1",
+        },
+      ],
+    }
+  `)
 })
