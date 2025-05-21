@@ -23,7 +23,7 @@ export class PinBuilder {
 
   constructor(
     private readonly chip: any, // TODO: Replace with proper ChipBuilder type
-    public readonly pinNumber: number,
+    public pinNumber: number,
   ) {}
 
   private get circuit(): CircuitBuilder {

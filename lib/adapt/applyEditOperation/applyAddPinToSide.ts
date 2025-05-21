@@ -35,7 +35,7 @@ export function applyAddPinToSide(C: CircuitBuilder, op: AddPinToSideOp): void {
   }
 
   /* ---------- 1. identify insertion position ---------- */
-  const afterPin = Math.min(...betweenPinNumbers)     // pin number we insert *after*
+  const afterPin = Math.min(...betweenPinNumbers) // pin number we insert *after*
   const sideArr =
     side === "left"
       ? chip.leftPins
@@ -45,8 +45,7 @@ export function applyAddPinToSide(C: CircuitBuilder, op: AddPinToSideOp): void {
           ? chip.topPins
           : chip.bottomPins
 
-  const insertIdx =
-    sideArr.findIndex((pb) => pb.pinNumber === afterPin) + 1
+  const insertIdx = sideArr.findIndex((pb) => pb.pinNumber === afterPin) + 1
   if (insertIdx === 0) return // could not locate gap – abort
 
   /* ---------- 2. enlarge side-count & insert new PinBuilder ---------- */
@@ -85,8 +84,8 @@ export function applyAddPinToSide(C: CircuitBuilder, op: AddPinToSideOp): void {
   const deltaByPin = new Map<number, { dx: number; dy: number }>() // key = NEW pin #
   for (let oldPn = 1; oldPn <= totalOldPins; ++oldPn) {
     const before = oldPos.get(oldPn)!
-    const newPn   = map.get(oldPn) ?? oldPn            // new number after renumbering
-    const after   = chip.getPinLocation(newPn)
+    const newPn = map.get(oldPn) ?? oldPn // new number after renumbering
+    const after = chip.getPinLocation(newPn)
     const dx = after.x - before.x
     const dy = after.y - before.y
     if (dx || dy) deltaByPin.set(newPn, { dx, dy })
@@ -94,13 +93,11 @@ export function applyAddPinToSide(C: CircuitBuilder, op: AddPinToSideOp): void {
 
   // 5. Helper to get shift for a ref
   const shiftForRef = (ref: any) =>
-    "boxId" in ref &&
-    ref.boxId === chipId &&
-    deltaByPin.has(ref.pinNumber)
+    "boxId" in ref && ref.boxId === chipId && deltaByPin.has(ref.pinNumber)
       ? deltaByPin.get(ref.pinNumber)!
       : null
 
-  // 6. Shift artefacts whose coordinates depend on the moved pins
+  // 6. Shift artifacts whose coordinates depend on the moved pins
 
   /* ---- shift whole line segments that touch a moved pin ---- */
   for (const l of C.lines) {
@@ -108,8 +105,8 @@ export function applyAddPinToSide(C: CircuitBuilder, op: AddPinToSideOp): void {
     if (d) {
       l.start.x += d.dx
       l.start.y += d.dy
-      l.end.x   += d.dx
-      l.end.y   += d.dy
+      l.end.x += d.dx
+      l.end.y += d.dy
     }
   }
 
