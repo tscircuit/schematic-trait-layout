@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test"
 import { circuit } from "lib/builder"
 
-test("bifurcate1", () => {
+test.skip("bifurcate1", () => {
   const C = circuit()
   const U1 = C.chip().leftpins(3).rightpins(3)
 

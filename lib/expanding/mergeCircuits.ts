@@ -95,6 +95,10 @@ export const mergeCircuits = ({
   const chip2 = circuit2.chips.find((c) => c.chipId === circuit2ChipId)!
   if (!chip1 || !chip2) throw new Error("Chip IDs not found")
 
+  /* ── Align coordinates of circuit2 so its merge-chip overlays chip1 ── */
+  const dx = chip1.x - chip2.x
+  const dy = chip1.y - chip2.y
+
   /* 2.  Memorise chip1 original side-counts                       */
   const chip1Orig = {
     left: chip1.leftPinCount,
@@ -153,8 +157,8 @@ export const mergeCircuits = ({
       const newIndex = targetArr.length // append beneath existing pins
       const newPinNumber = getPinNumberByCounts(side, newIndex, mergedCounts)
       const npb = new PinBuilder(chip1, newPinNumber)
-      npb.x = src.x
-      npb.y = src.y
+      npb.x = src.x + dx
+      npb.y = src.y + dy
       targetArr.push(npb)
     }
   }
@@ -168,8 +172,8 @@ export const mergeCircuits = ({
   for (const chip of circuit2.chips) {
     if (chip.chipId === circuit2ChipId) continue
     const nc = new ChipBuilder(merged, chip.chipId, chip.isPassive)
-    nc.x = chip.x
-    nc.y = chip.y
+    nc.x = chip.x + dx
+    nc.y = chip.y + dy
     nc.leftPinCount = chip.leftPinCount
     nc.bottomPinCount = chip.bottomPinCount
     nc.rightPinCount = chip.rightPinCount
@@ -222,8 +226,8 @@ export const mergeCircuits = ({
 
   for (const l of circuit2.lines) {
     const copy: Line = {
-      start: { ...l.start, ref: translateRef(l.start.ref) },
-      end: { ...l.end, ref: translateRef(l.end.ref) },
+      start: { ...l.start, x: l.start.x + dx, y: l.start.y + dy, ref: translateRef(l.start.ref) },
+      end:   { ...l.end,   x: l.end.x   + dx, y: l.end.y   + dy, ref: translateRef(l.end.ref)   },
     }
     merged.lines.push(copy)
   }
@@ -231,6 +235,8 @@ export const mergeCircuits = ({
   for (const p of circuit2.connectionPoints) {
     const copy: ConnectionPoint = {
       ...p,
+      x: p.x + dx,
+      y: p.y + dy,
       ref: translateRef(p.ref),
     }
     merged.connectionPoints.push(copy)
@@ -239,6 +245,8 @@ export const mergeCircuits = ({
   for (const nl of circuit2.netLabels) {
     const copy: NetLabel = {
       ...nl,
+      x: nl.x + dx,
+      y: nl.y + dy,
       fromRef: translateRef(nl.fromRef),
     }
     merged.netLabels.push(copy)

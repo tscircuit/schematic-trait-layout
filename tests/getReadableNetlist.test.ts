@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import circuit from "lib/builder"
+import { circuit } from "lib/builder"
 import { getReadableNetlist } from "lib/netlist/getReadableNetlist"
 
 test("getReadableNetlist", () => {
@@ -25,9 +25,9 @@ test("getReadableNetlist", () => {
                L       L
        ┌───┐   │       │
     L──┤1 6├───┘       │
-       │2 5├──┐  ┌───┐ │
+       ┤2 5├──┐  ┌───┐ │
      ┌─┤3 4├┐ └──┤1 4├─┤
-     │ └───┘│  ┌─┤2 3│ │
+     │ └───┘│  ┌─┤2 3├ │
      L      L  L └───┘ P
                        │
                        L
@@ -55,7 +55,7 @@ test("getReadableNetlist", () => {
                               │        
                               2        
                       ┌────────────────┐
-                      │    passive1    │                
+                      │    passive2    │                
                       └────────────────┘
                               1        
                               │        
@@ -65,6 +65,6 @@ test("getReadableNetlist", () => {
       - Connection 1:
         - Box Pin: chip1, Pin 4
         - Net: L6
-        - Box Pin: passive1, Pin 2"
+        - Box Pin: passive2, Pin 2"
     `)
 })

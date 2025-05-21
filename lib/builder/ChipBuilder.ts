@@ -92,7 +92,7 @@ export class ChipBuilder {
         side: "right",
         indexOnSide: i,
         ccwPinNumber,
-        offsetX: this.rightPinCount === 1 ? 1 : 4,
+        offsetX: this.rightPinCount === 1 ? 1 : this.getWidth(),
         offsetY: i + 1,
       })
       this.rightPins.push(pb)
@@ -146,14 +146,37 @@ export class ChipBuilder {
       return 1
     }
     // Temporary, eventually need to handle top and bottom pin counts
-    return 4
+    return this.circuit.defaultChipWidth
   }
 
   getHeight(): number {
     if (this.isPassive) {
       return 1
     }
-    return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
+    return (
+      Math.max(this.leftPinCount, this.rightPinCount) *
+        this.circuit.defaultPinSpacing +
+      this.circuit.defaultPinSpacing
+    )
+  }
+
+  getCenter(): { x: number; y: number } {
+    if (this.isPassive) {
+      return {
+        x: this.x,
+        y: this.y,
+      }
+    }
+    console.table({
+      x: this.x,
+      y: this.y,
+      width: this.getWidth(),
+      height: this.getHeight(),
+    })
+    return {
+      x: this.x + this.getWidth() / 2,
+      y: this.y + this.getHeight() / 2,
+    }
   }
 
   get totalPinCount(): number {
@@ -178,14 +201,9 @@ export class ChipBuilder {
 
     for (let pn = 1; pn <= this.totalPinCount; pn++) {
       const pb = this._getPin(pn)
-      const { side, indexFromTop, indexFromLeft } = getPinSideIndex(pn, this)
-      if (side === "left" || side === "right") {
-        pb.x = this.x + (side === "left" ? 0 : this.getWidth())
-        pb.y = this.y + this.getHeight() - 2 - indexFromTop!
-      } else {
-        pb.x = this.x + indexFromLeft!
-        pb.y = this.y + (side === "bottom" ? 0 : this.getHeight())
-      }
+      const pinLocation = this.getPinLocation(pn)
+      pb.x = pinLocation.x
+      pb.y = pinLocation.y
     }
     this.pinPositionsAreSet = true
   }
@@ -210,6 +228,34 @@ export class ChipBuilder {
     }
     // Find the pin by its 1-based ccwPinNumber by checking sides in order: Left, Bottom, Right, Top
     return this._getPin(pinNumber)
+  }
+
+  public getPinLocation(pinNumber: number): { x: number; y: number } {
+    const { side, indexFromTop, indexFromLeft } = getPinSideIndex(
+      pinNumber,
+      this,
+    )
+
+    if (this.isPassive) {
+      const dx = (this.leftPinCount > 0 ? 0.5 : 0) * (pinNumber === 1 ? 1 : -1)
+      const dy =
+        (this.bottomPinCount > 0 ? 0.5 : 0) * (pinNumber === 2 ? 1 : -1)
+      return { x: this.x + dx, y: this.y + dy }
+    }
+
+    let pinX: number
+    let pinY: number
+    const spacing = this.circuit.defaultPinSpacing
+
+    if (side === "left" || side === "right") {
+      pinX = this.x + (side === "left" ? 0 : this.getWidth())
+      pinY = this.y + this.getHeight() - spacing - indexFromTop! * spacing
+    } else {
+      // top or bottom
+      pinX = this.x + indexFromLeft! * spacing
+      pinY = this.y + (side === "bottom" ? 0 : this.getHeight())
+    }
+    return { x: pinX, y: pinY }
   }
 
   addMark(name: string, pinBuilder: PinBuilder): void {

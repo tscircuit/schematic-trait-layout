@@ -35,7 +35,7 @@ export const getPinSideIndex = (
 } => {
   let currentSideIndex = 0
   let currentIndexOnSide = 0
-  for (let i = 0; i < pinNumber; ) {
+  for (let i = 0; i < pinNumber && currentSideIndex < 4; ) {
     const currentSide = SIDES_CCW[currentSideIndex]
     const currentSideDimensions =
       chipDimensions[`${currentSide}PinCount` as keyof typeof chipDimensions]

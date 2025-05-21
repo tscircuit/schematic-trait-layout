@@ -26,20 +26,18 @@ export class PinBuilder {
   ) {}
 
   private get circuit(): CircuitBuilder {
-    // TODO: Replace with proper CircuitBuilder type
-    // biome-ignore lint/complexity/useLiteralKeys: Accessing private member
     return this.chip["circuit"]
   }
 
   line(dx: number, dy: number): this {
     const start = { x: this.x, y: this.y, ref: this.ref }
-    this.x += dx
-    this.y += dy
+    this.x += dx * this.circuit.defaultLineDistanceMultiple
+    this.y += dy * this.circuit.defaultLineDistanceMultiple
     const end = { x: this.x, y: this.y, ref: this.ref }
     const line = { start, end }
     this.circuit.lines.push(line)
-    this.lastDx = dx
-    this.lastDy = dy
+    this.lastDx = dx * this.circuit.defaultLineDistanceMultiple
+    this.lastDy = dy * this.circuit.defaultLineDistanceMultiple
     this.lastCreatedLine = line
     return this
   }
@@ -73,6 +71,13 @@ export class PinBuilder {
 
     this.lastCreatedLine!.end.ref = entryPin.ref
 
+    // Push the end position of the lastCreatedLine back 1 unit
+    this.lastCreatedLine!.end.x -= Math.sign(this.lastDx) / 2
+    this.lastCreatedLine!.end.y -= Math.sign(this.lastDy) / 2
+
+    exitPin.x += Math.sign(this.lastDx) / 2
+    exitPin.y += Math.sign(this.lastDy) / 2
+
     return exitPin
   }
 
@@ -82,6 +87,14 @@ export class PinBuilder {
       labelId: id,
       x: this.x,
       y: this.y,
+      anchorSide:
+        this.lastDx > 0
+          ? "left"
+          : this.lastDx < 0
+            ? "right"
+            : this.lastDy > 0
+              ? "bottom"
+              : "top",
       fromRef: this.ref,
     })
     // Optionally, overlay label on grid if available

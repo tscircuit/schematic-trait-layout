@@ -20,6 +20,7 @@ export interface NetLabel {
   labelId: string
   x: number
   y: number
+  anchorSide: Side
   fromRef: PortReference
 }
 
