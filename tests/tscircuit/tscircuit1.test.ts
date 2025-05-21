@@ -303,9 +303,10 @@ export default () => (
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
       ┌───┐
-    ┌P┤1 4├
-    L ┤2 L├
-      └───┘
+      ┤1 4├
+      ┤2 3├
+    ┌P└──L┘
+    L
     "
   `)
 
@@ -320,7 +321,7 @@ export default () => (
       {
         "center": {
           "x": 1,
-          "y": 1.5,
+          "y": 0.30000000000000004,
         },
         "pin_spacing": 0.2,
         "pin_styles": undefined,
@@ -329,7 +330,7 @@ export default () => (
         "rotation": 0,
         "schematic_component_id": "schematic_component_0",
         "size": {
-          "height": 2,
+          "height": 0.6000000000000001,
           "width": 1.2,
         },
         "source_component_id": "source_component_0",
@@ -337,8 +338,8 @@ export default () => (
       },
       {
         "center": {
-          "x": -0.5,
-          "y": 2,
+          "x": -1,
+          "y": 0.4000000000000001,
         },
         "schematic_component_id": "schematic_component_1",
         "size": {

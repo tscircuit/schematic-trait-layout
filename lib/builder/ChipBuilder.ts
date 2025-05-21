@@ -153,7 +153,30 @@ export class ChipBuilder {
     if (this.isPassive) {
       return 1
     }
-    return Math.max(this.leftPinCount, this.rightPinCount, 1) + 2
+    return (
+      Math.max(this.leftPinCount, this.rightPinCount) *
+        this.circuit.defaultPinSpacing +
+      this.circuit.defaultPinSpacing
+    )
+  }
+
+  getCenter(): { x: number; y: number } {
+    if (this.isPassive) {
+      return {
+        x: this.x,
+        y: this.y,
+      }
+    }
+    console.table({
+      x: this.x,
+      y: this.y,
+      width: this.getWidth(),
+      height: this.getHeight(),
+    })
+    return {
+      x: this.x + this.getWidth() / 2,
+      y: this.y + this.getHeight() / 2,
+    }
   }
 
   get totalPinCount(): number {
@@ -222,13 +245,14 @@ export class ChipBuilder {
 
     let pinX: number
     let pinY: number
+    const spacing = this.circuit.defaultPinSpacing
 
     if (side === "left" || side === "right") {
       pinX = this.x + (side === "left" ? 0 : this.getWidth())
-      pinY = this.y + this.getHeight() - 2 - indexFromTop!
+      pinY = this.y + this.getHeight() - spacing - indexFromTop! * spacing
     } else {
       // top or bottom
-      pinX = this.x + indexFromLeft!
+      pinX = this.x + indexFromLeft! * spacing
       pinY = this.y + (side === "bottom" ? 0 : this.getHeight())
     }
     return { x: pinX, y: pinY }

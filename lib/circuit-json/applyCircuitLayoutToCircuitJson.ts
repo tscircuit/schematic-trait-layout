@@ -53,17 +53,14 @@ export const applyCircuitLayoutToCircuitJson = (
     const layoutChip = layout.chips.find((c) => c.chipId === layoutBoxId)!
 
     let cjChipWidth = layoutChip.getWidth() - 0.8
-    let cjChipHeight = layoutChip.getHeight() - 2
+    let cjChipHeight = layoutChip.getHeight()
 
     if (layoutChip.isPassive) {
       cjChipWidth = 1
       cjChipHeight = 1
     }
 
-    schematicComponent.center = {
-      x: layoutChip.x + layoutChip.getWidth() / 2,
-      y: layoutChip.y + layoutChip.getHeight() / 2 - 0.5,
-    }
+    schematicComponent.center = layoutChip.getCenter()
     schematicComponent.size = {
       width: cjChipWidth,
       height: cjChipHeight,
