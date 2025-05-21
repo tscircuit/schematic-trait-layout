@@ -1,6 +1,7 @@
-import type { PortReference } from "../input-types"
+import type { PortReference, Side } from "../input-types"
 import type { Line } from "./circuit-types"
 import type { CircuitBuilder } from "./CircuitBuilder"
+import { getPinSideIndex } from "./getPinSideIndex"
 
 export interface PinConnectionState {
   x: number
@@ -40,6 +41,11 @@ export class PinBuilder {
     this.lastDy = dy * this.circuit.defaultLineDistanceMultiple
     this.lastCreatedLine = line
     return this
+  }
+
+  get side(): Side {
+    const { side } = getPinSideIndex(this.pinNumber, this.chip)
+    return side
   }
 
   get ref(): PortReference {

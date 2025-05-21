@@ -23,9 +23,23 @@ test("applyEditOperation1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-    ┌───┐
-    ┤1 2├
-    └───┘
+     ┌───┐
+    L┤1 2├
+     └───┘
+    "
+  `)
+
+  applyEditOperation(C, {
+    type: "add_label_to_pin",
+    chipId: U1.chipId,
+    pinNumber: 2,
+  })
+
+  expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
+    "
+     ┌───┐
+    L┤1 2├L
+     └───┘
     "
   `)
 })
