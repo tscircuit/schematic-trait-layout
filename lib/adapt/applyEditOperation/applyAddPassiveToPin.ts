@@ -6,5 +6,9 @@ export function applyAddPassiveToPin(
   op: AddPassiveToPinOp,
 ): void {
   const { chipId, pinNumber } = op
-  // TODO
+  const chip = C.chips.find((ch) => ch.chipId === chipId)
+  if (!chip) return
+  // Ensure the pin exists & already has at least one segment to attach
+  const pin = chip.pin(pinNumber)
+  pin.passive()
 }
