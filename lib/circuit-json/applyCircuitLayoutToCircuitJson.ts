@@ -101,11 +101,6 @@ export const applyCircuitLayoutToCircuitJson = (
     netIndexToCompositeNetId.set(netIndex, netId)
   }
 
-  console.log({
-    "layoutNorm.transform": layoutNorm.transform,
-    "cjNorm.transform": cjNorm.transform,
-  })
-
   // Filter all existing schematic_net_label items
   cj = cj.filter((elm) => elm.type !== "schematic_net_label")
 

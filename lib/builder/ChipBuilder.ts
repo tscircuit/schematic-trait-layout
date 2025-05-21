@@ -214,8 +214,10 @@ export class ChipBuilder {
     )
 
     if (this.isPassive) {
-      // For passive components as currently defined, pins 1 and 2 are at the component's origin.
-      return { x: this.x, y: this.y }
+      const dx = (this.leftPinCount > 0 ? 0.5 : 0) * (pinNumber === 1 ? 1 : -1)
+      const dy =
+        (this.bottomPinCount > 0 ? 0.5 : 0) * (pinNumber === 2 ? 1 : -1)
+      return { x: this.x + dx, y: this.y + dy }
     }
 
     let pinX: number

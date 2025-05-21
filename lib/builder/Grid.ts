@@ -49,13 +49,13 @@ export class Grid {
   overlay = new Map<string, string>() // key "x,y" → literal char
 
   addEdge(x: number, y: number, edge: Edge): void {
-    const key = `${x},${y}`
+    const key = `${Math.round(x)},${Math.round(y)}`
     const maskValue = EDGE_MASKS[edge]
     this.traces.set(key, (this.traces.get(key) ?? 0) | maskValue)
   }
 
   putOverlay(x: number, y: number, ch: string): void {
-    this.overlay.set(`${x},${y}`, ch)
+    this.overlay.set(`${Math.round(x)},${Math.round(y)}`, ch)
   }
 
   *coords(): IterableIterator<[number, number]> {

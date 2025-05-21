@@ -73,6 +73,13 @@ export class PinBuilder {
 
     this.lastCreatedLine!.end.ref = entryPin.ref
 
+    // Push the end position of the lastCreatedLine back 1 unit
+    this.lastCreatedLine!.end.x -= Math.sign(this.lastDx) / 2
+    this.lastCreatedLine!.end.y -= Math.sign(this.lastDy) / 2
+
+    exitPin.x += Math.sign(this.lastDx) / 2
+    exitPin.y += Math.sign(this.lastDy) / 2
+
     return exitPin
   }
 
