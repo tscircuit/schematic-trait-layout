@@ -52,6 +52,7 @@ export const buildEncounterMapFromNetlist = (
   /* ---------- DFS ---------- */
   const searchIter: Record<string, number> = { [rootBoxId]: 0 }
   const visitedBoxes = new Set<string>([rootBoxId])
+  const visitedNets = new Set<string>() // Keep track of visited nets
   const processedPinKeys = new Set<string>() // avoid re‑processing a pin
   let iter = 1
 
@@ -76,12 +77,27 @@ export const buildEncounterMapFromNetlist = (
     processedPinKeys.add(pinKey)
 
     const neighbouringBoxes: [string, number][] = [] // [boxId, theirPin]
+    const encounteredNetsThisPin = new Set<string>()
+
     const pinConns = connsByPin.get(pinKey) ?? []
     for (const conn of pinConns) {
       for (const p of conn.connectedPorts) {
-        if ("boxId" in p && p.boxId !== boxId) {
-          neighbouringBoxes.push([p.boxId, p.pinNumber])
+        if ("boxId" in p) {
+          if (p.boxId !== boxId) {
+            neighbouringBoxes.push([p.boxId, p.pinNumber])
+          }
+        } else if ("netId" in p) {
+          encounteredNetsThisPin.add(p.netId)
         }
+      }
+    }
+
+    // Process newly encountered nets, sorted alphabetically for determinism
+    const sortedNewNets = Array.from(encounteredNetsThisPin).sort()
+    for (const netId of sortedNewNets) {
+      if (!visitedNets.has(netId)) {
+        searchIter[netId] = iter++
+        visitedNets.add(netId)
       }
     }
 

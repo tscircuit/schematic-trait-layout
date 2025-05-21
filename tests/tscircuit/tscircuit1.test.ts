@@ -394,7 +394,6 @@ export default () => (
       },
     }
   `)
-  return
 
   expect(normalizeNetlist(C("cj").getNetlist())).toMatchInlineSnapshot(`
     {
