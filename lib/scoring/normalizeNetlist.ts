@@ -18,30 +18,30 @@ const computeSearchIters = (netlist: InputNetlist): Record<string, number> => {
   /* ---------- helpers ---------- */
   const pinsOfBox = (boxId: string): number[] => {
     const pins = new Set<number>()
-    netlist.connections.forEach((c) => {
-      c.connectedPorts.forEach((p) => {
+    for (const c of netlist.connections) {
+      for (const p of c.connectedPorts) {
         if ("boxId" in p && p.boxId === boxId) pins.add(p.pinNumber)
-      })
-    })
+      }
+    }
     return Array.from(pins).sort((a, b) => a - b) // CCW ⇒ ascending
   }
 
   // Pre‑index every pin → the connection(s) it appears in for O(1) access
   const connsByPin = new Map<string, typeof netlist.connections>()
-  netlist.connections.forEach((conn) => {
-    conn.connectedPorts.forEach((p) => {
+  for (const conn of netlist.connections) {
+    for (const p of conn.connectedPorts) {
       if ("boxId" in p) {
         const key = `${p.boxId}|${p.pinNumber}`
         if (!connsByPin.has(key)) connsByPin.set(key, [])
         connsByPin.get(key)!.push(conn)
       }
-    })
-  })
+    }
+  }
 
   /* ---------- pick the root ---------- */
   let rootBoxId = ""
   let maxPinCount = -1
-  netlist.boxes.forEach((b) => {
+  for (const b of netlist.boxes) {
     const count =
       (b.leftPinCount ?? 0) +
       (b.rightPinCount ?? 0) +
@@ -51,7 +51,7 @@ const computeSearchIters = (netlist: InputNetlist): Record<string, number> => {
       rootBoxId = b.boxId
       maxPinCount = count
     }
-  })
+  }
 
   /* ---------- DFS ---------- */
   const searchIter: Record<string, number> = { [rootBoxId]: 0 }
@@ -62,10 +62,13 @@ const computeSearchIters = (netlist: InputNetlist): Record<string, number> => {
   // Stack of candidate pins (LIFO). Push pins for a box **once** when we first visit it.
   const stack: { boxId: string; pinNumber: number }[] = []
   const pushPinsOf = (boxId: string) => {
-    pinsOfBox(boxId)
+    const pins = pinsOfBox(boxId)
       .slice() // clone
       .reverse() // so smallest pin pops first
-      .forEach((pin) => stack.push({ boxId, pinNumber: pin }))
+
+    for (const pin of pins) {
+      stack.push({ boxId, pinNumber: pin })
+    }
   }
 
   pushPinsOf(rootBoxId)
@@ -77,34 +80,33 @@ const computeSearchIters = (netlist: InputNetlist): Record<string, number> => {
     processedPinKeys.add(pinKey)
 
     const neighbouringBoxes: [string, number][] = [] // [boxId, theirPin]
-
     const pinConns = connsByPin.get(pinKey) ?? []
-    pinConns.forEach((conn) => {
-      conn.connectedPorts.forEach((p) => {
+    for (const conn of pinConns) {
+      for (const p of conn.connectedPorts) {
         if ("boxId" in p && p.boxId !== boxId) {
           neighbouringBoxes.push([p.boxId, p.pinNumber])
         }
-      })
-    })
+      }
+    }
 
     // Keep smallest pin per neighbour, then order by that pin
     const smallestPin: Record<string, number> = {}
-    neighbouringBoxes.forEach(([nbrId, nbrPin]) => {
+    for (const [nbrId, nbrPin] of neighbouringBoxes) {
       smallestPin[nbrId] =
         smallestPin[nbrId] === undefined
           ? nbrPin
           : Math.min(smallestPin[nbrId], nbrPin)
-    })
+    }
 
-    Object.entries(smallestPin)
-      .sort((a, b) => a[1] - b[1])
-      .forEach(([nbrId]) => {
-        if (!visitedBoxes.has(nbrId)) {
-          searchIter[nbrId] = iter++
-          visitedBoxes.add(nbrId)
-          pushPinsOf(nbrId) // **only once per new box**
-        }
-      })
+    for (const [nbrId] of Object.entries(smallestPin).sort(
+      (a, b) => a[1] - b[1],
+    )) {
+      if (!visitedBoxes.has(nbrId)) {
+        searchIter[nbrId] = iter++
+        visitedBoxes.add(nbrId)
+        pushPinsOf(nbrId) // **only once per new box**
+      }
+    }
   }
 
   return searchIter
@@ -135,9 +137,10 @@ export const normalizeNetlist = (
       const bi = iterMap[b] ?? Number.MAX_SAFE_INTEGER
       return ai !== bi ? ai - bi : a.localeCompare(b)
     })
-
   // ───────── populate transforms ─────────
-  finalSortedBoxIds.forEach((id, idx) => (transform.boxIdToBoxIndex[id] = idx))
+  finalSortedBoxIds.forEach((id, idx) => {
+    transform.boxIdToBoxIndex[id] = idx
+  })
 
   const normalizedBoxes: NormalizedNetlist["boxes"] = finalSortedBoxIds.map(
     (id) => {

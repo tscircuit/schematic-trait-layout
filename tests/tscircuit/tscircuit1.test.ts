@@ -6,6 +6,7 @@ import { getReadableNetlist } from "lib/netlist/getReadableNetlist"
 import { CircuitBuilder } from "lib/builder"
 import { applyCircuitLayoutToCircuitJson } from "lib/circuit-json/applyCircuitLayoutToCircuitJson"
 import { convertCircuitJsonToSchematicSvg } from "circuit-to-svg"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 
 test("tscircuit1", async () => {
   const circuitJson: any[] = await runTscircuitCode(`
@@ -293,28 +294,188 @@ export default () => (
       (none)"
   `)
 
-  const C = new CircuitBuilder()
-  C.defaultChipWidth = 2
-  C.defaultPinSpacing = 0.2
-  const U1 = C.chip().leftpins(2).rightpins(2)
+  const C = (mode?: "cj" | "ascii") => {
+    const C = new CircuitBuilder()
+    if (mode === "cj") {
+      C.defaultChipWidth = 2
+      C.defaultPinSpacing = 0.2
+    }
+    const U1 = C.chip().leftpins(2).rightpins(2)
 
-  U1.pin(1).line(-1, 0).passive().line(-1, 0).line(0, -1).label()
-  U1.pin(3).line(1, 0).label()
+    U1.pin(1).line(-1, 0).passive().line(-1, 0).line(0, -1).label()
+    U1.pin(3).line(1, 0).label()
+    return C
+  }
 
-  expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
+  expect(`\n${C("ascii").toString()}\n`).toMatchInlineSnapshot(`
     "
       ┌───┐
-      ┤1 4├
-      ┤2 3├
-    ┌P└──L┘
-    L
+    ┌P┤1 4├
+    L ┤2 3├L
+      └───┘
     "
+  `)
+
+  expect(normalizeNetlist(C("cj").getNetlist())).toMatchInlineSnapshot(`
+    {
+      "normalizedNetlist": {
+        "boxes": [
+          {
+            "bottomPinCount": 0,
+            "boxIndex": 0,
+            "leftPinCount": 2,
+            "rightPinCount": 2,
+            "topPinCount": 0,
+          },
+          {
+            "bottomPinCount": 0,
+            "boxIndex": 1,
+            "leftPinCount": 1,
+            "rightPinCount": 1,
+            "topPinCount": 0,
+          },
+        ],
+        "connections": [
+          {
+            "connectedPorts": [
+              {
+                "boxIndex": 0,
+                "pinNumber": 1,
+              },
+              {
+                "boxIndex": 1,
+                "pinNumber": 1,
+              },
+            ],
+          },
+          {
+            "connectedPorts": [
+              {
+                "boxIndex": 0,
+                "pinNumber": 3,
+              },
+              {
+                "netIndex": 1,
+              },
+            ],
+          },
+          {
+            "connectedPorts": [
+              {
+                "boxIndex": 1,
+                "pinNumber": 2,
+              },
+              {
+                "netIndex": 0,
+              },
+            ],
+          },
+        ],
+        "nets": [
+          {
+            "netIndex": 0,
+          },
+          {
+            "netIndex": 1,
+          },
+        ],
+      },
+      "transform": {
+        "boxIdToBoxIndex": {
+          "chip0": 0,
+          "passive1": 1,
+        },
+        "netIdToNetIndex": {
+          "L1": 0,
+          "L2": 1,
+        },
+      },
+    }
+  `)
+
+  expect(
+    normalizeNetlist(convertCircuitJsonToInputNetlist(circuitJson)),
+  ).toMatchInlineSnapshot(`
+    {
+      "normalizedNetlist": {
+        "boxes": [
+          {
+            "bottomPinCount": 0,
+            "boxIndex": 0,
+            "leftPinCount": 2,
+            "rightPinCount": 2,
+            "topPinCount": 0,
+          },
+          {
+            "bottomPinCount": 0,
+            "boxIndex": 1,
+            "leftPinCount": 1,
+            "rightPinCount": 1,
+            "topPinCount": 0,
+          },
+        ],
+        "connections": [
+          {
+            "connectedPorts": [
+              {
+                "boxIndex": 0,
+                "pinNumber": 1,
+              },
+              {
+                "boxIndex": 1,
+                "pinNumber": 1,
+              },
+            ],
+          },
+          {
+            "connectedPorts": [
+              {
+                "boxIndex": 0,
+                "pinNumber": 3,
+              },
+              {
+                "netIndex": 0,
+              },
+            ],
+          },
+          {
+            "connectedPorts": [
+              {
+                "boxIndex": 1,
+                "pinNumber": 2,
+              },
+              {
+                "netIndex": 1,
+              },
+            ],
+          },
+        ],
+        "nets": [
+          {
+            "netIndex": 0,
+          },
+          {
+            "netIndex": 1,
+          },
+        ],
+      },
+      "transform": {
+        "boxIdToBoxIndex": {
+          "R1": 1,
+          "U1": 0,
+        },
+        "netIdToNetIndex": {
+          "GND1,U1.3": 0,
+          "GND2,R1.2": 1,
+        },
+      },
+    }
   `)
 
   const newCircuitJson = applyCircuitLayoutToCircuitJson(
     circuitJson,
     convertCircuitJsonToInputNetlist(circuitJson),
-    C,
+    C("cj"),
   )
 
   expect(cju(newCircuitJson).schematic_component.list()).toMatchInlineSnapshot(`
