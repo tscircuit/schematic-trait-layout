@@ -118,4 +118,144 @@ test("getPinSubsetNetlist1", () => {
       ],
     }
   `)
+
+  expect(
+    getPinSubsetNetlist({
+      netlist: C.getNetlist(),
+      chipId: "chip0",
+      pinNumber: 2,
+    }),
+  ).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0.pin2",
+          "leftPinCount": 0,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+        {
+          "bottomPinCount": 0,
+          "boxId": "passive1",
+          "leftPinCount": 1,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+      ],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0.pin2",
+              "pinNumber": 1,
+            },
+            {
+              "boxId": "passive1",
+              "pinNumber": 1,
+            },
+          ],
+        },
+      ],
+      "nets": [],
+    }
+  `)
+
+  expect(
+    getPinSubsetNetlist({
+      netlist: C.getNetlist(),
+      chipId: "chip0",
+      pinNumber: 3,
+    }),
+  ).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0.pin3",
+          "leftPinCount": 0,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+        {
+          "bottomPinCount": 0,
+          "boxId": "passive2",
+          "leftPinCount": 1,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+      ],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0.pin3",
+              "pinNumber": 1,
+            },
+            {
+              "netId": "L4",
+            },
+            {
+              "boxId": "passive2",
+              "pinNumber": 1,
+            },
+          ],
+        },
+      ],
+      "nets": [
+        {
+          "netId": "L4",
+        },
+      ],
+    }
+  `)
+
+  expect(
+    getPinSubsetNetlist({
+      netlist: C.getNetlist(),
+      chipId: "chip0",
+      pinNumber: 4,
+    }),
+  ).toMatchInlineSnapshot(`
+    {
+      "boxes": [
+        {
+          "bottomPinCount": 0,
+          "boxId": "chip0.pin4",
+          "leftPinCount": 0,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+        {
+          "bottomPinCount": 0,
+          "boxId": "passive2",
+          "leftPinCount": 1,
+          "rightPinCount": 1,
+          "topPinCount": 0,
+        },
+      ],
+      "connections": [
+        {
+          "connectedPorts": [
+            {
+              "boxId": "chip0.pin4",
+              "pinNumber": 1,
+            },
+            {
+              "boxId": "passive2",
+              "pinNumber": 2,
+            },
+            {
+              "netId": "L3",
+            },
+          ],
+        },
+      ],
+      "nets": [
+        {
+          "netId": "L3",
+        },
+      ],
+    }
+  `)
 })
