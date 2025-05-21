@@ -21,16 +21,16 @@ export default () => (
         pin1: "EN1",
         pin2: "EN2",
         pin5: "DGND",
-        pin6: "D1",
-        pin7: "D0",
+        pin6: "D0",
+        pin7: "D1",
         pin8: "VCC"
       }}
       connections={{
-        pin1: sel.R1.pin1,
-        pin5: sel.net.GND,
-        pin6: sel.net.D0,
-        pin7: [sel.R3.pin1, sel.net.D1],
-        pin8: sel.net.VCC,
+        EN1: sel.R1.pin1,
+        DGND: sel.net.GND,
+        D0: sel.net.D0,
+        D1: [sel.R3.pin1, sel.net.D1],
+        VCC: sel.net.VCC,
       }}
     />
     <resistor
@@ -114,33 +114,42 @@ export default () => (
       (none)"
   `)
 
-  const C = new CircuitBuilder()
-  C.defaultChipWidth = 2
-  C.defaultPinSpacing = 0.2
-  C.defaultLineDistanceMultiple = 0.4
-  const U1 = C.chip().leftpins(4).rightpins(4)
+  const C = (mode: "ascii" | "cj") => {
+    const C = new CircuitBuilder()
+    if (mode === "cj") {
+      C.defaultChipWidth = 2
+      C.defaultPinSpacing = 0.2
+      C.defaultLineDistanceMultiple = 0.4
+    }
+    const U1 = C.chip().leftpins(4).rightpins(4)
 
-  U1.pin(1).line(-3, 0).passive().line(-1, 0).line(0, -1).label()
-  U1.pin(2).line(-1, 0).line(0, 3).passive().line(0, 1).label()
-  // U1.pin(3).line(-1, 0).line(0, -1).connect()
-  // U1.pin(4).line(-1, 0).line(0, -1).label()
-  U1.pin(8).line(1, 0).line(0, 3).line(1, 0).intersect()
-  U1.pin(7).line(2, 0).line(0, 2).passive().line(0, 1).label()
-  U1.pin(6).line(1, 0).label()
-  U1.pin(5).line(1, 0).line(0, -1).label()
+    U1.pin(1).line(-3, 0).passive().line(-1, 0).line(0, -1).label()
+    U1.pin(2).line(-1, 0).line(0, 3).passive().line(0, 1).label()
+    // U1.pin(3).line(-1, 0).line(0, -1).connect()
+    // U1.pin(4).line(-1, 0).line(0, -1).label()
+    U1.pin(8).line(1, 0).line(0, 3).line(1, 0).intersect()
+    U1.pin(7).line(2, 0).mark("m1").line(0, 2).passive().line(0, 1).label()
+    U1.fromMark("m1").line(1, 0).label()
+    U1.pin(6).line(1, 0).label()
+    U1.pin(5).line(1, 0).line(0, -1).label()
+    return C
+  }
 
-  expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
+  expect(`\n${C("ascii").toString()}\n`).toMatchInlineSnapshot(`
     "
-      ┌───┐
-      ┤1 8├
-      L2 7├
-      P3 ●├
-    ┬P┤4 P├
-    L └─L─┘
+       L
+       │     ┌●
+       P     ││
+       │┌───┐│P
+    ┌P─┼┤1 8├┘│
+    L  └┤2 7├─┴L
+        ┤3 6├L
+        ┤4 5├┐
+        └───┘L
     "
   `)
 
-  expect(normalizeNetlist(C.getNetlist())).toMatchInlineSnapshot(`
+  expect(normalizeNetlist(C("cj").getNetlist())).toMatchInlineSnapshot(`
     {
       "normalizedNetlist": {
         "boxes": [
@@ -230,6 +239,9 @@ export default () => (
                 "boxIndex": 3,
                 "pinNumber": 2,
               },
+              {
+                "netIndex": 4,
+              },
             ],
           },
           {
@@ -243,7 +255,7 @@ export default () => (
                 "pinNumber": 1,
               },
               {
-                "netIndex": 4,
+                "netIndex": 5,
               },
             ],
           },
@@ -286,6 +298,9 @@ export default () => (
           {
             "netIndex": 4,
           },
+          {
+            "netIndex": 5,
+          },
         ],
       },
       "transform": {
@@ -298,9 +313,10 @@ export default () => (
         "netIdToNetIndex": {
           "L1": 0,
           "L2": 1,
-          "L3": 4,
-          "L4": 3,
-          "L5": 2,
+          "L3": 5,
+          "L4": 4,
+          "L5": 3,
+          "L6": 2,
         },
       },
     }
@@ -503,7 +519,7 @@ export default () => (
   const newCircuitJson = applyCircuitLayoutToCircuitJson(
     circuitJson,
     convertCircuitJsonToInputNetlist(circuitJson),
-    C,
+    C("cj"),
   )
 
   expect(
