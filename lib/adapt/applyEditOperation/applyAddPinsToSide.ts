@@ -83,12 +83,16 @@ export function applyAddPinsToSide(
           ? chip.topPins
           : chip.bottomPins
 
+  const newPins = new Set<PinBuilder>() // <-- NEW
+
   for (let i = 0; i < delta; ++i) {
     const idx = oldPinCount + i
     const pn = getPinNumber(side, idx, countsAfter)
-    const pb =
+    const pbCtor =
       (chip as any).constructor.prototype.PinBuilder?.constructor || PinBuilder // fallback if minified
-    sideArr.push(new pb(chip, pn))
+    const pb = new pbCtor(chip, pn)
+    sideArr.push(pb)
+    newPins.add(pb) // <-- NEW
   }
 
   /* ---------- 2. build map: oldPin → newPin ---------- */
@@ -107,6 +111,7 @@ export function applyAddPinsToSide(
   /* ---------- 3. renumber existing PinBuilder objects ---------- */
   const patchSide = (arr: any[]) =>
     arr.forEach((pb) => {
+      if (newPins.has(pb)) return // <-- NEW: do not touch new pins
       if (map.has(pb.pinNumber)) pb.pinNumber = map.get(pb.pinNumber)!
     })
   patchSide(chip.leftPins)
