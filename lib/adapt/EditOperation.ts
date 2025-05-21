@@ -22,6 +22,20 @@ export interface RemovePinsFromSideOp {
   newPinCount: number
 }
 
+export interface AddPinToSideOp {
+  type: "add_pin_to_side"
+  side: Side
+  chipId: string
+  betweenPinNumbers: [number, number]
+}
+
+export interface RemovePinFromSideOp {
+  type: "remove_pin_from_side"
+  side: Side
+  chipId: string
+  pinNumber: number
+}
+
 export interface AddPassiveToPinOp {
   type: "add_passive_to_pin"
   pinNumber: number
@@ -46,3 +60,5 @@ export type EditOperation =
   | AddPassiveToPinOp
   | ClearPinOp
   | RemoveChipOp
+  | AddPinToSideOp
+  | RemovePinFromSideOp
