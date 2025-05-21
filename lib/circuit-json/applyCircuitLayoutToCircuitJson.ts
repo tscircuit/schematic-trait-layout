@@ -4,7 +4,6 @@ import type {
   SchematicPort,
   SchematicTrace,
   SourceTrace,
-  SourceComponent,
   SourcePort,
   SourceNet,
   Point,
@@ -53,7 +52,7 @@ export const applyCircuitLayoutToCircuitJson = (
 
     const layoutChip = layout.chips.find((c) => c.chipId === layoutBoxId)!
 
-    let cjChipWidth = layoutChip.getWidth() - 2
+    let cjChipWidth = layoutChip.getWidth() - 0.8
     let cjChipHeight = layoutChip.getHeight() - 2
 
     if (layoutChip.isPassive) {
@@ -63,7 +62,7 @@ export const applyCircuitLayoutToCircuitJson = (
 
     schematicComponent.center = {
       x: layoutChip.x + layoutChip.getWidth() / 2,
-      y: layoutChip.y + layoutChip.getHeight() / 2,
+      y: layoutChip.y + layoutChip.getHeight() / 2 - 0.5,
     }
     schematicComponent.size = {
       width: cjChipWidth,
@@ -77,7 +76,7 @@ export const applyCircuitLayoutToCircuitJson = (
       const { x: layoutX, y: layoutY } = layoutChip.getPinLocation(pin_number!)
       schematicPort.center = {
         x: layoutX,
-        y: layoutY + 0.5,
+        y: layoutY,
       }
     }
 
@@ -134,8 +133,34 @@ export const applyCircuitLayoutToCircuitJson = (
     cj.push(...newSchematicNetLabels)
   }
 
-  // Filter all schematic_traces (they won't properly connect after the moving)
+  // Create schematic_trace for each layout.lines
+  const newSchematicTraces: SchematicTrace[] = []
+  for (const layoutLine of layout.lines) {
+    const newSchematicTrace: SchematicTrace = {
+      type: "schematic_trace",
+      edges: [
+        {
+          from: {
+            x: layoutLine.start.x,
+            y: layoutLine.start.y,
+          },
+          to: {
+            x: layoutLine.end.x,
+            y: layoutLine.end.y,
+          },
+        },
+      ],
+      schematic_trace_id: "asd",
+      source_trace_id: "asd",
+      junctions: [],
+    }
+    newSchematicTraces.push(newSchematicTrace)
+  }
+
   cj = cj.filter((c) => c.type !== "schematic_trace")
+  cj.push(...newSchematicTraces)
+
+  // Filter all schematic_traces (they won't properly connect after the moving)
   cj = cj.filter((c) => c.type !== "schematic_text")
 
   return cj

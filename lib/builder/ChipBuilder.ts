@@ -92,7 +92,7 @@ export class ChipBuilder {
         side: "right",
         indexOnSide: i,
         ccwPinNumber,
-        offsetX: this.rightPinCount === 1 ? 1 : 4,
+        offsetX: this.rightPinCount === 1 ? 1 : this.getWidth(),
         offsetY: i + 1,
       })
       this.rightPins.push(pb)
@@ -146,7 +146,7 @@ export class ChipBuilder {
       return 1
     }
     // Temporary, eventually need to handle top and bottom pin counts
-    return 4
+    return this.circuit.defaultChipWidth
   }
 
   getHeight(): number {

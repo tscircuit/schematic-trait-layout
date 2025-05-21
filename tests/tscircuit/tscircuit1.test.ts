@@ -13,12 +13,17 @@ import { sel } from "tscircuit"
 
 export default () => (
   <board routingDisabled>
-    <chip name="U1" footprint="soic4" />
-    <resistor name="R1" resistance="1k" schX={-2} schRotation="180deg" footprint="0402" />
-    
-    <trace from={sel.U1.pin1} to={sel.R1.pin1} />
-    <trace from={sel.U1.pin3} to="net.GND" />
-    <trace from={sel.R1.pin2} to={sel.net.GND} />
+    <chip
+      name="U1"
+      footprint="soic4"
+      connections={{ pin1: sel.R1.pin1, pin3: sel.net.GND }}
+    />
+    <resistor
+      name="R1"
+      resistance="1k"
+      footprint="0402"
+      connections={{ pin2: sel.net.GND }}
+    />
   </board>
 )
   `)
@@ -60,17 +65,17 @@ export default () => (
       },
       {
         "center": {
-          "x": -2,
+          "x": 0,
           "y": 0,
         },
         "schematic_component_id": "schematic_component_1",
         "size": {
-          "height": 0.468910699999999,
+          "height": 0.388910699999999,
           "width": 1.0583332999999997,
         },
         "source_component_id": "source_component_1",
         "symbol_display_value": "1kΩ",
-        "symbol_name": "boxresistor_left",
+        "symbol_name": "boxresistor_right",
         "type": "schematic_component",
       },
       {
@@ -139,12 +144,12 @@ export default () => (
       },
       {
         "center": {
-          "x": -1.4662092999999996,
-          "y": -0.04580519999999926,
+          "x": -0.5337907000000003,
+          "y": 0.045805199999999324,
         },
         "display_pin_label": "pos",
         "distance_from_component_edge": 0.4,
-        "facing_direction": "right",
+        "facing_direction": "left",
         "pin_number": 1,
         "schematic_component_id": "schematic_component_1",
         "schematic_port_id": "schematic_port_4",
@@ -155,12 +160,12 @@ export default () => (
       },
       {
         "center": {
-          "x": -2.5687907,
-          "y": -0.04525870000000072,
+          "x": 0.5687907000000003,
+          "y": 0.04525870000000065,
         },
         "display_pin_label": "neg",
         "distance_from_component_edge": 0.4,
-        "facing_direction": "left",
+        "facing_direction": "right",
         "pin_number": 2,
         "schematic_component_id": "schematic_component_1",
         "schematic_port_id": "schematic_port_5",
@@ -186,13 +191,13 @@ export default () => (
       },
       {
         "anchor_position": {
-          "x": -2.5687907,
-          "y": -0.04525870000000072,
+          "x": 0.5687907000000003,
+          "y": 0.04525870000000065,
         },
-        "anchor_side": "right",
+        "anchor_side": "left",
         "center": {
-          "x": -2.5687907,
-          "y": -0.04525870000000072,
+          "x": 0.5687907000000003,
+          "y": 0.04525870000000065,
         },
         "schematic_net_label_id": "schematic_net_label_1",
         "source_net_id": "source_net_0",
@@ -288,6 +293,7 @@ export default () => (
   `)
 
   const C = new CircuitBuilder()
+  C.defaultChipWidth = 2
   const U1 = C.chip().leftpins(2).rightpins(2)
 
   U1.pin(1).line(-2, 0).passive().line(-1, 0).line(0, -1).label()
@@ -297,7 +303,7 @@ export default () => (
     "
        ┌───┐
     ┌P─┤1 4├
-    L  ┤2 3├─L
+    L  ┤2 3L
        └───┘
     "
   `)
@@ -312,8 +318,8 @@ export default () => (
     [
       {
         "center": {
-          "x": 2,
-          "y": 2,
+          "x": 1,
+          "y": 1.5,
         },
         "pin_spacing": 0.2,
         "pin_styles": undefined,
@@ -323,7 +329,7 @@ export default () => (
         "schematic_component_id": "schematic_component_0",
         "size": {
           "height": 2,
-          "width": 2,
+          "width": 1.2,
         },
         "source_component_id": "source_component_0",
         "type": "schematic_component",
@@ -331,7 +337,7 @@ export default () => (
       {
         "center": {
           "x": -1.5,
-          "y": 2.5,
+          "y": 2,
         },
         "schematic_component_id": "schematic_component_1",
         "size": {
@@ -340,7 +346,7 @@ export default () => (
         },
         "source_component_id": "source_component_1",
         "symbol_display_value": "1kΩ",
-        "symbol_name": "boxresistor_left",
+        "symbol_name": "boxresistor_right",
         "type": "schematic_component",
       },
     ]

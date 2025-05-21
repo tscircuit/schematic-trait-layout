@@ -2,7 +2,12 @@ import type { InputNetlist, Box, Net, Connection } from "../input-types"
 import { getReadableNetlist } from "../netlist/getReadableNetlist"
 import { bifurcateXCircuit } from "./bifurcateXCircuit"
 import { ChipBuilder } from "./ChipBuilder"
-import type { Line, NetLabel, ConnectionPoint, PortReference } from "./circuit-types"
+import type {
+  Line,
+  NetLabel,
+  ConnectionPoint,
+  PortReference,
+} from "./circuit-types"
 import { flipXCircuit } from "./flipCircuit"
 import { getGridFromCircuit } from "./getGridFromCircuit"
 import { NetlistBuilder } from "../netlist/NetlistBuilder"
@@ -13,6 +18,7 @@ export class CircuitBuilder {
   netLabels: NetLabel[] = []
   lines: Line[] = []
   connectionPoints: ConnectionPoint[] = []
+  public defaultChipWidth = 4
   private autoLabelCounter = 1
   private _grid: any = null
 
@@ -32,24 +38,26 @@ export class CircuitBuilder {
       // location and pin counts
       c.x = chip.x
       c.y = chip.y
-      c.leftPinCount   = chip.leftPinCount
-      c.rightPinCount  = chip.rightPinCount
-      c.topPinCount    = chip.topPinCount
+      c.leftPinCount = chip.leftPinCount
+      c.rightPinCount = chip.rightPinCount
+      c.topPinCount = chip.topPinCount
       c.bottomPinCount = chip.bottomPinCount
       c.pinPositionsAreSet = chip.pinPositionsAreSet
 
       // Create lightweight pin stubs – grid rendering needs only pinNumber
       const mkPins = (count: number, first: number) =>
-        Array.from({ length: count }, (_, i) => ({ pinNumber: first + i })) as any
+        Array.from({ length: count }, (_, i) => ({
+          pinNumber: first + i,
+        })) as any
 
       /* order must match original builder semantics                    */
-      c.leftPins   = mkPins(c.leftPinCount, 1)
+      c.leftPins = mkPins(c.leftPinCount, 1)
       c.bottomPins = mkPins(c.bottomPinCount, c.leftPinCount + 1)
-      c.rightPins  = mkPins(
+      c.rightPins = mkPins(
         c.rightPinCount,
         c.leftPinCount + c.bottomPinCount + 1,
       )
-      c.topPins    = mkPins(
+      c.topPins = mkPins(
         c.topPinCount,
         c.leftPinCount + c.bottomPinCount + c.rightPinCount + 1,
       )
@@ -58,8 +66,8 @@ export class CircuitBuilder {
     }
 
     /* 3.  simple collections (no cycles inside) ---------------------- */
-    clone.lines            = structuredClone(this.lines)
-    clone.netLabels        = structuredClone(this.netLabels)
+    clone.lines = structuredClone(this.lines)
+    clone.netLabels = structuredClone(this.netLabels)
     clone.connectionPoints = structuredClone(this.connectionPoints)
 
     return clone
@@ -143,13 +151,17 @@ export class CircuitBuilder {
 
     // 2. line end-points
     for (const line of this.lines) {
-      addToCoordMap(portsByCoord, `${line.start.x},${line.start.y}`, line.start.ref)
+      addToCoordMap(
+        portsByCoord,
+        `${line.start.x},${line.start.y}`,
+        line.start.ref,
+      )
       addToCoordMap(portsByCoord, `${line.end.x},${line.end.y}`, line.end.ref)
     }
 
     // 3. connect every pair of ports that sit on a coordinate that has a CP
     for (const [key, refs] of portsByCoord.entries()) {
-      if (!coordsWithCP.has(key)) continue   // ← skip coords without CP
+      if (!coordsWithCP.has(key)) continue // ← skip coords without CP
       for (let i = 0; i < refs.length; ++i) {
         for (let j = i + 1; j < refs.length; ++j) {
           nb.connect(refs[i]!, refs[j]!)
