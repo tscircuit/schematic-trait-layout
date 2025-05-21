@@ -296,15 +296,15 @@ export default () => (
   C.defaultChipWidth = 2
   const U1 = C.chip().leftpins(2).rightpins(2)
 
-  U1.pin(1).line(-2, 0).passive().line(-1, 0).line(0, -1).label()
-  U1.pin(3).line(2, 0).label()
+  U1.pin(1).line(-1, 0).passive().line(-1, 0).line(0, -1).label()
+  U1.pin(3).line(1, 0).label()
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-       ┌───┐
-    ┌P─┤1 4├
-    L  ┤2 3L
-       └───┘
+      ┌───┐
+    ┌P┤1 4├
+    L ┤2 L├
+      └───┘
     "
   `)
 
@@ -336,7 +336,7 @@ export default () => (
       },
       {
         "center": {
-          "x": -1.5,
+          "x": -0.5,
           "y": 2,
         },
         "schematic_component_id": "schematic_component_1",
