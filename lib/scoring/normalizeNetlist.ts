@@ -130,6 +130,9 @@ export const normalizeNetlist = (
 
   /* ---------- box ordering via DFS ---------- */
   const iterMap = computeSearchIters(netlist)
+
+  console.log(iterMap)
+
   const finalSortedBoxIds = netlist.boxes
     .map((b) => b.boxId)
     .sort((a, b) => {
