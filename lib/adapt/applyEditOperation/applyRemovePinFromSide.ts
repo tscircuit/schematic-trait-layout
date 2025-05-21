@@ -1,5 +1,5 @@
 import type { CircuitBuilder } from "lib/builder"
-import type { AddPinToSideOp, RemovePinFromSideOp } from "../EditOperation"
+import type { RemovePinFromSideOp } from "../EditOperation"
 
 export function applyRemovePinFromSide(
   C: CircuitBuilder,
