@@ -357,7 +357,7 @@ export default () => (
                 "pinNumber": 3,
               },
               {
-                "netIndex": 0,
+                "netIndex": 1,
               },
             ],
           },
@@ -368,7 +368,7 @@ export default () => (
                 "pinNumber": 2,
               },
               {
-                "netIndex": 1,
+                "netIndex": 0,
               },
             ],
           },
@@ -388,8 +388,8 @@ export default () => (
           "U1": 0,
         },
         "netIdToNetIndex": {
-          "GND1,U1.3": 0,
-          "GND2,R1.2": 1,
+          "GND1,U1.3": 1,
+          "GND2,R1.2": 0,
         },
       },
     }

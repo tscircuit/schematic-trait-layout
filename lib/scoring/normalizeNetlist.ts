@@ -26,8 +26,6 @@ export const normalizeNetlist = (
   /* ---------- box ordering via DFS ---------- */
   const encounterMap = buildEncounterMapFromNetlist(netlist)
 
-  console.log(encounterMap)
-
   const finalSortedBoxIds = netlist.boxes
     .map((b) => b.boxId)
     .sort((a, b) => {
@@ -56,7 +54,7 @@ export const normalizeNetlist = (
   /* ---------- nets (unchanged) ---------- */
   const finalSortedNetIds = netlist.nets
     .map((n) => n.netId)
-    .sort((a, b) => a.localeCompare(b))
+    .sort((a, b) => encounterMap[a]! - encounterMap[b]!)
   finalSortedNetIds.forEach(
     (nid, idx) => (transform.netIdToNetIndex[nid] = idx),
   )

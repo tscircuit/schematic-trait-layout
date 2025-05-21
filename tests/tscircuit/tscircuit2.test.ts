@@ -205,7 +205,7 @@ export default () => (
                 "pinNumber": 5,
               },
               {
-                "netIndex": 4,
+                "netIndex": 2,
               },
             ],
           },
@@ -243,7 +243,7 @@ export default () => (
                 "pinNumber": 1,
               },
               {
-                "netIndex": 2,
+                "netIndex": 4,
               },
             ],
           },
@@ -298,9 +298,9 @@ export default () => (
         "netIdToNetIndex": {
           "L1": 0,
           "L2": 1,
-          "L3": 2,
+          "L3": 4,
           "L4": 3,
-          "L5": 4,
+          "L5": 2,
         },
       },
     }
@@ -373,7 +373,7 @@ export default () => (
                 "pinNumber": 5,
               },
               {
-                "netIndex": 3,
+                "netIndex": 2,
               },
             ],
           },
@@ -384,7 +384,7 @@ export default () => (
                 "pinNumber": 6,
               },
               {
-                "netIndex": 0,
+                "netIndex": 3,
               },
             ],
           },
@@ -407,7 +407,7 @@ export default () => (
                 "pinNumber": 7,
               },
               {
-                "netIndex": 1,
+                "netIndex": 4,
               },
             ],
           },
@@ -429,7 +429,7 @@ export default () => (
                 "pinNumber": 2,
               },
               {
-                "netIndex": 2,
+                "netIndex": 0,
               },
             ],
           },
@@ -440,7 +440,7 @@ export default () => (
                 "pinNumber": 2,
               },
               {
-                "netIndex": 4,
+                "netIndex": 1,
               },
             ],
           },
@@ -488,11 +488,11 @@ export default () => (
           "U1": 0,
         },
         "netIdToNetIndex": {
-          "D0,U1.6": 0,
-          "D1,U1.7": 1,
-          "GND,R1.2": 2,
-          "GND,U1.5": 3,
-          "R2.2,VCC": 4,
+          "D0,U1.6": 3,
+          "D1,U1.7": 4,
+          "GND,R1.2": 0,
+          "GND,U1.5": 2,
+          "R2.2,VCC": 1,
           "R3.2,VCC": 5,
           "U1.8,VCC": 6,
         },

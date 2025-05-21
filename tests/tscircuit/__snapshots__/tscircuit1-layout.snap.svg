@@ -21,11 +21,11 @@
     L 142.72,483.23199999999997
     L 142.72,388.64
     Z
-  " fill="rgba(255, 255, 255, 0.6)" stroke="rgb(132, 0, 0)" stroke-width="3.2px"/><text class="net-label-text" x="160" y="394.4" fill="rgb(132, 0, 0)" text-anchor="start" dominant-baseline="central" font-family="sans-serif" font-variant-numeric="tabular-nums" font-size="28.799999999999997px" transform="rotate(90 160 394.4)">GND1</text><path class="net-label" d="
+  " fill="rgba(255, 255, 255, 0.6)" stroke="rgb(132, 0, 0)" stroke-width="3.2px"/><text class="net-label-text" x="160" y="394.4" fill="rgb(132, 0, 0)" text-anchor="start" dominant-baseline="central" font-family="sans-serif" font-variant-numeric="tabular-nums" font-size="28.799999999999997px" transform="rotate(90 160 394.4)">GND2</text><path class="net-label" d="
     M 1040,252
     L 1048.64,234.72
     L 1143.232,234.72
     L 1143.232,269.28
     L 1048.64,269.28
     Z
-  " fill="rgba(255, 255, 255, 0.6)" stroke="rgb(132, 0, 0)" stroke-width="3.2px"/><text class="net-label-text" x="1054.4" y="252" fill="rgb(132, 0, 0)" text-anchor="start" dominant-baseline="central" font-family="sans-serif" font-variant-numeric="tabular-nums" font-size="28.799999999999997px" transform="">GND2</text></svg>
+  " fill="rgba(255, 255, 255, 0.6)" stroke="rgb(132, 0, 0)" stroke-width="3.2px"/><text class="net-label-text" x="1054.4" y="252" fill="rgb(132, 0, 0)" text-anchor="start" dominant-baseline="central" font-family="sans-serif" font-variant-numeric="tabular-nums" font-size="28.799999999999997px" transform="">GND1</text></svg>
