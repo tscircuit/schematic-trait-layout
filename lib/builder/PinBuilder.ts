@@ -26,20 +26,18 @@ export class PinBuilder {
   ) {}
 
   private get circuit(): CircuitBuilder {
-    // TODO: Replace with proper CircuitBuilder type
-    // biome-ignore lint/complexity/useLiteralKeys: Accessing private member
     return this.chip["circuit"]
   }
 
   line(dx: number, dy: number): this {
     const start = { x: this.x, y: this.y, ref: this.ref }
-    this.x += dx
-    this.y += dy
+    this.x += dx * this.circuit.defaultLineDistanceMultiple
+    this.y += dy * this.circuit.defaultLineDistanceMultiple
     const end = { x: this.x, y: this.y, ref: this.ref }
     const line = { start, end }
     this.circuit.lines.push(line)
-    this.lastDx = dx
-    this.lastDy = dy
+    this.lastDx = dx * this.circuit.defaultLineDistanceMultiple
+    this.lastDy = dy * this.circuit.defaultLineDistanceMultiple
     this.lastCreatedLine = line
     return this
   }

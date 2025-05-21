@@ -16,13 +16,14 @@ export default () => (
     <chip
       name="U1"
       footprint="soic4"
-      connections={{ pin1: sel.R1.pin1, pin3: sel.net.GND }}
+      connections={{ pin1: sel.R1.pin1, pin3: sel.net.GND1 }}
     />
     <resistor
       name="R1"
+      schX={-3}
       resistance="1k"
       footprint="0402"
-      connections={{ pin2: sel.net.GND }}
+      connections={{ pin2: sel.net.GND2 }}
     />
   </board>
 )
@@ -65,7 +66,7 @@ export default () => (
       },
       {
         "center": {
-          "x": 0,
+          "x": -3,
           "y": 0,
         },
         "schematic_component_id": "schematic_component_1",
@@ -144,7 +145,7 @@ export default () => (
       },
       {
         "center": {
-          "x": -0.5337907000000003,
+          "x": -3.5337907,
           "y": 0.045805199999999324,
         },
         "display_pin_label": "pos",
@@ -160,7 +161,7 @@ export default () => (
       },
       {
         "center": {
-          "x": 0.5687907000000003,
+          "x": -2.4312092999999995,
           "y": 0.04525870000000065,
         },
         "display_pin_label": "neg",
@@ -186,22 +187,22 @@ export default () => (
         },
         "schematic_net_label_id": "schematic_net_label_0",
         "source_net_id": "source_net_0",
-        "text": "GND",
+        "text": "GND1",
         "type": "schematic_net_label",
       },
       {
         "anchor_position": {
-          "x": 0.5687907000000003,
+          "x": -2.4312092999999995,
           "y": 0.04525870000000065,
         },
         "anchor_side": "left",
         "center": {
-          "x": 0.5687907000000003,
+          "x": -2.4312092999999995,
           "y": 0.04525870000000065,
         },
         "schematic_net_label_id": "schematic_net_label_1",
-        "source_net_id": "source_net_0",
-        "text": "GND",
+        "source_net_id": "source_net_1",
+        "text": "GND2",
         "type": "schematic_net_label",
       },
     ]
@@ -245,7 +246,7 @@ export default () => (
               "pinNumber": 3,
             },
             {
-              "netId": "GND,U1.3",
+              "netId": "GND1,U1.3",
             },
           ],
         },
@@ -256,17 +257,17 @@ export default () => (
               "pinNumber": 2,
             },
             {
-              "netId": "GND,R1.2",
+              "netId": "GND2,R1.2",
             },
           ],
         },
       ],
       "nets": [
         {
-          "netId": "GND,U1.3",
+          "netId": "GND1,U1.3",
         },
         {
-          "netId": "GND,R1.2",
+          "netId": "GND2,R1.2",
         },
       ],
     }
@@ -280,12 +281,12 @@ export default () => (
 
                       ┌────────────────┐
             R1.1 ──  1│       U1       │4               
-                     2│                │3  ── GND,U1.3  
+                     2│                │3  ── GND1,U1.3 
                       └────────────────┘
 
 
                       ┌────────────────┐
-            U1.1 ──  1│       R1       │2  ── GND,R1.2  
+            U1.1 ──  1│       R1       │2  ── GND2,R1.2 
                       └────────────────┘
 
     Complex Connections (more than 2 points):

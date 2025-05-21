@@ -18,8 +18,11 @@ export class CircuitBuilder {
   netLabels: NetLabel[] = []
   lines: Line[] = []
   connectionPoints: ConnectionPoint[] = []
+
   public defaultChipWidth = 4
-  public defaultPinSpacing = 0.2
+  public defaultPinSpacing = 1
+  public defaultLineDistanceMultiple = 1
+
   private autoLabelCounter = 1
   private _grid: any = null
 
