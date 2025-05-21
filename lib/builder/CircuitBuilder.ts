@@ -24,7 +24,6 @@ export class CircuitBuilder {
   public defaultLineDistanceMultiple = 1
 
   private autoLabelCounter = 1
-  private _grid: any = null
 
   /* ------------------------------------------------------------------ *
    * Deep-clone without JSON.stringify (avoids cyclic-structure error)  *
@@ -211,9 +210,6 @@ export class CircuitBuilder {
   }
 
   getGrid(): any {
-    if (!this._grid) {
-      this._grid = getGridFromCircuit(this)
-    }
-    return this._grid
+    return getGridFromCircuit(this)
   }
 }
