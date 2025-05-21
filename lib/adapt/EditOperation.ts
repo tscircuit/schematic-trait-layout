@@ -34,9 +34,15 @@ export interface ClearPinOp {
   chipId: string
 }
 
+export interface RemoveChipOp {
+  type: "remove_chip"
+  chipId: string
+}
+
 export type EditOperation =
   | RemovePinsFromSideOp
   | AddLabelToPinOp
   | AddPinsToSideOp
   | AddPassiveToPinOp
   | ClearPinOp
+  | RemoveChipOp
