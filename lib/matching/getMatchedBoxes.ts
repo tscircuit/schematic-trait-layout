@@ -1,9 +1,9 @@
 import type { NormalizedNetlist } from "lib/scoring/types"
 import type { MatchingIssue } from "./types"
-import { computeDifferenceScoreFromIssues } from "./computeIssueDifferenceScore"
+import { computeSimilarityDistanceFromIssues } from "./computeSimilarityDistanceFromIssues"
 import { getIssuesForMatchedBoxes } from "./getIssuesForMatchedBoxes"
 
-interface MatchedBox {
+export interface MatchedBox {
   targetBoxIndex: number
   candidateBoxIndex: number
   issues: MatchingIssue[]
@@ -28,7 +28,7 @@ export function getMatchedBoxes(params: {
   ) {
     const pairingResult: Map<
       { targetBoxIndex: number; candidateBoxIndex: number },
-      { issues: MatchingIssue[]; score: number }
+      { issues: MatchingIssue[]; similarityDistance: number }
     > = new Map()
 
     for (
@@ -49,7 +49,10 @@ export function getMatchedBoxes(params: {
 
       pairingResult.set(
         { targetBoxIndex, candidateBoxIndex },
-        { issues, score: computeDifferenceScoreFromIssues(issues) },
+        {
+          issues,
+          similarityDistance: computeSimilarityDistanceFromIssues(issues),
+        },
       )
     }
 
@@ -60,7 +63,10 @@ export function getMatchedBoxes(params: {
     } | null = null
     let bestScore = Infinity
 
-    for (const [pairing, { score }] of pairingResult.entries()) {
+    for (const [
+      pairing,
+      { similarityDistance: score },
+    ] of pairingResult.entries()) {
       if (score < bestScore) {
         bestScore = score
         bestPairing = pairing
@@ -70,7 +76,8 @@ export function getMatchedBoxes(params: {
     // If we found a valid pairing, mark the candidate box as used and add to matched boxes
     if (bestPairing) {
       const { candidateBoxIndex } = bestPairing
-      const { issues, score } = pairingResult.get(bestPairing)!
+      const { issues, similarityDistance: score } =
+        pairingResult.get(bestPairing)!
 
       // Mark the candidate box as used
       usedCandidateBoxes.add(candidateBoxIndex)

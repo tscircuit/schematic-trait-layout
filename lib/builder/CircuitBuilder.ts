@@ -76,8 +76,8 @@ export class CircuitBuilder {
     return clone
   }
 
-  chip(): ChipBuilder {
-    const id = `chip${this.chips.length}`
+  chip(id?: string): ChipBuilder {
+    id ??= `chip${this.chips.length}`
     const c = new ChipBuilder(this, id)
     this.chips.push(c)
     return c

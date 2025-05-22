@@ -2,7 +2,7 @@ import type { InputNetlist } from "lib/input-types"
 import type { NormalizedNetlist } from "./types"
 import { buildEncounterMapFromNetlist } from "./buildEncounterMapFromNetlist"
 
-interface NormalizationTransform {
+export interface NormalizationTransform {
   boxIdToBoxIndex: Record<string, number>
   netIdToNetIndex: Record<string, number>
 }

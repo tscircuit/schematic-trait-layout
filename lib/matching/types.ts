@@ -9,6 +9,12 @@ export interface NoBoxMatchingPinCounts {
   targetBoxIndex: number
 }
 
+export interface MatchedBoxSideHasWrongPinCount {
+  type: "matched_box_side_has_wrong_pin_count"
+  candidateBoxIndex: number
+  targetBoxIndex: number
+}
+
 export interface MatchedBoxMissingPinShape {
   type: "matched_box_missing_pin_shape"
   candidateBoxIndex: number
@@ -33,3 +39,6 @@ export type MatchingIssue =
   | NoBoxMatchingPinCounts
   | MatchedBoxMissingPinShape
   | MatchedPinOutOfPlace
+  | MatchedBoxSideHasWrongPinCount
+
+export type { MatchedBox } from "lib/matching/getMatchedBoxes"

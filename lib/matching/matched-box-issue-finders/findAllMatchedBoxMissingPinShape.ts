@@ -1,7 +1,7 @@
 import type { NormalizedNetlist } from "lib/scoring/types"
 import type { NoBoxMatchingPinCounts } from "../types"
 
-export function findAllNoBoxMatchingPinCounts(params: {
+export function findAllMatchedBoxMissingPinShape(params: {
   candidateNetlist: NormalizedNetlist
   targetNetlist: NormalizedNetlist
   candidateBoxIndex: number

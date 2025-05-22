@@ -6,7 +6,7 @@ import type { MatchingIssue } from "./types"
  * This score is used to compare different netlist pairings to determine how
  * similar or different they are
  */
-export function computeDifferenceScoreFromIssues(
+export function computeSimilarityDistanceFromIssues(
   issues: MatchingIssue[],
 ): number {
   // TODO
