@@ -5,26 +5,26 @@ import { CircuitBuilder } from "lib/builder"
 test("computeEditOperationsToFixPinSubsetNetlist1", () => {
   const target = new CircuitBuilder()
   const U = target.chip().leftpins(2).rightpins(2)
-  U.pin(1).line(-1, 0).label()
 
   expect(`\n${target.toString()}\n`).toMatchInlineSnapshot(`
-    "
-     ┌───┐
-    L┤1 4├
-     ┤2 3├
-     └───┘
-    "
-  `)
-
-  const template = new CircuitBuilder()
-  const V = template.chip().leftpins(2).rightpins(2)
-
-  expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
     ┌───┐
     ┤1 4├
     ┤2 3├
     └───┘
+    "
+  `)
+
+  const template = new CircuitBuilder()
+  const V = template.chip().leftpins(2).rightpins(2)
+  V.pin(1).line(-2, 0).passive().line(-2, 0).label()
+
+  expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
+    "
+        ┌───┐
+    L─P─┤1 4├
+        ┤2 3├
+        └───┘
     "
   `)
 
@@ -40,7 +40,7 @@ test("computeEditOperationsToFixPinSubsetNetlist1", () => {
       {
         "chipId": "chip0",
         "pinNumber": 1,
-        "type": "add_label_to_pin",
+        "type": "clear_pin",
       },
     ]
   `)
