@@ -35,5 +35,13 @@ test("computeEditOperationsToFixPinSubsetNetlist1", () => {
     targetNetlist: target.getNetlist(),
   })
 
-  expect(operations).toMatchInlineSnapshot(`[]`)
+  expect(operations).toMatchInlineSnapshot(`
+    [
+      {
+        "type": "add_passive_to_pin",
+        "chipId": "chip0",
+        "pinNumber": 1,
+      }
+    ]
+    `)
 })
