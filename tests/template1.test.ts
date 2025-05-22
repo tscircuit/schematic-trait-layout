@@ -12,7 +12,7 @@ test("template1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-            chip0
+             U1
             ┌───┐
     ├───────┤1 4├───L
     │    ┌──┤2 3├───L
@@ -26,14 +26,14 @@ test("template1", () => {
       "boxes": [
         {
           "bottomPinCount": 0,
-          "boxId": "chip0",
+          "boxId": "U1",
           "leftPinCount": 2,
           "rightPinCount": 2,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 1,
-          "boxId": "passive1",
+          "boxId": "R2",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
@@ -43,7 +43,7 @@ test("template1", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "passive1",
+              "boxId": "R2",
               "pinNumber": 1,
             },
             {
@@ -54,7 +54,7 @@ test("template1", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 2,
             },
             {
@@ -65,7 +65,7 @@ test("template1", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 3,
             },
             {
@@ -76,7 +76,7 @@ test("template1", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 4,
             },
             {
@@ -87,11 +87,11 @@ test("template1", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 1,
             },
             {
-              "boxId": "passive1",
+              "boxId": "R2",
               "pinNumber": 2,
             },
           ],
@@ -115,19 +115,19 @@ test("template1", () => {
   `)
 
   expect(getNetlistAsReadableTree(C.getNetlist())).toMatchInlineSnapshot(`
-    "chip0 (Box #0)
+    "U1 (Box #0)
       pin1
-        passive1.pin2 (Box #1)
+        R2.pin2 (Box #1)
       pin2
         L2 (Net #3)
       pin3
         L3 (Net #4)
       pin4
         L4 (Net #5)
-    passive1 (Box #1)
+    R2 (Box #1)
       pin1
         L1 (Net #2)
       pin2
-        chip0.pin1 (Box #0)"
+        U1.pin1 (Box #0)"
   `)
 })
