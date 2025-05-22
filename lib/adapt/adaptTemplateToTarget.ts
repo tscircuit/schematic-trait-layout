@@ -52,11 +52,31 @@ export function adaptTemplateToTarget(params: {
       ] as number
 
       if (currentSideCount < targetSideCount) {
+        // TODO: This currently adds one pin at a time. A future optimization
+        // could be to add all missing pins for a side in one operation if
+        // an AddPinsToSideOp (plural) is available.
+
+        let afterPin: number
+        if (side === "left") {
+          // Add to the start (top-most) of the left side.
+          afterPin = 0
+        } else if (side === "bottom") {
+          // Add to the end (left-most) of the bottom side.
+          afterPin = chip.leftPinCount + chip.bottomPinCount
+        } else if (side === "right") {
+          // Add to the end (top-most) of the right side.
+          afterPin = chip.leftPinCount + chip.bottomPinCount + chip.rightPinCount
+        } else {
+          // side === "top"
+          // Add to the end (right-most) of the top side.
+          afterPin = chip.totalPinCount
+        }
+
         const op: AddPinToSideOp = {
           type: "add_pin_to_side",
           chipId: chip.chipId,
           side,
-          betweenPinNumbers: [0, 1],
+          betweenPinNumbers: [afterPin, afterPin + 1],
         }
         applyEditOperation(template, op)
         appliedOperations.push(op)
