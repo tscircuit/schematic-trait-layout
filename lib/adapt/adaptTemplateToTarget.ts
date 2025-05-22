@@ -1,6 +1,7 @@
 import { SIDES_CCW, type CircuitBuilder } from "lib/builder"
 import type { InputNetlist } from "lib/input-types"
-import type { EditOperation } from "./EditOperation"
+import { applyEditOperation } from "./applyEditOperation"
+import type { AddPinsToSideOp, EditOperation } from "./EditOperation"
 import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 import { getPinsInBox } from "lib/utils/getPinsInBox"
 
@@ -27,29 +28,38 @@ export function adaptTemplateToTarget(params: {
   const targetNorm = normalizeNetlist(target)
   const boxes1 = getCurrentNorm().normalizedNetlist.boxes
 
-  // STEP ONE: Make sure all the boxes have the correct number of pins on each
-  // side
-  for (let boxIndex = 0; boxIndex < boxes1.length; boxIndex++) {
-    const box = boxes1[boxIndex]!
+  // STEP ONE: make every box have the right number of pins per side
+  for (const chip of template.chips) {
+    const targetBox = targetNorm.normalizedNetlist.boxes.find(
+      (b) => b.boxId === chip.chipId,
+    )
+    if (!targetBox) continue // (chip removed – will be handled later)
 
-    const targetBox = targetNorm.normalizedNetlist.boxes[boxIndex]!
-
-    if (!targetBox) {
-      // TODO create remove_chip operation
-    }
+    const countsNow = {
+      left: chip.leftPinCount,
+      bottom: chip.bottomPinCount,
+      right: chip.rightPinCount,
+      top: chip.topPinCount,
+    } as const
 
     for (const side of SIDES_CCW) {
-      const currentSideCount = box[`${side}PinCount` as keyof typeof box]
+      const currentSideCount = countsNow[side]
       const targetSideCount =
-        targetBox[`${side}PinCount` as keyof typeof targetBox]
-      if (currentSideCount > targetSideCount) {
-        // TODO create remove_pins_from_side operation and apply
-      } else if (currentSideCount < targetSideCount) {
-        // TODO create add_pins_to_side operation and apply
-      }
-    }
+        targetBox[`${side}PinCount` as keyof typeof targetBox] as number
 
-    // TODO create add_pins_to_side or remove_pins_from_side operations
+      if (currentSideCount < targetSideCount) {
+        const op: AddPinsToSideOp = {
+          type: "add_pins_to_side",
+          chipId: chip.chipId,
+          side,
+          oldPinCount: currentSideCount,
+          newPinCount: targetSideCount,
+        }
+        applyEditOperation(template, op)
+        appliedOperations.push(op)
+      }
+      // (removal will be implemented later)
+    }
   }
 
   /** boxes with correct pin counts */
