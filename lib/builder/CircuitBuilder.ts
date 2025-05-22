@@ -77,14 +77,14 @@ export class CircuitBuilder {
   }
 
   chip(id?: string): ChipBuilder {
-    id ??= `chip${this.chips.length}`
+    id ??= `U${this.chips.length + 1}`
     const c = new ChipBuilder(this, id)
     this.chips.push(c)
     return c
   }
 
   passive(): ChipBuilder {
-    const id = `passive${this.chips.length}`
+    const id = `R${this.chips.length + 1}`
     const c = new ChipBuilder(this, id, true)
     this.chips.push(c)
     return c

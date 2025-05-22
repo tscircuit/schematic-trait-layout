@@ -18,7 +18,7 @@ test("template2", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-          L
+     U1   L
     ┌───┐ │
     │  7├─┘┌─P──L
     │  6├──┘
@@ -37,35 +37,35 @@ test("template2", () => {
       "boxes": [
         {
           "bottomPinCount": 0,
-          "boxId": "chip0",
+          "boxId": "U1",
           "leftPinCount": 0,
           "rightPinCount": 7,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 0,
-          "boxId": "passive1",
+          "boxId": "R2",
           "leftPinCount": 1,
           "rightPinCount": 1,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 0,
-          "boxId": "passive2",
+          "boxId": "R3",
           "leftPinCount": 1,
           "rightPinCount": 1,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 1,
-          "boxId": "passive3",
+          "boxId": "R4",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
         },
         {
           "bottomPinCount": 1,
-          "boxId": "passive4",
+          "boxId": "R5",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
@@ -75,7 +75,7 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 7,
             },
             {
@@ -86,7 +86,7 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "passive1",
+              "boxId": "R2",
               "pinNumber": 2,
             },
             {
@@ -97,7 +97,7 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "passive2",
+              "boxId": "R3",
               "pinNumber": 2,
             },
             {
@@ -108,7 +108,7 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "passive3",
+              "boxId": "R4",
               "pinNumber": 1,
             },
             {
@@ -119,7 +119,7 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "passive4",
+              "boxId": "R5",
               "pinNumber": 1,
             },
             {
@@ -130,14 +130,14 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 2,
             },
             {
               "netId": "L6",
             },
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 1,
             },
           ],
@@ -145,11 +145,11 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 6,
             },
             {
-              "boxId": "passive1",
+              "boxId": "R2",
               "pinNumber": 1,
             },
           ],
@@ -157,11 +157,11 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 5,
             },
             {
-              "boxId": "passive2",
+              "boxId": "R3",
               "pinNumber": 1,
             },
           ],
@@ -169,11 +169,11 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 4,
             },
             {
-              "boxId": "passive3",
+              "boxId": "R4",
               "pinNumber": 2,
             },
           ],
@@ -181,11 +181,11 @@ test("template2", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 3,
             },
             {
-              "boxId": "passive4",
+              "boxId": "R5",
               "pinNumber": 2,
             },
           ],
@@ -215,41 +215,41 @@ test("template2", () => {
   `)
 
   expect(getNetlistAsReadableTree(C.getNetlist())).toMatchInlineSnapshot(`
-    "chip0 (Box #0)
+    "U1 (Box #0)
       pin1
-        chip0.pin2 (Box #0)
+        U1.pin2 (Box #0)
         L6 (Net #1)
       pin2
         L6 (Net #1)
-        chip0.pin1 (Box #0)
+        U1.pin1 (Box #0)
       pin3
-        passive4.pin2 (Box #2)
+        R5.pin2 (Box #2)
       pin4
-        passive3.pin2 (Box #4)
+        R4.pin2 (Box #4)
       pin5
-        passive2.pin1 (Box #6)
+        R3.pin1 (Box #6)
       pin6
-        passive1.pin1 (Box #8)
+        R2.pin1 (Box #8)
       pin7
         L1 (Net #10)
-    passive4 (Box #2)
+    R5 (Box #2)
       pin1
         L5 (Net #3)
       pin2
-        chip0.pin3 (Box #0)
-    passive3 (Box #4)
+        U1.pin3 (Box #0)
+    R4 (Box #4)
       pin1
         L4 (Net #5)
       pin2
-        chip0.pin4 (Box #0)
-    passive2 (Box #6)
+        U1.pin4 (Box #0)
+    R3 (Box #6)
       pin1
-        chip0.pin5 (Box #0)
+        U1.pin5 (Box #0)
       pin2
         L3 (Net #7)
-    passive1 (Box #8)
+    R2 (Box #8)
       pin1
-        chip0.pin6 (Box #0)
+        U1.pin6 (Box #0)
       pin2
         L2 (Net #9)"
   `)

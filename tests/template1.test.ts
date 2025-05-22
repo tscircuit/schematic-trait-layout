@@ -12,6 +12,7 @@ test("template1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+            chip0
             ┌───┐
     ├───────┤1 4├───L
     │    ┌──┤2 3├───L

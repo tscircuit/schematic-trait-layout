@@ -18,6 +18,29 @@ export const getGridFromCircuit = (
     }
     // width = 5, height = max(leftPins.length, rightPins.length, 1) + 2
     const height = Math.max(chip.leftPinCount, chip.rightPinCount, 1) + 2
+
+    if (opts.chipLabels && chip.topPinCount === 0) {
+      const labelY = chip.y + height; // One row above the chip's top border
+      const chipBodyWidth = 5; // Chip body is 5 characters wide
+      const labelText = chip.chipId;
+
+      let displayLabel = labelText;
+      let labelActualX = chip.x; // Base X position for the label
+
+      if (labelText.length <= chipBodyWidth) {
+        // Center the label if it's shorter than or equal to the chip width
+        labelActualX += Math.floor((chipBodyWidth - labelText.length) / 2);
+      } else {
+        // Truncate the label if it's longer than the chip width
+        displayLabel = labelText.substring(0, chipBodyWidth);
+        // For truncated labels, they start at chip.x, so labelActualX is already correct.
+      }
+
+      for (let i = 0; i < displayLabel.length; i++) {
+        g.putOverlay(labelActualX + i, labelY, displayLabel[i]);
+      }
+    }
+
     for (let r = 0; r < height; ++r) {
       // r is visual row index from bottom (0) to top (height-1)
       // Pins are now rendered inside mid1, so leftChar and rightChar are not used here.
