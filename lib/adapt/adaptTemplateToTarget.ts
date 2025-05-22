@@ -25,14 +25,13 @@ export function adaptTemplateToTarget(params: {
   const appliedOperations: EditOperation[] = []
 
   const getCurrentNorm = () => normalizeNetlist(template.getNetlist())
-  const targetNorm = normalizeNetlist(target)
+  const targetNorm = normalizeNetlist(target)            // ← still used later
+  const targetBoxes = target.boxes                       // ← NEW
   const boxes1 = getCurrentNorm().normalizedNetlist.boxes
 
   // STEP ONE: make every box have the right number of pins per side
   for (const chip of template.chips) {
-    const targetBox = targetNorm.normalizedNetlist.boxes.find(
-      (b) => b.boxId === chip.chipId,
-    )
+    const targetBox = targetBoxes.find((b) => b.boxId === chip.chipId)
     if (!targetBox) continue // (chip removed – will be handled later)
 
     const countsNow = {
