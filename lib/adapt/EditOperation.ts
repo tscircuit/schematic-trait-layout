@@ -6,22 +6,6 @@ export interface AddLabelToPinOp {
   chipId: string
 }
 
-export interface AddPinsToSideOp {
-  type: "add_pins_to_side"
-  side: Side
-  chipId: string
-  oldPinCount: number
-  newPinCount: number
-}
-
-export interface RemovePinsFromSideOp {
-  type: "remove_pins_from_side"
-  side: Side
-  chipId: string
-  oldPinCount: number
-  newPinCount: number
-}
-
 export interface AddPinToSideOp {
   type: "add_pin_to_side"
   side: Side
@@ -54,9 +38,7 @@ export interface RemoveChipOp {
 }
 
 export type EditOperation =
-  | RemovePinsFromSideOp
   | AddLabelToPinOp
-  | AddPinsToSideOp
   | AddPassiveToPinOp
   | ClearPinOp
   | RemoveChipOp

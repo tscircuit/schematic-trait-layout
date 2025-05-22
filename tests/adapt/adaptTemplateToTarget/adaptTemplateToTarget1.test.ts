@@ -17,10 +17,23 @@ test("adaptTemplateToTarget adds missing pins on a side", () => {
     target: target.getNetlist(),
   })
 
+  expect(appliedOperations).toMatchInlineSnapshot(`
+    [
+      {
+        "betweenPinNumbers": [
+          0,
+          1,
+        ],
+        "chipId": "chip0",
+        "side": "left",
+        "type": "add_pin_to_side",
+      },
+    ]
+  `)
+
   /* assertions ------------------------------------------------------- */
   expect(template.chips[0]!.leftPinCount).toBe(2) // pin was added
-  expect(appliedOperations.length).toBe(1)
-  expect(appliedOperations[0]!.type).toBe("add_pins_to_side")
+  expect(appliedOperations.length).toBe(2)
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "

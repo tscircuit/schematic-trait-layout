@@ -1,7 +1,11 @@
 import { SIDES_CCW, type CircuitBuilder } from "lib/builder"
 import type { InputNetlist } from "lib/input-types"
 import { applyEditOperation } from "./applyEditOperation"
-import type { AddPinsToSideOp, EditOperation } from "./EditOperation"
+import type {
+  AddPinsToSideOp,
+  AddPinToSideOp,
+  EditOperation,
+} from "./EditOperation"
 import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 import { getPinsInBox } from "lib/utils/getPinsInBox"
 
@@ -25,8 +29,8 @@ export function adaptTemplateToTarget(params: {
   const appliedOperations: EditOperation[] = []
 
   const getCurrentNorm = () => normalizeNetlist(template.getNetlist())
-  const targetNorm = normalizeNetlist(target)            // ← still used later
-  const targetBoxes = target.boxes                       // ← NEW
+  const targetNorm = normalizeNetlist(target) // ← still used later
+  const targetBoxes = target.boxes // ← NEW
   const boxes1 = getCurrentNorm().normalizedNetlist.boxes
 
   // STEP ONE: make every box have the right number of pins per side
@@ -43,16 +47,16 @@ export function adaptTemplateToTarget(params: {
 
     for (const side of SIDES_CCW) {
       const currentSideCount = countsNow[side]
-      const targetSideCount =
-        targetBox[`${side}PinCount` as keyof typeof targetBox] as number
+      const targetSideCount = targetBox[
+        `${side}PinCount` as keyof typeof targetBox
+      ] as number
 
       if (currentSideCount < targetSideCount) {
-        const op: AddPinsToSideOp = {
-          type: "add_pins_to_side",
+        const op: AddPinToSideOp = {
+          type: "add_pin_to_side",
           chipId: chip.chipId,
           side,
-          oldPinCount: currentSideCount,
-          newPinCount: targetSideCount,
+          betweenPinNumbers: [0, 1],
         }
         applyEditOperation(template, op)
         appliedOperations.push(op)
