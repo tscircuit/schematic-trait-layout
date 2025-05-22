@@ -37,25 +37,27 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
     target: target.getNetlist(),
   })
 
-  expect(appliedOperations).toMatchInlineSnapshot(`[
-    {
-      "chipId": "chip0",
-      "pinNumber": 4,
-      "type": "clear_label",
-    },
-    {
-      "chipId": "chip0",
-      "pinNumber": 1,
-      "type": "add_label",
-    },
-  ]`)
+  expect(appliedOperations).toMatchInlineSnapshot(`
+    [
+      {
+        "chipId": "chip0",
+        "pinNumber": 1,
+        "type": "add_label_to_pin",
+      },
+      {
+        "chipId": "chip0",
+        "pinNumber": 4,
+        "type": "clear_pin",
+      },
+    ]
+  `)
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
-      ┌───┐
-    L─┤1 4├
-      ┤2 3├
-      └───┘
+     ┌───┐
+    L┤1 4├
+     ┤2 3├
+     └───┘
     "
   `)
 })

@@ -4,10 +4,10 @@ import { applyEditOperation } from "./applyEditOperation"
 import type {
   AddPinsToSideOp,
   AddPinToSideOp,
+  AddPinToSideOp,
   EditOperation,
 } from "./EditOperation"
-import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
-import { getPinsInBox } from "lib/utils/getPinsInBox"
+import { computeEditOperationsToFixPinSubsetNetlist } from "./computeEditOperationsToFixPinSubsetNetlist"
 
 /**
  * Mutates template until it has the same normalized netlist as the target.
@@ -28,10 +28,7 @@ export function adaptTemplateToTarget(params: {
   const { template, target } = params
   const appliedOperations: EditOperation[] = []
 
-  const getCurrentNorm = () => normalizeNetlist(template.getNetlist())
-  const targetNorm = normalizeNetlist(target) // ← still used later
-  const targetBoxes = target.boxes // ← NEW
-  const boxes1 = getCurrentNorm().normalizedNetlist.boxes
+  const targetBoxes = target.boxes
 
   // STEP ONE: make every box have the right number of pins per side
   for (const chip of template.chips) {
@@ -85,16 +82,22 @@ export function adaptTemplateToTarget(params: {
     }
   }
 
-  /** boxes with correct pin counts */
-  const boxes2 = getCurrentNorm().normalizedNetlist.boxes
-
   // STEP TWO: Go through each pin and make sure it has the right shape by
   // comparing the target pin subset to the current pin subset.
-  for (let boxIndex = 0; boxIndex < boxes2.length; boxIndex++) {
-    const box = boxes2[boxIndex]!
-    const pinsInBox = getPinsInBox(box)
-    for (const { pinNumber, side } of pinsInBox) {
-      // TODO
+  for (const chip of template.chips) {
+    for (let pinNumber = 1; pinNumber <= chip.totalPinCount; pinNumber++) {
+      const currentNetlistForPin = template.getNetlist()
+      const operationsForPin = computeEditOperationsToFixPinSubsetNetlist({
+        currentNetlist: currentNetlistForPin,
+        targetNetlist: target,
+        chipId: chip.chipId,
+        pinNumber: pinNumber,
+      })
+
+      for (const op of operationsForPin) {
+        applyEditOperation(template, op)
+        appliedOperations.push(op)
+      }
     }
   }
 
