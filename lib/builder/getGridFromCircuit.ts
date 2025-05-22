@@ -1,7 +1,14 @@
 import type { CircuitBuilder } from "./CircuitBuilder"
 import { Grid } from "./Grid"
 
-export const getGridFromCircuit = (circuit: CircuitBuilder): Grid => {
+export const getGridFromCircuit = (
+  circuit: CircuitBuilder,
+  opts: {
+    chipLabels?: boolean
+  } = {},
+): Grid => {
+  opts.chipLabels ??= true
+
   const g = new Grid()
   // 1. Draw every chip
   for (const chip of circuit.chips) {
