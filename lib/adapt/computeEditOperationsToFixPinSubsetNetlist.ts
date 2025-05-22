@@ -50,6 +50,16 @@ export const computeEditOperationsToFixPinSubsetNetlist = (params: {
     subset.connections.filter((c) => pinAppearsInConnection(c, pinBoxId, 1))
       .length
 
+  /* Does the subset contain a connection from the pin to a “passive” chip? */
+  const hasPassiveConnection = (subset: InputNetlist): boolean =>
+    subset.connections.some(
+      (c) =>
+        pinAppearsInConnection(c, pinBoxId, 1) &&
+        c.connectedPorts.some(
+          (p) => "boxId" in p && p.boxId.startsWith("passive"),
+        ),
+    )
+
   /* ------------------------------------------------------------------ *
    * Decide what edit-operation(s) are required                          *
    * ------------------------------------------------------------------ */
@@ -67,7 +77,20 @@ export const computeEditOperationsToFixPinSubsetNetlist = (params: {
     return operations
   }
 
-  // 2. Add label if target has a label but current does not
+  // 2. Add passive element if target has one but current does not
+  if (
+    hasPassiveConnection(targetSubset) &&
+    !hasPassiveConnection(currentSubset)
+  ) {
+    operations.push({
+      type: "add_passive_to_pin",
+      chipId,
+      pinNumber,
+    })
+    return operations
+  }
+
+  // 3. Add label if target has a label but current does not
   if (hasLabelConnection(targetSubset) && !hasLabelConnection(currentSubset)) {
     operations.push({
       type: "add_label_to_pin",
