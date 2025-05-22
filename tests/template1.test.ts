@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test"
 import { circuit } from "lib/builder"
+import { getNetlistAsReadableTree } from "lib/netlist/getNetlistAsReadableTree"
 
 test("template1", () => {
   const C = circuit()
@@ -12,7 +13,7 @@ test("template1", () => {
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
             ┌───┐
-    ┌───────┤1 4├───L
+    ├───────┤1 4├───L
     │    ┌──┤2 3├───L
     P    │  └───┘
     │    L
@@ -110,5 +111,22 @@ test("template1", () => {
         },
       ],
     }
+  `)
+
+  expect(getNetlistAsReadableTree(C.getNetlist())).toMatchInlineSnapshot(`
+    "chip0 (Box #0)
+      pin1
+        passive1.pin2 (Box #1)
+      pin2
+        L2 (Net #3)
+      pin3
+        L3 (Net #4)
+      pin4
+        L4 (Net #5)
+    passive1 (Box #1)
+      pin1
+        L1 (Net #2)
+      pin2
+        chip0.pin1 (Box #0)"
   `)
 })
