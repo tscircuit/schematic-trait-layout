@@ -14,12 +14,35 @@ test("template1", () => {
     "
              U1
             ┌───┐
-    ├───────┤1 4├───L
-    │    ┌──┤2 3├───L
-    P    │  └───┘
-    │    L
-    L
+    ├───────┤1 4├───D
+    │    ┌──┤2 3├───C
+    R2   │  └───┘
+    │    B
+    A
     "
+  `)
+  expect(C.getReadableNetlist()).toMatchInlineSnapshot(`
+    "Boxes:
+
+
+                      ┌────────────────┐
+            R2.2 ──  1│       U1       │4  ── D         
+               B ──  2│                │3  ── C         
+                      └────────────────┘
+
+
+                             U1.1      
+                              │        
+                              2        
+                      ┌────────────────┐
+                      │       R2       │                
+                      └────────────────┘
+                              1        
+                              │        
+                              A        
+
+    Complex Connections (more than 2 points):
+      (none)"
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
     {
@@ -47,7 +70,7 @@ test("template1", () => {
               "pinNumber": 1,
             },
             {
-              "netId": "L1",
+              "netId": "A",
             },
           ],
         },
@@ -58,7 +81,7 @@ test("template1", () => {
               "pinNumber": 2,
             },
             {
-              "netId": "L2",
+              "netId": "B",
             },
           ],
         },
@@ -69,7 +92,7 @@ test("template1", () => {
               "pinNumber": 3,
             },
             {
-              "netId": "L3",
+              "netId": "C",
             },
           ],
         },
@@ -80,7 +103,7 @@ test("template1", () => {
               "pinNumber": 4,
             },
             {
-              "netId": "L4",
+              "netId": "D",
             },
           ],
         },
@@ -99,16 +122,16 @@ test("template1", () => {
       ],
       "nets": [
         {
-          "netId": "L1",
+          "netId": "A",
         },
         {
-          "netId": "L2",
+          "netId": "B",
         },
         {
-          "netId": "L3",
+          "netId": "C",
         },
         {
-          "netId": "L4",
+          "netId": "D",
         },
       ],
     }
@@ -119,14 +142,14 @@ test("template1", () => {
       pin1
         R2.pin2 (Box #1)
       pin2
-        L2 (Net #3)
+        B (Net #3)
       pin3
-        L3 (Net #4)
+        C (Net #4)
       pin4
-        L4 (Net #5)
+        D (Net #5)
     R2 (Box #1)
       pin1
-        L1 (Net #2)
+        A (Net #2)
       pin2
         U1.pin1 (Box #0)"
   `)

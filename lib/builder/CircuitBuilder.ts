@@ -13,6 +13,8 @@ import { getGridFromCircuit } from "./getGridFromCircuit"
 import { NetlistBuilder } from "../netlist/NetlistBuilder"
 import { isSamePortRef } from "./isSamePortRef"
 
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 export class CircuitBuilder {
   chips: ChipBuilder[] = []
   netLabels: NetLabel[] = []
@@ -206,7 +208,10 @@ export class CircuitBuilder {
   }
 
   generateAutoLabel(): string {
-    return String(this.autoLabelCounter++)
+    return (
+      alphabet[this.autoLabelCounter++ - 1] ??
+      `L${this.autoLabelCounter - alphabet.length}`
+    )
   }
 
   getGrid(): any {

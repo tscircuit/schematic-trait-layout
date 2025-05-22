@@ -6,13 +6,14 @@ test("template3", () => {
   const C = template3()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-    ┌───┐      L
+     U1
+    ┌───┐      A
     │  3├───●──┤
     │  2├─┐ │  │
-    │  1├┐│ P  P
+    │  1├┐│ R3 R2
     └───┘│└─┘  │
          │     │
-         L     L
+         C     B
     "
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
@@ -20,21 +21,21 @@ test("template3", () => {
       "boxes": [
         {
           "bottomPinCount": 0,
-          "boxId": "chip0",
+          "boxId": "U1",
           "leftPinCount": 0,
           "rightPinCount": 3,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 1,
-          "boxId": "passive1",
+          "boxId": "R2",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
         },
         {
           "bottomPinCount": 1,
-          "boxId": "passive2",
+          "boxId": "R3",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
@@ -44,52 +45,48 @@ test("template3", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 3,
             },
             {
-              "netId": "L1",
+              "netId": "A",
             },
             {
-              "boxId": "passive1",
+              "boxId": "R2",
+              "pinNumber": 2,
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "R2",
+              "pinNumber": 1,
+            },
+            {
+              "netId": "B",
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "U1",
+              "pinNumber": 1,
+            },
+            {
+              "netId": "C",
+            },
+          ],
+        },
+        {
+          "connectedPorts": [
+            {
+              "boxId": "U1",
               "pinNumber": 2,
             },
             {
-              "boxId": "passive2",
-              "pinNumber": 1,
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "passive1",
-              "pinNumber": 1,
-            },
-            {
-              "netId": "L2",
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip0",
-              "pinNumber": 1,
-            },
-            {
-              "netId": "L3",
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "chip0",
-              "pinNumber": 2,
-            },
-            {
-              "boxId": "passive2",
+              "boxId": "R3",
               "pinNumber": 2,
             },
           ],
@@ -97,111 +94,53 @@ test("template3", () => {
       ],
       "nets": [
         {
-          "netId": "L1",
+          "netId": "A",
         },
         {
-          "netId": "L2",
+          "netId": "B",
         },
         {
-          "netId": "L3",
+          "netId": "C",
         },
       ],
     }
   `)
+  expect(C.getReadableNetlist()).toMatchInlineSnapshot(`
+    "Boxes:
 
-  expect(
-    normalizeNetlist(C.getNetlist()).normalizedNetlist,
-  ).toMatchInlineSnapshot(`
-    {
-      "boxes": [
-        {
-          "bottomPinCount": 0,
-          "boxIndex": 0,
-          "leftPinCount": 0,
-          "rightPinCount": 3,
-          "topPinCount": 0,
-        },
-        {
-          "bottomPinCount": 1,
-          "boxIndex": 1,
-          "leftPinCount": 0,
-          "rightPinCount": 0,
-          "topPinCount": 1,
-        },
-        {
-          "bottomPinCount": 1,
-          "boxIndex": 2,
-          "leftPinCount": 0,
-          "rightPinCount": 0,
-          "topPinCount": 1,
-        },
-      ],
-      "connections": [
-        {
-          "connectedPorts": [
-            {
-              "boxIndex": 0,
-              "pinNumber": 1,
-            },
-            {
-              "netIndex": 0,
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxIndex": 0,
-              "pinNumber": 2,
-            },
-            {
-              "boxIndex": 1,
-              "pinNumber": 2,
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxIndex": 0,
-              "pinNumber": 3,
-            },
-            {
-              "boxIndex": 1,
-              "pinNumber": 1,
-            },
-            {
-              "boxIndex": 2,
-              "pinNumber": 2,
-            },
-            {
-              "netIndex": 1,
-            },
-          ],
-        },
-        {
-          "connectedPorts": [
-            {
-              "boxIndex": 2,
-              "pinNumber": 1,
-            },
-            {
-              "netIndex": 2,
-            },
-          ],
-        },
-      ],
-      "nets": [
-        {
-          "netIndex": 0,
-        },
-        {
-          "netIndex": 1,
-        },
-        {
-          "netIndex": 2,
-        },
-      ],
-    }
+
+                      ┌────────────────┐
+                      │                │3  ── ...       
+                      │       U1       │2  ── R3.2      
+                      │                │1  ── C         
+                      └────────────────┘
+
+
+                             ...       
+                              │        
+                              2        
+                      ┌────────────────┐
+                      │       R2       │                
+                      └────────────────┘
+                              1        
+                              │        
+                              B        
+
+
+                             U1.2      
+                              │        
+                              2        
+                      ┌────────────────┐
+                      │       R3       │                
+                      └────────────────┘
+                              1        
+                              │        
+                                       
+
+    Complex Connections (more than 2 points):
+      - Connection 1:
+        - Box Pin: U1, Pin 3
+        - Net: A
+        - Box Pin: R2, Pin 2"
   `)
 })

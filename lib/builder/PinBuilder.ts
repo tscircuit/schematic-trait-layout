@@ -88,7 +88,7 @@ export class PinBuilder {
   }
 
   label(text?: string): void {
-    const id = text ?? `L${this.circuit.generateAutoLabel()}`
+    const id = text ?? `${this.circuit.generateAutoLabel()}`
     this.circuit.netLabels.push({
       labelId: id,
       x: this.x,

@@ -13,31 +13,33 @@ export const getGridFromCircuit = (
   // 1. Draw every chip
   for (const chip of circuit.chips) {
     if (chip.isPassive) {
-      g.putOverlay(chip.x, chip.y, "P")
+      g.putOverlay(chip.x, chip.y, chip.chipId[0]!)
+      // TODO if the x+1,y is already occupied, then don't write to it
+      g.putOverlay(chip.x + 1, chip.y, chip.chipId[1]!)
       continue
     }
     // width = 5, height = max(leftPins.length, rightPins.length, 1) + 2
     const height = Math.max(chip.leftPinCount, chip.rightPinCount, 1) + 2
 
     if (opts.chipLabels && chip.topPinCount === 0) {
-      const labelY = chip.y + height; // One row above the chip's top border
-      const chipBodyWidth = 5; // Chip body is 5 characters wide
-      const labelText = chip.chipId;
+      const labelY = chip.y + height // One row above the chip's top border
+      const chipBodyWidth = 5 // Chip body is 5 characters wide
+      const labelText = chip.chipId
 
-      let displayLabel = labelText;
-      let labelActualX = chip.x; // Base X position for the label
+      let displayLabel = labelText
+      let labelActualX = chip.x // Base X position for the label
 
       if (labelText.length <= chipBodyWidth) {
         // Center the label if it's shorter than or equal to the chip width
-        labelActualX += Math.floor((chipBodyWidth - labelText.length) / 2);
+        labelActualX += Math.floor((chipBodyWidth - labelText.length) / 2)
       } else {
         // Truncate the label if it's longer than the chip width
-        displayLabel = labelText.substring(0, chipBodyWidth);
+        displayLabel = labelText.substring(0, chipBodyWidth)
         // For truncated labels, they start at chip.x, so labelActualX is already correct.
       }
 
       for (let i = 0; i < displayLabel.length; i++) {
-        g.putOverlay(labelActualX + i, labelY, displayLabel[i]);
+        g.putOverlay(labelActualX + i, labelY, displayLabel[i]!)
       }
     }
 
