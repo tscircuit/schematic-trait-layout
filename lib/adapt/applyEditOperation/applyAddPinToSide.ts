@@ -46,7 +46,10 @@ export function applyAddPinToSide(C: CircuitBuilder, op: AddPinToSideOp): void {
           : chip.bottomPins
 
   const insertIdx = sideArr.findIndex((pb) => pb.pinNumber === afterPin) + 1
-  if (insertIdx === 0) return // could not locate gap – abort
+  // If afterPin is a real pin number (not 0) and wasn't found, then insertIdx would be 0.
+  // In this case, we can't find the gap, so abort.
+  // If afterPin is 0, insertIdx will be 0, and that's valid (insert at the beginning).
+  if (afterPin !== 0 && insertIdx === 0) return // could not locate 'afterPin' to insert after – abort
 
   /* ---------- 2. enlarge side-count & insert new PinBuilder ---------- */
   chip[`${side}PinCount` as const] += 1
