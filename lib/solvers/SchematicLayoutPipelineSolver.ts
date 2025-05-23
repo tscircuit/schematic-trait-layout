@@ -1,7 +1,7 @@
 import type { InputNetlist } from "lib/input-types"
 import { BaseSolver } from "./BaseSolver"
-import { AdaptSolver } from "./AdaptSolver"
-import { MatchSolver } from "./MatchSolver"
+import { AdaptPhaseSolver } from "./AdaptPhaseSolver"
+import { MatchPhaseSolver } from "./MatchPhaseSolver"
 
 type PipelineStep<T extends new (...args: any[]) => BaseSolver> = {
   solverName: string
@@ -36,8 +36,8 @@ function definePipelineStep<
 export class SchematicLayoutPipelineSolver extends BaseSolver {
   inputNetlist: InputNetlist
 
-  matchSolver?: MatchSolver
-  adaptSolver?: AdaptSolver
+  matchPhaseSolver?: MatchPhaseSolver
+  adaptPhaseSolver?: AdaptPhaseSolver
 
   startTimeOfPhase: Record<string, number> = {}
   endTimeOfPhase: Record<string, number> = {}
@@ -46,10 +46,19 @@ export class SchematicLayoutPipelineSolver extends BaseSolver {
   pipelineDef = [
     // TODO partition
     // TODO match
-    definePipelineStep("matchSolver", MatchSolver, () => [], {
-      onSolved: (pipeline) => {},
-    }),
-    definePipelineStep("adaptSolver", AdaptSolver, () => [], {
+    definePipelineStep(
+      "matchPhaseSolver",
+      MatchPhaseSolver,
+      () => [
+        {
+          inputNetlists: this.inputNetlist,
+        },
+      ],
+      {
+        onSolved: (pipeline) => {},
+      },
+    ),
+    definePipelineStep("adaptPhaseSolver", AdaptPhaseSolver, () => [], {
       onSolved: (pipeline) => {},
     }),
     // TODO adapt
