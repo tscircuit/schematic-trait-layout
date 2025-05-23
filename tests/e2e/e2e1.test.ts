@@ -49,7 +49,11 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
     `\n${solver.matchPhaseSolver?.outputMatchedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-    undefined
+     U1        U2
+    ┌───┐     ┌───┐
+    ┤1 4├─────┤1 2├
+    ┤2 3├     └───┘
+    └───┘
     "
   `)
 })

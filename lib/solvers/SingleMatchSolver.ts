@@ -29,5 +29,6 @@ export class SingleMatchSolver extends BaseSolver {
       this.inputNetlist,
       this.templates,
     )
+    this.solved = true
   }
 }
