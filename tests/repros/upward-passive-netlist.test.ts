@@ -11,7 +11,6 @@ test("upward-passive-netlist", () => {
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
           A
-          │
      U1   │
     ┌───┐ R2
     ┤1 2├ │
