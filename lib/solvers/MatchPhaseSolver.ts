@@ -11,7 +11,7 @@ export class MatchPhaseSolver extends BaseSolver {
   inputNetlists: InputNetlist[]
   currentInputNetlistIndex = 0
 
-  matchedTemplates: Array<{
+  outputMatchedTemplates: Array<{
     template: CircuitBuilder
     netlist: InputNetlist
   }> = []
@@ -27,11 +27,20 @@ export class MatchPhaseSolver extends BaseSolver {
     if (this.activeSubSolver) {
       this.activeSubSolver.step()
       if (this.activeSubSolver.solved) {
+        this.outputMatchedTemplates.push({
+          template: this.activeSubSolver.outputBestMatchTemplate!,
+          netlist: this.inputNetlists[this.currentInputNetlistIndex]!,
+        })
+
         this.currentInputNetlistIndex++
         this.activeSubSolver = null
       } else {
         return
       }
+    }
+    if (this.currentInputNetlistIndex >= this.inputNetlists.length) {
+      this.solved = true
+      return
     }
 
     this.activeSubSolver = new SingleMatchSolver({

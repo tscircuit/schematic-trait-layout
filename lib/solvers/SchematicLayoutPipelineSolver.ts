@@ -51,7 +51,7 @@ export class SchematicLayoutPipelineSolver extends BaseSolver {
       MatchPhaseSolver,
       () => [
         {
-          inputNetlists: this.inputNetlist,
+          inputNetlists: [this.inputNetlist] as InputNetlist[],
         },
       ],
       {

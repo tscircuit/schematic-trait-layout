@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- For test files, we use bun:test and use one test per file. For multiple tests, we enumerate like "myFunction01.test.ts", "myFunction02.test.ts" etc.
+- Tests should generate start with user input created with the `CircuitBuilder`, then should have a `.toMatchInlineSnapshot` to help visualize the input created for the test, then the test content with `.toMatchInlineSnapshot` to verify the major output. Small assertions are not important.
