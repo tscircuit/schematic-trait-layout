@@ -27,6 +27,18 @@ Because the algorithm is extended by adding new templates, it is simple to
 extend to algorithm to handle new scenarios as users need them or as edge cases
 are found.
 
+## Usage
+
+You should create an `InputNetlist` to describe your schematic input. You can
+then call `getLayoutForNetlist` to get `CircuitBuilder` instance with the
+layout applied.
+
+```tsx
+import { getLayoutForNetlist } from "@tscircuit/pmars-layout"
+
+const circuitBuilder = getLayout({})
+```
+
 ## Great Reference Schematics
 
 - https://cdn.sparkfun.com/assets/7/7/2/1/9/SparkFun_STM32_Thing_Plus.pdf
