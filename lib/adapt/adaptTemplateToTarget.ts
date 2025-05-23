@@ -4,7 +4,6 @@ import { applyEditOperation } from "./applyEditOperation"
 import type {
   AddPinsToSideOp,
   AddPinToSideOp,
-  AddPinToSideOp,
   EditOperation,
 } from "./EditOperation"
 import { computeEditOperationsToFixPinSubsetNetlist } from "./computeEditOperationsToFixPinSubsetNetlist"
@@ -62,7 +61,8 @@ export function adaptTemplateToTarget(params: {
           afterPin = chip.leftPinCount + chip.bottomPinCount
         } else if (side === "right") {
           // Add to the end (top-most) of the right side.
-          afterPin = chip.leftPinCount + chip.bottomPinCount + chip.rightPinCount
+          afterPin =
+            chip.leftPinCount + chip.bottomPinCount + chip.rightPinCount
         } else {
           // side === "top"
           // Add to the end (right-most) of the top side.
