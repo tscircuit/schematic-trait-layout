@@ -34,9 +34,46 @@ then call `getLayoutForNetlist` to get `CircuitBuilder` instance with the
 layout applied.
 
 ```tsx
-import { getLayoutForNetlist } from "@tscircuit/pmars-layout"
+import { SchematicLayoutPipelineSolver } from "@tscircuit/pmars-layout"
 
-const circuitBuilder = getLayout({})
+const solver = new SchematicLayoutPipelineSolver({
+  inputNetlist: {
+    boxes: [
+      {
+        boxId: "U1",
+        leftPinCount: 2,
+        rightPinCount: 2,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "R1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
+    connections: [
+      {
+        connectedPorts: [
+          { boxId: "U1", pinNumber: 1 },
+          { boxId: "R1", pinNumber: 1 },
+        ],
+      },
+      {
+        connectedPorts: [{ boxId: "U1", pinNumber: 4 }, { netId: "VCC" }],
+      },
+    ],
+    nets: [{ netId: "VCC" }, { netId: "GND" }],
+  },
+})
+
+solver.solve()
+
+console.log(solver.toAsciiString())
+
+// You can access the position of each box via circuitBuilder.chips
 ```
 
 ## Great Reference Schematics
