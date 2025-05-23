@@ -49,11 +49,13 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
     `\n${solver.matchPhaseSolver?.outputMatchedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-     U1        U2
-    ┌───┐     ┌───┐
-    ┤1 4├─────┤1 2├
-    ┤2 3├     └───┘
-    └───┘
+             U1
+            ┌───┐
+    ├───────┤1 4├───D
+    │    ┌──┤2 3├───C
+    R2   │  └───┘
+    │    B
+    A
     "
   `)
 
@@ -61,12 +63,39 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
     `\n${solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-     U1
-    ┌───┐
-    ┤1 4├───
-    ┤2 3├
-    └───┘
+              U1
+             ┌───┐
+     ────────┤1 4├───D
+     │    ┌──┤2 3├───C
+    ER2   │  └───┘
+     A    B
     "
+  `)
+
+  expect(
+    solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.getReadableNetlist(),
+  ).toMatchInlineSnapshot(`
+    "Boxes:
+
+
+                      ┌────────────────┐
+                     1│       U1       │4  ── D         
+               B ──  2│                │3  ── C         
+                      └────────────────┘
+
+
+                                       
+                              │        
+                              3        
+                      ┌────────────────┐
+               E ──  1│       R2       │                
+                      └────────────────┘
+                              2        
+                              │        
+                              A        
+
+    Complex Connections (more than 2 points):
+      (none)"
   `)
 
   expect(
@@ -74,23 +103,32 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
   ).toMatchInlineSnapshot(`
     [
       {
-        "chipId": "U1",
-        "pinNumber": 2,
+        "betweenPinNumbers": [
+          0,
+          1,
+        ],
+        "chipId": "R2",
+        "side": "left",
+        "type": "add_pin_to_side",
+      },
+      {
+        "betweenPinNumbers": [
+          2,
+          3,
+        ],
+        "chipId": "R2",
+        "side": "right",
+        "type": "add_pin_to_side",
+      },
+      {
+        "chipId": "R2",
+        "pinNumber": 1,
         "type": "add_label_to_pin",
       },
       {
-        "chipId": "U1",
+        "chipId": "R2",
         "pinNumber": 3,
-        "type": "add_label_to_pin",
-      },
-      {
-        "chipId": "U1",
-        "pinNumber": 4,
-        "type": "add_label_to_pin",
-      },
-      {
-        "chipId": "U2",
-        "type": "remove_chip",
+        "type": "clear_pin",
       },
     ]
   `)
