@@ -55,20 +55,40 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
   // Matching issues
   expect(
     getMatchingIssues({
-      candidateNetlist: normalizeNetlist(inputCircuit.getNetlist())
+      targetNetlist: normalizeNetlist(inputCircuit.getNetlist())
         .normalizedNetlist,
-      targetNetlist: normalizeNetlist(template3().getNetlist())
+      candidateNetlist: normalizeNetlist(template3().getNetlist())
         .normalizedNetlist,
     }),
-  ).toMatchInlineSnapshot(`[]`)
+  ).toMatchInlineSnapshot(`
+    [
+      {
+        "candidateBoxIndex": 0,
+        "targetBoxIndex": 0,
+        "targetPinNumber": 1,
+        "targetPinShapeSignature": "L0B0R1T0|C",
+        "type": "matched_box_missing_pin_shape",
+      },
+    ]
+  `)
   expect(
     getMatchingIssues({
-      candidateNetlist: normalizeNetlist(inputCircuit.getNetlist())
+      targetNetlist: normalizeNetlist(inputCircuit.getNetlist())
         .normalizedNetlist,
-      targetNetlist: normalizeNetlist(template4().getNetlist())
+      candidateNetlist: normalizeNetlist(template4().getNetlist())
         .normalizedNetlist,
     }),
-  ).toMatchInlineSnapshot(`[]`)
+  ).toMatchInlineSnapshot(`
+    [
+      {
+        "candidateBoxIndex": 0,
+        "targetBoxIndex": 0,
+        "targetPinNumber": 1,
+        "targetPinShapeSignature": "L0B0R1T0|C",
+        "type": "matched_box_missing_pin_shape",
+      },
+    ]
+  `)
 
   // 2. Find the best match against all templates
   const bestMatchCircuit = findBestMatch(
@@ -84,13 +104,14 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
   // TODO this is incorrect, template4 is a better match than template3
   expect(`\n${bestMatchCircuit!.toString()}\n`).toMatchInlineSnapshot(`
     "
-     U1     A
-    ┌───┐   │
-    │  3├───┤
-    │  2├─C │
-    │  1├┐  R2
-    └───┘│  │
-         D  B
+     U1
+    ┌───┐      A
+    │  3├───●──┤
+    │  2├─┐ │  │
+    │  1├┐│ R3 R2
+    └───┘│└─┘  │
+         │     │
+         C     B
     "
   `)
 })

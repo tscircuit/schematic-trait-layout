@@ -3,7 +3,8 @@ import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 import { getPinSubsetNetlist } from "./getPinSubsetNetlist"
 
 export const getPinShapeSignature = (params: {
-  netlist: InputNetlist
+  netlist?: InputNetlist
+  normNetlist?: InputNetlist
   chipId: string
   pinNumber: number
 }): string => {
@@ -17,7 +18,7 @@ export const getPinShapeSignature = (params: {
 
   const normNetlist = normalizeNetlist(pinShapeNetlist)
 
-  return `B${normNetlist.normalizedNetlist.boxes
+  return `${normNetlist.normalizedNetlist.boxes
     .map(
       (b) =>
         `L${b.leftPinCount}B${b.bottomPinCount}R${b.rightPinCount}T${b.topPinCount}`,

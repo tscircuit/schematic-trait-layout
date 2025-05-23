@@ -1,4 +1,4 @@
-export type PinShape =
+export type PinShapeSummary =
   | "not_connected"
   | "connected_to_label"
   | "connected_to_passive"
@@ -21,7 +21,8 @@ export interface MatchedBoxMissingPinShape {
   targetBoxIndex: number
 
   targetPinNumber: number
-  targetPinShape: PinShape
+  targetPinShapeSignature?: string
+  targetPinShapeSummary?: PinShapeSummary
 }
 
 export interface MatchedPinOutOfPlace {
