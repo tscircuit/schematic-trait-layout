@@ -1,18 +1,14 @@
 import type { NormalizedNetlist } from "lib/scoring/types"
-import type {
-  MatchedBoxMissingPinShape,
-  NoBoxMatchingPinCounts,
-} from "../types"
+import type { MatchedBoxPinShapeInWrongPosition } from "../types"
 import { convertNormalizedNetlistToInputNetlist } from "lib/netlist/convertNormalizedNetlistToInputNetlist"
 import { getPinShapeSignature } from "lib/adapt/getPinShapeSignature"
-import { getPinSubsetNetlist } from "lib/adapt/getPinSubsetNetlist"
 
-export function findAllMatchedBoxMissingPinShape(params: {
+export function findAllMatchedBoxPinShapeInWrongPosition(params: {
   candidateNetlist: NormalizedNetlist
   targetNetlist: NormalizedNetlist
   candidateBoxIndex: number
   targetBoxIndex: number
-}): MatchedBoxMissingPinShape[] {
+}): MatchedBoxPinShapeInWrongPosition[] {
   const candidateInputNetlist = convertNormalizedNetlistToInputNetlist(
     params.candidateNetlist,
   )
@@ -32,16 +28,14 @@ export function findAllMatchedBoxMissingPinShape(params: {
     candidateBox.topPinCount +
     candidateBox.bottomPinCount
   for (let i = 0; i < candidatePinCount; i++) {
-    const pinShapeNetlist = getPinSubsetNetlist({
-      netlist: candidateInputNetlist,
-      chipId: candidateBox.boxId,
+    candidatePinShapes.push({
+      signature: getPinShapeSignature({
+        netlist: candidateInputNetlist,
+        chipId: candidateBox.boxId,
+        pinNumber: i + 1,
+      }),
       pinNumber: i + 1,
     })
-    candidatePinShapes.push(
-      getPinShapeSignature({
-        pinShapeNetlist,
-      }),
-    )
   }
 
   const unusedCandidatePinShapes = [...candidatePinShapes]
@@ -54,19 +48,10 @@ export function findAllMatchedBoxMissingPinShape(params: {
     targetBox.topPinCount +
     targetBox.bottomPinCount
   for (let i = 0; i < targetPinCount; i++) {
-    const targetPinShapeNetlist = getPinSubsetNetlist({
+    const targetPinShapeSignature = getPinShapeSignature({
       netlist: targetInputNetlist,
       chipId: targetBox.boxId,
-      pinNumber: i + 1,
-    })
-
-    // Skip pins that are simple not connected (it's not a major issue)
-    if (targetPinShapeNetlist.connections.length === 0) {
-      continue
-    }
-
-    const targetPinShapeSignature = getPinShapeSignature({
-      pinShapeNetlist: targetPinShapeNetlist,
+      pinNumber: i,
     })
 
     if (unusedCandidatePinShapes.includes(targetPinShapeSignature)) {
@@ -81,7 +66,7 @@ export function findAllMatchedBoxMissingPinShape(params: {
       type: "matched_box_missing_pin_shape",
       candidateBoxIndex: params.candidateBoxIndex,
       targetBoxIndex: params.targetBoxIndex,
-      targetPinNumber: i + 1,
+      targetPinNumber: i,
       targetPinShapeSignature,
     })
   }

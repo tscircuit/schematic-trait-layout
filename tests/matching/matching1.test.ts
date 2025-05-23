@@ -7,6 +7,7 @@ import { getMatchingIssues } from "lib/matching/getMatchingIssues"
 import template3 from "templates/template3"
 import template4 from "templates/template4"
 import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
+import { getPinShapeSignature } from "lib/adapt/getPinShapeSignature"
 
 test("findBestMatch should find a compatible template and snapshot it", () => {
   // 1. Construct an input netlist using the circuit builder
@@ -52,6 +53,30 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
     "
   `)
 
+  expect(
+    getPinShapeSignature({
+      netlist: inputCircuit.getNetlist(),
+      chipId: "U1",
+      pinNumber: 3,
+    }),
+  ).toMatchInlineSnapshot(`"L0B1R0T1,L0B0R1T0|C[b0.2,b1.1,n0]"`)
+
+  expect(
+    getPinShapeSignature({
+      netlist: template3().getNetlist(),
+      chipId: "U1",
+      pinNumber: 3,
+    }),
+  ).toMatchInlineSnapshot(`"L0B1R0T1,L0B0R1T0|C[b0.2,b1.1,n0]"`)
+
+  expect(
+    getPinShapeSignature({
+      netlist: template4().getNetlist(),
+      chipId: "U1",
+      pinNumber: 3,
+    }),
+  ).toMatchInlineSnapshot(`"L0B1R0T1,L0B0R1T0|C[b0.2,b1.1,n0]"`)
+
   // Matching issues
   expect(
     getMatchingIssues({
@@ -60,17 +85,7 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
       candidateNetlist: normalizeNetlist(template3().getNetlist())
         .normalizedNetlist,
     }),
-  ).toMatchInlineSnapshot(`
-    [
-      {
-        "candidateBoxIndex": 0,
-        "targetBoxIndex": 0,
-        "targetPinNumber": 1,
-        "targetPinShapeSignature": "L0B0R1T0|C",
-        "type": "matched_box_missing_pin_shape",
-      },
-    ]
-  `)
+  ).toMatchInlineSnapshot(`[]`)
   expect(
     getMatchingIssues({
       targetNetlist: normalizeNetlist(inputCircuit.getNetlist())
@@ -78,17 +93,7 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
       candidateNetlist: normalizeNetlist(template4().getNetlist())
         .normalizedNetlist,
     }),
-  ).toMatchInlineSnapshot(`
-    [
-      {
-        "candidateBoxIndex": 0,
-        "targetBoxIndex": 0,
-        "targetPinNumber": 1,
-        "targetPinShapeSignature": "L0B0R1T0|C",
-        "type": "matched_box_missing_pin_shape",
-      },
-    ]
-  `)
+  ).toMatchInlineSnapshot(`[]`)
 
   // 2. Find the best match against all templates
   const bestMatchCircuit = findBestMatch(

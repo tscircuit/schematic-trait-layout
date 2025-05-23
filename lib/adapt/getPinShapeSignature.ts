@@ -2,19 +2,28 @@ import type { InputNetlist } from "lib/input-types"
 import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 import { getPinSubsetNetlist } from "./getPinSubsetNetlist"
 
-export const getPinShapeSignature = (params: {
-  netlist?: InputNetlist
-  normNetlist?: InputNetlist
-  chipId: string
-  pinNumber: number
-}): string => {
-  const { netlist, chipId, pinNumber } = params
+export const getPinShapeSignature = (
+  params:
+    | {
+        netlist: InputNetlist
+        chipId: string
+        pinNumber: number
+      }
+    | { pinShapeNetlist: InputNetlist },
+): string => {
+  let pinShapeNetlist: InputNetlist
 
-  const pinShapeNetlist = getPinSubsetNetlist({
-    chipId,
-    pinNumber,
-    netlist,
-  })
+  if ("pinShapeNetlist" in params) {
+    pinShapeNetlist = params.pinShapeNetlist
+  } else {
+    const { netlist, chipId, pinNumber } = params
+
+    pinShapeNetlist = getPinSubsetNetlist({
+      chipId,
+      pinNumber,
+      netlist,
+    })
+  }
 
   const normNetlist = normalizeNetlist(pinShapeNetlist)
 
