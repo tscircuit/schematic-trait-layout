@@ -1,7 +1,7 @@
 import type { InputNetlist } from "lib/input-types"
 import { BaseSolver } from "./BaseSolver"
 import type { CircuitBuilder } from "lib/builder"
-import { TEMPLATE_FNS, TEMPLATES } from "templates/index"
+import { TEMPLATE_FNS, TEMPLATE_FN_MAP } from "templates/index"
 import { findBestMatch } from "lib/matching/findBestMatch"
 
 /**

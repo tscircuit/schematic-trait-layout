@@ -1,6 +1,8 @@
 import type { CircuitBuilder } from "lib/builder"
 import type { InputNetlist } from "lib/input-types"
 import { getMatchingIssues } from "./getMatchingIssues"
+import { computeSimilarityDistanceFromIssues } from "./computeSimilarityDistanceFromIssues"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 
 export const findBestMatch = (
   inputNetlist: InputNetlist,
@@ -13,8 +15,9 @@ export const findBestMatch = (
 
   for (const template of templates) {
     const issues = getMatchingIssues({
-      candidateNetlist: template.getNetlist(),
-      targetNetlist: inputNetlist,
+      candidateNetlist: normalizeNetlist(template.getNetlist())
+        .normalizedNetlist,
+      targetNetlist: normalizeNetlist(inputNetlist).normalizedNetlist,
     })
 
     const similarityDistance = computeSimilarityDistanceFromIssues(issues)
@@ -25,7 +28,23 @@ export const findBestMatch = (
     })
   }
 
-  // TODO find the lowest similarity distance
+  if (results.length === 0) {
+    return null
+  }
 
-  // TODO return the template with the lowest similarity distance
+  let bestMatch = results[0]!
+  for (let i = 1; i < results.length; i++) {
+    if (results[i]!.similarityDistance < bestMatch.similarityDistance) {
+      bestMatch = results[i]!
+    }
+  }
+
+  // If all similarity distances are Infinity, it means no suitable match was found.
+  // This check depends on how computeSimilarityDistanceFromIssues handles "no match".
+  // Assuming lower is better and a valid match has a finite distance.
+  if (bestMatch.similarityDistance === Infinity) {
+    return null
+  }
+
+  return bestMatch.template
 }

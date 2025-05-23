@@ -14,4 +14,4 @@ export const TEMPLATE_FN_MAP = {
 } satisfies Record<string, () => CircuitBuilder>
 
 export const TEMPLATE_FNS: Array<() => CircuitBuilder> =
-  Object.values(TEMPLATE_MAP)
+  Object.values(TEMPLATE_FN_MAP)
