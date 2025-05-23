@@ -3,6 +3,10 @@ import { circuit } from "lib/builder"
 import { findBestMatch } from "lib/matching/findBestMatch"
 import type { InputNetlist } from "lib/input-types"
 import { TEMPLATE_FNS } from "templates/index"
+import { getMatchingIssues } from "lib/matching/getMatchingIssues"
+import template3 from "templates/template3"
+import template4 from "templates/template4"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 
 test("findBestMatch should find a compatible template and snapshot it", () => {
   // 1. Construct an input netlist using the circuit builder
@@ -24,6 +28,48 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
     "
   `)
 
+  expect(`\n${template3().toString()}\n`).toMatchInlineSnapshot(`
+    "
+     U1
+    ┌───┐      A
+    │  3├───●──┤
+    │  2├─┐ │  │
+    │  1├┐│ R3 R2
+    └───┘│└─┘  │
+         │     │
+         C     B
+    "
+  `)
+  expect(`\n${template4().toString()}\n`).toMatchInlineSnapshot(`
+    "
+     U1     A
+    ┌───┐   │
+    │  3├───┤
+    │  2├─C │
+    │  1├┐  R2
+    └───┘│  │
+         D  B
+    "
+  `)
+
+  // Matching issues
+  expect(
+    getMatchingIssues({
+      candidateNetlist: normalizeNetlist(inputCircuit.getNetlist())
+        .normalizedNetlist,
+      targetNetlist: normalizeNetlist(template3().getNetlist())
+        .normalizedNetlist,
+    }),
+  ).toMatchInlineSnapshot(`[]`)
+  expect(
+    getMatchingIssues({
+      candidateNetlist: normalizeNetlist(inputCircuit.getNetlist())
+        .normalizedNetlist,
+      targetNetlist: normalizeNetlist(template4().getNetlist())
+        .normalizedNetlist,
+    }),
+  ).toMatchInlineSnapshot(`[]`)
+
   // 2. Find the best match against all templates
   const bestMatchCircuit = findBestMatch(
     inputCircuit.getNetlist(),
@@ -36,15 +82,15 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
   // 4. Take an inline snapshot of the matched template's string representation
   // This input is designed to match template1.
   // TODO this is incorrect, template4 is a better match than template3
-  // expect(`\n${bestMatchCircuit!.toString()}\n`).toMatchInlineSnapshot(`
-  //   "
-  //    U1     A
-  //   ┌───┐   │
-  //   │  3├───┤
-  //   │  2├─C │
-  //   │  1├┐  R2
-  //   └───┘│  │
-  //        D  B
-  //   "
-  // `)
+  expect(`\n${bestMatchCircuit!.toString()}\n`).toMatchInlineSnapshot(`
+    "
+     U1     A
+    ┌───┐   │
+    │  3├───┤
+    │  2├─C │
+    │  1├┐  R2
+    └───┘│  │
+         D  B
+    "
+  `)
 })
