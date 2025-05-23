@@ -29,24 +29,25 @@ test("areNetlistsCompatible with template4", () => {
   // Create snapshots
   expect(`\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
-    │  3├────┬──L
-    │  2├─L  │
-    │  1├    P
+    │  3├────┼──B
+    │  2├─C  │
+    │  1├    R2
     └───┘    │
-             L
+             A
     "
   `)
 
   expect(`\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
-            L
+     U1     A
     ┌───┐   │
     │  3├───┤
-    │  2├─L │
-    │  1├┐  P
+    │  2├─C │
+    │  1├┐  R2
     └───┘│  │
-         L  L
+         D  B
     "
   `)
 
@@ -76,7 +77,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 2,
             },
             {
-              "netIndex": 2,
+              "netIndex": 0,
             },
           ],
         },
@@ -102,7 +103,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "netIndex": 0,
+              "netIndex": 2,
             },
           ],
         },
@@ -147,7 +148,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "netIndex": 3,
+              "netIndex": 0,
             },
           ],
         },
@@ -158,7 +159,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 2,
             },
             {
-              "netIndex": 2,
+              "netIndex": 1,
             },
           ],
         },
@@ -173,7 +174,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 2,
             },
             {
-              "netIndex": 0,
+              "netIndex": 2,
             },
           ],
         },
@@ -184,7 +185,7 @@ test("areNetlistsCompatible with template4", () => {
               "pinNumber": 1,
             },
             {
-              "netIndex": 1,
+              "netIndex": 3,
             },
           ],
         },

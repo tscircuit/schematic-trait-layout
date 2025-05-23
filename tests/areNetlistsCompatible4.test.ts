@@ -15,6 +15,7 @@ test("areNetlistsCompatible2: template has extra connections/components not used
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
+     U1
     ┌───┐
     │  1├─A
     └───┘
@@ -23,6 +24,7 @@ test("areNetlistsCompatible2: template has extra connections/components not used
   expect(`\nTemplate:\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Template:
+     U1
     ┌───┐
     │  2├─E
     │  1├─A
@@ -35,7 +37,7 @@ test("areNetlistsCompatible2: template has extra connections/components not used
 
 
                       ┌────────────────┐
-                      │     chip0      │1  ── A         
+                      │       U1       │1  ── A         
                       └────────────────┘
 
     Complex Connections (more than 2 points):
@@ -46,7 +48,7 @@ test("areNetlistsCompatible2: template has extra connections/components not used
 
 
                       ┌────────────────┐
-                      │     chip0      │2  ── E         
+                      │       U1       │2  ── E         
                       │                │1  ── A         
                       └────────────────┘
 

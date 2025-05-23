@@ -16,18 +16,20 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
 
   expect(`\n${T1.toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-    L─┤1  │
-    L─┤2  │
+    A─┤1  │
+    B─┤2  │
       └───┘
     "
   `)
   expect(`\n${T2.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     │  2├─┐
     │  1├ │
-    └───┘ L
+    └───┘ A
     "
   `)
 
@@ -35,9 +37,10 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
 
   expect(`\n${T1_flipped.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
-    │  1├─L
-    │  2├─L
+    │  1├─A
+    │  2├─B
     └───┘
     "
   `)
@@ -49,17 +52,19 @@ test("createTemplateVariationsByJoiningHalfBoxes1", () => {
   expect(variations.length).toBe(2)
   expect(`\n${variations[0]!.toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-    L─┤1 4├─┐
-    L─┤2 3├ │
-      └───┘ L
+    A─┤1 4├─┐
+    B─┤2 3├ │
+      └───┘ A
     "
   `)
   expect(`\n${variations[1]!.toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-    L─┤1 4├─L
-    L─┤2 3├─L
+    A─┤1 4├─A
+    B─┤2 3├─B
       └───┘
     "
   `)

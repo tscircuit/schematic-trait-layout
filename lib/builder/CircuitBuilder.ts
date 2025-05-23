@@ -13,6 +13,8 @@ import { getGridFromCircuit } from "./getGridFromCircuit"
 import { NetlistBuilder } from "../netlist/NetlistBuilder"
 import { isSamePortRef } from "./isSamePortRef"
 
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 export class CircuitBuilder {
   chips: ChipBuilder[] = []
   netLabels: NetLabel[] = []
@@ -76,15 +78,15 @@ export class CircuitBuilder {
     return clone
   }
 
-  chip(): ChipBuilder {
-    const id = `chip${this.chips.length}`
+  chip(id?: string): ChipBuilder {
+    id ??= `U${this.chips.length + 1}`
     const c = new ChipBuilder(this, id)
     this.chips.push(c)
     return c
   }
 
   passive(): ChipBuilder {
-    const id = `passive${this.chips.length}`
+    const id = `R${this.chips.length + 1}`
     const c = new ChipBuilder(this, id, true)
     this.chips.push(c)
     return c
@@ -206,7 +208,10 @@ export class CircuitBuilder {
   }
 
   generateAutoLabel(): string {
-    return String(this.autoLabelCounter++)
+    return (
+      alphabet[this.autoLabelCounter++ - 1] ??
+      `L${this.autoLabelCounter - alphabet.length}`
+    )
   }
 
   getGrid(): any {

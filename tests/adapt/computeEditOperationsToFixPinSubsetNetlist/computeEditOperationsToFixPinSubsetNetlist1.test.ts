@@ -9,8 +9,9 @@ test("computeEditOperationsToFixPinSubsetNetlist1", () => {
 
   expect(`\n${target.toString()}\n`).toMatchInlineSnapshot(`
     "
+      U1
      ┌───┐
-    L┤1 4├
+    A┤1 4├
      ┤2 3├
      └───┘
     "
@@ -21,6 +22,7 @@ test("computeEditOperationsToFixPinSubsetNetlist1", () => {
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     ┤1 4├
     ┤2 3├
@@ -38,7 +40,7 @@ test("computeEditOperationsToFixPinSubsetNetlist1", () => {
   expect(operations).toMatchInlineSnapshot(`
     [
       {
-        "chipId": "chip0",
+        "chipId": "U1",
         "pinNumber": 1,
         "type": "add_label_to_pin",
       },

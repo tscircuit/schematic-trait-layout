@@ -13,12 +13,13 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
 
   expect(`\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
-    │  3├────┬──L
-    │  2├─L  │
-    │  1│    P
+    │  3├────┼──B
+    │  2├─C  │
+    │  1├    R2
     └───┘    │
-             L
+             A
     "
   `)
 
@@ -32,13 +33,13 @@ test("findBestMatch should find a compatible template and snapshot it", () => {
   // This input is designed to match template1.
   expect(`\n${bestMatchCircuit!.toString()}\n`).toMatchInlineSnapshot(`
     "
-            L
+     U1     A
     ┌───┐   │
     │  3├───┤
-    │  2├─L │
-    │  1├┐  P
+    │  2├─C │
+    │  1├┐  R2
     └───┘│  │
-         L  L
+         D  B
     "
   `)
 })

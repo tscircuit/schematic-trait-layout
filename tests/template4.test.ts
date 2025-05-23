@@ -5,13 +5,13 @@ test("template4", () => {
   const C = template4()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-            L
+     U1     A
     ┌───┐   │
     │  3├───┤
-    │  2├─L │
-    │  1├┐  P
+    │  2├─C │
+    │  1├┐  R2
     └───┘│  │
-         L  L
+         D  B
     "
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
@@ -19,14 +19,14 @@ test("template4", () => {
       "boxes": [
         {
           "bottomPinCount": 0,
-          "boxId": "chip0",
+          "boxId": "U1",
           "leftPinCount": 0,
           "rightPinCount": 3,
           "topPinCount": 0,
         },
         {
           "bottomPinCount": 1,
-          "boxId": "passive1",
+          "boxId": "R2",
           "leftPinCount": 0,
           "rightPinCount": 0,
           "topPinCount": 1,
@@ -36,14 +36,14 @@ test("template4", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 3,
             },
             {
-              "netId": "L1",
+              "netId": "A",
             },
             {
-              "boxId": "passive1",
+              "boxId": "R2",
               "pinNumber": 2,
             },
           ],
@@ -51,49 +51,49 @@ test("template4", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "passive1",
+              "boxId": "R2",
               "pinNumber": 1,
             },
             {
-              "netId": "L2",
+              "netId": "B",
             },
           ],
         },
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 2,
             },
             {
-              "netId": "L3",
+              "netId": "C",
             },
           ],
         },
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 1,
             },
             {
-              "netId": "L4",
+              "netId": "D",
             },
           ],
         },
       ],
       "nets": [
         {
-          "netId": "L1",
+          "netId": "A",
         },
         {
-          "netId": "L2",
+          "netId": "B",
         },
         {
-          "netId": "L3",
+          "netId": "C",
         },
         {
-          "netId": "L4",
+          "netId": "D",
         },
       ],
     }

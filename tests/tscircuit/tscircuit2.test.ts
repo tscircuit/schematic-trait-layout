@@ -137,15 +137,15 @@ export default () => (
 
   expect(`\n${C("ascii").toString()}\n`).toMatchInlineSnapshot(`
     "
-       L
+       B
        │     ┌●
-       P     ││
-       │┌───┐│P
-    ┌P─┼┤1 8├┘│
-    L  └┤2 7├─┴L
-        ┤3 6├L
+       R3U1  ││
+       │┌───┐│R4
+    ┌R2┼┤1 8├┘│
+    A  └┤2 7├─┴D
+        ┤3 6├E
         ┤4 5├┐
-        └───┘L
+        └───┘F
     "
   `)
 
@@ -191,7 +191,7 @@ export default () => (
               },
               {
                 "boxIndex": 1,
-                "pinNumber": 1,
+                "pinNumber": 2,
               },
             ],
           },
@@ -203,7 +203,7 @@ export default () => (
               },
               {
                 "boxIndex": 2,
-                "pinNumber": 2,
+                "pinNumber": 1,
               },
             ],
           },
@@ -237,7 +237,7 @@ export default () => (
               },
               {
                 "boxIndex": 3,
-                "pinNumber": 2,
+                "pinNumber": 1,
               },
               {
                 "netIndex": 4,
@@ -252,7 +252,7 @@ export default () => (
               },
               {
                 "boxIndex": 3,
-                "pinNumber": 1,
+                "pinNumber": 2,
               },
               {
                 "netIndex": 5,
@@ -263,7 +263,7 @@ export default () => (
             "connectedPorts": [
               {
                 "boxIndex": 1,
-                "pinNumber": 2,
+                "pinNumber": 1,
               },
               {
                 "netIndex": 0,
@@ -274,7 +274,7 @@ export default () => (
             "connectedPorts": [
               {
                 "boxIndex": 2,
-                "pinNumber": 1,
+                "pinNumber": 2,
               },
               {
                 "netIndex": 1,
@@ -305,18 +305,18 @@ export default () => (
       },
       "transform": {
         "boxIdToBoxIndex": {
-          "chip0": 0,
-          "passive1": 1,
-          "passive2": 2,
-          "passive3": 3,
+          "R2": 1,
+          "R3": 2,
+          "R4": 3,
+          "U1": 0,
         },
         "netIdToNetIndex": {
-          "L1": 0,
-          "L2": 1,
-          "L3": 5,
-          "L4": 4,
-          "L5": 3,
-          "L6": 2,
+          "A": 0,
+          "B": 1,
+          "C": 5,
+          "D": 4,
+          "E": 3,
+          "F": 2,
         },
       },
     }

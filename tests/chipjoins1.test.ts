@@ -20,13 +20,13 @@ test("chipjoins1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-               L       L
+        U1     A       F
        ┌───┐   │       │
-    L──┤1 6├───┘       │
+    C──┤1 6├───┘  U2   │
        ┤2 5├──┐  ┌───┐ │
      ┌─┤3 4├┐ └──┤1 4├─┘
      │ └───┘│  ┌─┤2 3├
-     L      L  L └───┘
+     D      B  E └───┘
     "
   `)
 })

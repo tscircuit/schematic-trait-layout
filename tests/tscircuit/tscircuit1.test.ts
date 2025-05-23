@@ -309,9 +309,10 @@ export default () => (
 
   expect(`\n${C("ascii").toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-    ┌P┤1 4├
-    L ┤2 3├L
+    ┌R21 4├
+    A ┤2 3├B
       └───┘
     "
   `)
@@ -423,7 +424,7 @@ export default () => (
               },
               {
                 "boxIndex": 1,
-                "pinNumber": 1,
+                "pinNumber": 2,
               },
             ],
           },
@@ -442,7 +443,7 @@ export default () => (
             "connectedPorts": [
               {
                 "boxIndex": 1,
-                "pinNumber": 2,
+                "pinNumber": 1,
               },
               {
                 "netIndex": 0,
@@ -461,12 +462,12 @@ export default () => (
       },
       "transform": {
         "boxIdToBoxIndex": {
-          "chip0": 0,
-          "passive1": 1,
+          "R2": 1,
+          "U1": 0,
         },
         "netIdToNetIndex": {
-          "L1": 0,
-          "L2": 1,
+          "A": 0,
+          "B": 1,
         },
       },
     }
