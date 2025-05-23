@@ -58,9 +58,18 @@ export class SchematicLayoutPipelineSolver extends BaseSolver {
         onSolved: (pipeline) => {},
       },
     ),
-    definePipelineStep("adaptPhaseSolver", AdaptPhaseSolver, () => [], {
-      onSolved: (pipeline) => {},
-    }),
+    definePipelineStep(
+      "adaptPhaseSolver",
+      AdaptPhaseSolver,
+      () => [
+        {
+          matchedTemplates: this.matchPhaseSolver?.outputMatchedTemplates!,
+        },
+      ],
+      {
+        onSolved: (pipeline) => {},
+      },
+    ),
     // TODO adapt
     // TODO refine
     // TODO stitch
