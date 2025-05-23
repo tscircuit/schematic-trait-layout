@@ -24,7 +24,7 @@ export default () => {
     .line(2, 0)
     .line(0, 1)
     .passive()
-    .line(0, 1)
+    .line(0, 2)
     .intersect()
   U1.pin(1).line(1, 0).line(0, -3).label()
 

@@ -128,7 +128,7 @@ export default () => (
     // U1.pin(3).line(-1, 0).line(0, -1).connect()
     // U1.pin(4).line(-1, 0).line(0, -1).label()
     U1.pin(8).line(1, 0).line(0, 3).line(1, 0).intersect()
-    U1.pin(7).line(2, 0).mark("m1").line(0, 2).passive().line(0, 1).label()
+    U1.pin(7).line(2, 0).mark("m1").line(0, 2).passive().line(0, 3).label()
     U1.fromMark("m1").line(1, 0).label()
     U1.pin(6).line(1, 0).label()
     U1.pin(5).line(1, 0).line(0, -1).label()
@@ -137,8 +137,8 @@ export default () => (
 
   expect(`\n${C("ascii").toString()}\n`).toMatchInlineSnapshot(`
     "
-       B
-       │     ┌●
+              C
+       B     ┌●
        R3U1  ││
        │┌───┐│R4
     ┌R2┼┤1 8├┘│
