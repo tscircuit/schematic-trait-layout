@@ -16,6 +16,7 @@ test("areNetlistsCompatible2: identical netlists using chip builder", () => {
   expect(`\nInput:\n${inputChip.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
+     U1
     ┌───┐
     │  1A
     └───┘
@@ -24,6 +25,7 @@ test("areNetlistsCompatible2: identical netlists using chip builder", () => {
   expect(`\nTemplate:\n${templateChip.toString()}\n`).toMatchInlineSnapshot(`
     "
     Template:
+     U1
     ┌───┐
     │  1A
     └───┘
@@ -48,6 +50,7 @@ test("areNetlistsCompatible2: template has more pins on a box", () => {
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
+     U1
     ┌───┐
     │  1A
     └───┘
@@ -56,6 +59,7 @@ test("areNetlistsCompatible2: template has more pins on a box", () => {
   expect(`\nTemplate:\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Template:
+     U1
     ┌───┐
     │  2├
     │  1A
@@ -84,6 +88,7 @@ test("areNetlistsCompatible2: input requires more pins than template", () => {
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
+     U1
     ┌───┐
     │  2B
     │  1A
@@ -93,6 +98,7 @@ test("areNetlistsCompatible2: input requires more pins than template", () => {
   expect(`\nTemplate:\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Template:
+     U1
     ┌───┐
     │  1A
     └───┘
@@ -119,14 +125,16 @@ test("areNetlistsCompatible2: different number of boxes (components)", () => {
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
+     U1
     ┌───┐
-    │  1├A
+    │  1├RA
     └───┘
     "
   `)
   expect(`\nTemplate:\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Template:
+     U1
     ┌───┐
     │  1A
     └───┘
@@ -157,6 +165,7 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
   expect(`\nInput:\n${inputCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Input:
+     U1
     ┌───┐
     │  2├●
     │  1├┘
@@ -166,6 +175,7 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
   expect(`\nTemplate:\n${templateCircuit.toString()}\n`).toMatchInlineSnapshot(`
     "
     Template:
+     U1
     ┌───┐
     │  2├●─A
     │  1├┘
@@ -178,8 +188,8 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
 
 
                       ┌────────────────┐
-                      │     chip0      │2  ── chip0.1   
-                      │                │1  ── chip0.2   
+                      │       U1       │2  ── U1.1      
+                      │                │1  ── U1.2      
                       └────────────────┘
 
     Complex Connections (more than 2 points):
@@ -191,15 +201,15 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
 
 
                       ┌────────────────┐
-                      │     chip0      │2  ── ...       
+                      │       U1       │2  ── ...       
                       │                │1  ── ...       
                       └────────────────┘
 
     Complex Connections (more than 2 points):
       - Connection 1:
-        - Box Pin: chip0, Pin 1
+        - Box Pin: U1, Pin 1
         - Net: A
-        - Box Pin: chip0, Pin 2"
+        - Box Pin: U1, Pin 2"
   `)
 
   expect(inputCircuit.getNetlist()).toMatchInlineSnapshot(`
@@ -207,7 +217,7 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
       "boxes": [
         {
           "bottomPinCount": 0,
-          "boxId": "chip0",
+          "boxId": "U1",
           "leftPinCount": 0,
           "rightPinCount": 2,
           "topPinCount": 0,
@@ -217,11 +227,11 @@ test("areNetlistsCompatible2: input connection satisfied by a larger template co
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 1,
             },
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 2,
             },
           ],

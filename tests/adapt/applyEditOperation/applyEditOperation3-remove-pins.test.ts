@@ -7,6 +7,7 @@ test("remove pins from side", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     ┤1  │
     ┤2  │
@@ -16,14 +17,13 @@ test("remove pins from side", () => {
   `)
 
   applyEditOperation(C, {
-    type: "remove_pins_from_side",
+    type: "remove_pin_from_side",
     chipId: U.chipId,
     side: "left",
-    oldPinCount: 3,
-    newPinCount: 1,
+    pinNumber: 1,
   })
-  expect(U.leftPinCount).toBe(1)
-  expect(U.totalPinCount).toBe(2)
+  expect(U.leftPinCount).toBe(2)
+  expect(U.totalPinCount).toBe(3)
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
     ┌───┐

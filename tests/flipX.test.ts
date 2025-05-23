@@ -9,6 +9,7 @@ test("flipX should flip the circuit horizontally", () => {
 
   expect(`\n${c.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     │  2├───A
     │  1├─B
@@ -22,6 +23,7 @@ test("flipX should flip the circuit horizontally", () => {
   // lines etc. so the netlist is actually changing a little
   expect(`\n${c.toString()}\n`).toMatchInlineSnapshot(`
     "
+         U1
         ┌───┐
     A───┤1  │
       B─┤2  │

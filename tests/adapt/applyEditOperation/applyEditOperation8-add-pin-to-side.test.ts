@@ -10,10 +10,11 @@ test("add pin to side", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-     L┤1  │
+     A┤1  │
     ┌─┤2 3├
-    L └───┘
+    B └───┘
     "
   `)
 
@@ -30,11 +31,12 @@ test("add pin to side", () => {
   // Expect pin 1, then new pin, then pin 2 (now pin 3)
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-     L┤1  │
+     A┤1  │
       ┤2  │
     ┌─┤3 4├
-    L └───┘
+    B └───┘
     "
   `)
 })

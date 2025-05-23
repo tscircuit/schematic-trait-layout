@@ -22,15 +22,15 @@ test("getReadableNetlist", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-               L       L
+        U1     A       F
        ┌───┐   │       │
-    L──┤1 6├───┘       │
+    C──┤1 6├───┘  U2   │
        ┤2 5├──┐  ┌───┐ │
      ┌─┤3 4├┐ └──┤1 4├─┤
      │ └───┘│  ┌─┤2 3├ │
-     L      L  L └───┘ P
+     D      B  E └───┘ R3
                        │
-                       L
+                       G
     "
   `)
 
@@ -39,15 +39,15 @@ test("getReadableNetlist", () => {
 
 
                       ┌────────────────┐
-              L3 ──  1│                │6  ── L1        
-                     2│     chip0      │5  ── chip1.1   
-              L4 ──  3│                │4  ── L2        
+               C ──  1│                │6  ── A         
+                     2│       U1       │5  ── U2.1      
+               D ──  3│                │4  ── B         
                       └────────────────┘
 
 
                       ┌────────────────┐
-         chip0.5 ──  1│     chip1      │4  ── ...       
-              L5 ──  2│                │3               
+            U1.5 ──  1│       U2       │4  ── ...       
+               E ──  2│                │3               
                       └────────────────┘
 
 
@@ -55,16 +55,16 @@ test("getReadableNetlist", () => {
                               │        
                               2        
                       ┌────────────────┐
-                      │    passive2    │                
+                      │       R3       │                
                       └────────────────┘
                               1        
                               │        
-                              L7       
+                              G        
 
     Complex Connections (more than 2 points):
       - Connection 1:
-        - Box Pin: chip1, Pin 4
-        - Net: L6
-        - Box Pin: passive2, Pin 2"
+        - Box Pin: U2, Pin 4
+        - Net: F
+        - Box Pin: R3, Pin 2"
     `)
 })

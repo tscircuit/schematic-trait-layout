@@ -10,13 +10,13 @@ test("clone", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-            L
+     U1     A
     ┌───┐   │
     ┤1 6├───┤
     ┤2 5├   │
-    ┤3 4├   P
+    ┤3 4├   R2
     └───┘   │
-            L
+            B
     "
   `)
 
@@ -24,13 +24,13 @@ test("clone", () => {
 
   expect(`\n${C2.toString()}\n`).toMatchInlineSnapshot(`
     "
-            L
+     U1     A
     ┌───┐   │
     ┤1 6├───┤
     ┤2 5├   │
-    ┤3 4├   P
+    ┤3 4├   R2
     └───┘   │
-            L
+            B
     "
   `)
 })

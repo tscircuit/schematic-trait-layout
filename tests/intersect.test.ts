@@ -9,6 +9,7 @@ test(".intersect", () => {
 
   expect(`\n${c.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     │  2├─┐
     │  1├─●─A
@@ -21,7 +22,7 @@ test(".intersect", () => {
       "boxes": [
         {
           "bottomPinCount": 0,
-          "boxId": "chip0",
+          "boxId": "U1",
           "leftPinCount": 0,
           "rightPinCount": 2,
           "topPinCount": 0,
@@ -31,14 +32,14 @@ test(".intersect", () => {
         {
           "connectedPorts": [
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 1,
             },
             {
               "netId": "A",
             },
             {
-              "boxId": "chip0",
+              "boxId": "U1",
               "pinNumber": 2,
             },
           ],

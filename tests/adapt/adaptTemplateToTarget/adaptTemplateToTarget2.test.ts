@@ -15,8 +15,9 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
 
   expect(`\n${target.toString()}\n`).toMatchInlineSnapshot(`
     "
+       U1
       ┌───┐
-    L─┤1 4├
+    A─┤1 4├
       ┤2 3├
       └───┘
     "
@@ -24,8 +25,9 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
-    ┤1 4├─L
+    ┤1 4├─A
     ┤2 3├
     └───┘
     "
@@ -40,12 +42,12 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
   expect(appliedOperations).toMatchInlineSnapshot(`
     [
       {
-        "chipId": "chip0",
+        "chipId": "U1",
         "pinNumber": 1,
         "type": "add_label_to_pin",
       },
       {
-        "chipId": "chip0",
+        "chipId": "U1",
         "pinNumber": 4,
         "type": "clear_pin",
       },
@@ -54,8 +56,9 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
+      U1
      ┌───┐
-    L┤1 4├
+    B┤1 4├
      ┤2 3├
      └───┘
     "

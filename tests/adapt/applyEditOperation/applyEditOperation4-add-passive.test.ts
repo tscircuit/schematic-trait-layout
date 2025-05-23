@@ -7,6 +7,7 @@ test("add passive to pin", () => {
   U.pin(1).line(-1, 0)
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+      U1
      ┌───┐
     ─┤1  │
      └───┘
@@ -20,8 +21,9 @@ test("add passive to pin", () => {
   expect(C.chips.length).toBe(2) // original + passive
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
+      U1
      ┌───┐
-    P┤1  │
+    R21  │
      └───┘
     "
   `)

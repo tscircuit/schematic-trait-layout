@@ -13,6 +13,7 @@ test("adaptTemplateToTarget adds missing pins on a side", () => {
 
   expect(`\n${target.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     ┤1 4├
     ┤2 3├
@@ -22,6 +23,7 @@ test("adaptTemplateToTarget adds missing pins on a side", () => {
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     ┤1 2├
     └───┘
@@ -41,7 +43,7 @@ test("adaptTemplateToTarget adds missing pins on a side", () => {
           0,
           1,
         ],
-        "chipId": "chip0",
+        "chipId": "U1",
         "side": "left",
         "type": "add_pin_to_side",
       },
@@ -50,7 +52,7 @@ test("adaptTemplateToTarget adds missing pins on a side", () => {
           3,
           4,
         ],
-        "chipId": "chip0",
+        "chipId": "U1",
         "side": "right",
         "type": "add_pin_to_side",
       },
@@ -63,6 +65,7 @@ test("adaptTemplateToTarget adds missing pins on a side", () => {
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     ┤1 4├
     ┤2 3├

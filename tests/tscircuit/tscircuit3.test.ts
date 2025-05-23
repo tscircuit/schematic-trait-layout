@@ -51,6 +51,7 @@ export default () => (
 
   expect(`\n${C("ascii").toString()}\n`).toMatchInlineSnapshot(`
     "
+     U1
     ┌───┐
     ┤1 2├
     └───┘
