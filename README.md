@@ -1,7 +1,12 @@
-# @tscircuit/mash-layout
+# @tscircuit/pmars-layout
 
-An automatic layout system for schematics that uses a pre-baked templates and
-a scoring system to determine the best layout.
+An automatic layout system for schematics that uses the **PMARS** pattern:
+
+- **Partition** the input schematic
+- **Match** partitions with close, pregenerated templates
+- **Adapt** the template until the netlist matches the partition
+- **Refine** the layout to fix overlapping or clutter caused by adaptation
+- **Stitch** the laid-out partitions together
 
 ## Motivation
 
