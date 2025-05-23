@@ -70,10 +70,23 @@ export class PinBuilder {
       passive.bottompins(1).toppins(1)
     }
 
+    const entrySide =
+      this.lastDx > 0
+        ? "left"
+        : this.lastDx < 0
+          ? "right"
+          : this.lastDy > 0
+            ? "bottom"
+            : "top"
+
     const entryPin =
-      entryDirection === "horizontal" ? passive.pin(1) : passive.pin(2)
+      entrySide === "left" || entrySide === "bottom"
+        ? passive.pin(1)
+        : passive.pin(2)
     const exitPin =
-      entryDirection === "horizontal" ? passive.pin(2) : passive.pin(1)
+      entrySide === "left" || entrySide === "bottom"
+        ? passive.pin(2)
+        : passive.pin(1)
 
     this.lastCreatedLine!.end.ref = entryPin.ref
 
@@ -88,7 +101,7 @@ export class PinBuilder {
   }
 
   label(text?: string): void {
-    const id = text ?? `${this.circuit.generateAutoLabel()}`
+    const id = text ?? this.circuit.generateAutoLabel()
     this.circuit.netLabels.push({
       labelId: id,
       x: this.x,

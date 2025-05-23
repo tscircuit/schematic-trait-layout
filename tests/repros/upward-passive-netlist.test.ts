@@ -25,12 +25,12 @@ test("upward-passive-netlist", () => {
 
 
                       ┌────────────────┐
-            R2.2 ──  1│       U1       │4               
+            R2.1 ──  1│       U1       │4               
                      2│                │3               
                       └────────────────┘
 
 
-                             U1.1      
+                              A        
                               │        
                               2        
                       ┌────────────────┐
@@ -38,7 +38,7 @@ test("upward-passive-netlist", () => {
                       └────────────────┘
                               1        
                               │        
-                              A        
+                             U1.1      
 
     Complex Connections (more than 2 points):
       (none)"
