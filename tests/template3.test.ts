@@ -87,7 +87,7 @@ test("template3", () => {
             },
             {
               "boxId": "R3",
-              "pinNumber": 2,
+              "pinNumber": 1,
             },
           ],
         },
@@ -111,7 +111,7 @@ test("template3", () => {
 
                       ┌────────────────┐
                       │                │3  ── ...       
-                      │       U1       │2  ── R3.2      
+                      │       U1       │2  ── R3.1      
                       │                │1  ── C         
                       └────────────────┘
 
@@ -127,7 +127,7 @@ test("template3", () => {
                               B        
 
 
-                             U1.2      
+                                       
                               │        
                               2        
                       ┌────────────────┐
@@ -135,7 +135,7 @@ test("template3", () => {
                       └────────────────┘
                               1        
                               │        
-                                       
+                             U1.2      
 
     Complex Connections (more than 2 points):
       - Connection 1:

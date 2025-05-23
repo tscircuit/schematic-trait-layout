@@ -263,7 +263,11 @@ export class ChipBuilder {
   }
 
   fromMark(name: string): PinBuilder {
+    if (!this.marks[name]) {
+      throw new Error(`Mark "${name}" not found`)
+    }
     const { pinBuilder, state } = this.marks[name]
+
     pinBuilder.applyMarkableState(state)
     return pinBuilder
   }

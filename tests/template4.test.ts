@@ -5,13 +5,13 @@ test("template4", () => {
   const C = template4()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-     U1     L
+     U1     A
     ┌───┐   │
     │  3├───┤
-    │  2├─L │
-    │  1├┐  P
+    │  2├─C │
+    │  1├┐  R2
     └───┘│  │
-         L  L
+         D  B
     "
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
@@ -40,7 +40,7 @@ test("template4", () => {
               "pinNumber": 3,
             },
             {
-              "netId": "L1",
+              "netId": "A",
             },
             {
               "boxId": "R2",
@@ -55,7 +55,7 @@ test("template4", () => {
               "pinNumber": 1,
             },
             {
-              "netId": "L2",
+              "netId": "B",
             },
           ],
         },
@@ -66,7 +66,7 @@ test("template4", () => {
               "pinNumber": 2,
             },
             {
-              "netId": "L3",
+              "netId": "C",
             },
           ],
         },
@@ -77,23 +77,23 @@ test("template4", () => {
               "pinNumber": 1,
             },
             {
-              "netId": "L4",
+              "netId": "D",
             },
           ],
         },
       ],
       "nets": [
         {
-          "netId": "L1",
+          "netId": "A",
         },
         {
-          "netId": "L2",
+          "netId": "B",
         },
         {
-          "netId": "L3",
+          "netId": "C",
         },
         {
-          "netId": "L4",
+          "netId": "D",
         },
       ],
     }
