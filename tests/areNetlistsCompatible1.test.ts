@@ -16,10 +16,7 @@ test("areNetlistsCompatible: identical netlists", () => {
     nets: [{ netId: "N1" }],
     connections: [
       {
-        connectedPorts: [
-          { boxId: "U1", pinNumber: 1 },
-          { netId: "N1" },
-        ],
+        connectedPorts: [{ boxId: "U1", pinNumber: 1 }, { netId: "N1" }],
       },
     ],
   }
@@ -88,14 +85,34 @@ test("areNetlistsCompatible: input requires more pins than template", () => {
 
 test("areNetlistsCompatible: different number of boxes", () => {
   const input: InputNetlist = {
-    boxes: [{ boxId: "U1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "U1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [],
     connections: [],
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "U1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "U2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "U1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "U2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [],
     connections: [],
@@ -105,14 +122,30 @@ test("areNetlistsCompatible: different number of boxes", () => {
 
 test("areNetlistsCompatible: template has extra connections", () => {
   const input: InputNetlist = {
-    boxes: [{ boxId: "B1", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "B1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [{ netId: "N1" }],
     connections: [
       { connectedPorts: [{ boxId: "B1", pinNumber: 1 }, { netId: "N1" }] },
     ],
   }
   const template: InputNetlist = {
-    boxes: [{ boxId: "TB1", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "TB1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [{ netId: "TN1" }, { netId: "TN2" }],
     connections: [
       { connectedPorts: [{ boxId: "TB1", pinNumber: 1 }, { netId: "TN1" }] },
@@ -125,19 +158,48 @@ test("areNetlistsCompatible: template has extra connections", () => {
 test("areNetlistsCompatible: input connection not satisfiable (missing port in template connection)", () => {
   const input: InputNetlist = {
     boxes: [
-      { boxId: "A", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "B", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "A",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "B",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [],
     connections: [
       // Connection A.1 to B.1
-      { connectedPorts: [{ boxId: "A", pinNumber: 1 }, { boxId: "B", pinNumber: 1 }] },
+      {
+        connectedPorts: [
+          { boxId: "A", pinNumber: 1 },
+          { boxId: "B", pinNumber: 1 },
+        ],
+      },
     ],
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "TA", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "TB", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "TA",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "TB",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "TN1" }],
     connections: [
@@ -159,18 +221,47 @@ test("areNetlistsCompatible: input connection not satisfiable (missing port in t
 test("areNetlistsCompatible: input connection satisfied by a larger template connection", () => {
   const input: InputNetlist = {
     boxes: [
-      { boxId: "X", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "Y", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "X",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "Y",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [],
     connections: [
-      { connectedPorts: [{ boxId: "X", pinNumber: 1 }, { boxId: "Y", pinNumber: 1 }] },
+      {
+        connectedPorts: [
+          { boxId: "X", pinNumber: 1 },
+          { boxId: "Y", pinNumber: 1 },
+        ],
+      },
     ],
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "TX", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "TY", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "TX",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "TY",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "TNEXTRA" }],
     connections: [
@@ -188,12 +279,28 @@ test("areNetlistsCompatible: input connection satisfied by a larger template con
 
 test("areNetlistsCompatible: different boxIds but compatible structure", () => {
   const input: InputNetlist = {
-    boxes: [{ boxId: "chip1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "chip1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [],
     connections: [],
   }
   const template: InputNetlist = {
-    boxes: [{ boxId: "deviceA", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "deviceA",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [],
     connections: [],
   }
@@ -203,14 +310,30 @@ test("areNetlistsCompatible: different boxIds but compatible structure", () => {
 
 test("areNetlistsCompatible: different netIds but compatible structure and connections", () => {
   const input: InputNetlist = {
-    boxes: [{ boxId: "B1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "B1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [{ netId: "SignalA" }],
     connections: [
       { connectedPorts: [{ boxId: "B1", pinNumber: 1 }, { netId: "SignalA" }] },
     ],
   }
   const template: InputNetlist = {
-    boxes: [{ boxId: "B1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, }],
+    boxes: [
+      {
+        boxId: "B1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
     nets: [{ netId: "WireX" }],
     connections: [
       { connectedPorts: [{ boxId: "B1", pinNumber: 1 }, { netId: "WireX" }] },
@@ -223,8 +346,20 @@ test("areNetlistsCompatible: different netIds but compatible structure and conne
 test("areNetlistsCompatible: input connection not satisfied because template connection is missing a required box pin", () => {
   const input: InputNetlist = {
     boxes: [
-      { boxId: "U1", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "U2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "U1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "U2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [],
     connections: [
@@ -238,8 +373,20 @@ test("areNetlistsCompatible: input connection not satisfied because template con
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "U1", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "U2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "U1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "U2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "N1" }],
     connections: [
@@ -259,8 +406,20 @@ test("areNetlistsCompatible: input connection not satisfied because template con
 test("areNetlistsCompatible: complex compatible case", () => {
   const input: InputNetlist = {
     boxes: [
-      { boxId: "chipA", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "res1", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "chipA",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "res1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "N1" }],
     connections: [
@@ -280,27 +439,42 @@ test("areNetlistsCompatible: complex compatible case", () => {
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "IC1", leftPinCount: 2, rightPinCount: 2, topPinCount: 1, bottomPinCount: 1, }, // chipA equivalent, more pins
-      { boxId: "R01", leftPinCount: 1, rightPinCount: 1, topPinCount: 0, bottomPinCount: 0, }, // res1 equivalent
+      {
+        boxId: "IC1",
+        leftPinCount: 2,
+        rightPinCount: 2,
+        topPinCount: 1,
+        bottomPinCount: 1,
+      }, // chipA equivalent, more pins
+      {
+        boxId: "R01",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      }, // res1 equivalent
     ],
     nets: [{ netId: "NetAlpha" }, { netId: "NetBeta" }], // N1 equivalent + extra
     connections: [
-      { // Satisfies input's chipA.L1 - res1.L1
+      {
+        // Satisfies input's chipA.L1 - res1.L1
         connectedPorts: [
-          { boxId: "IC1", pinNumber: 1 },    // chipA.L1
-          { boxId: "R01", pinNumber: 1 },    // res1.L1
-          { netId: "NetBeta" },             // Extra connection part
+          { boxId: "IC1", pinNumber: 1 }, // chipA.L1
+          { boxId: "R01", pinNumber: 1 }, // res1.L1
+          { netId: "NetBeta" }, // Extra connection part
         ],
       },
-      { // Satisfies input's res1.R1 - N1
+      {
+        // Satisfies input's res1.R1 - N1
         connectedPorts: [
-          { boxId: "R01", pinNumber: 2 },    // res1.R1
-          { netId: "NetAlpha" },            // N1
+          { boxId: "R01", pinNumber: 2 }, // res1.R1
+          { netId: "NetAlpha" }, // N1
         ],
       },
-      { // Extra connection in template
+      {
+        // Extra connection in template
         connectedPorts: [
-          { boxId: "IC1", pinNumber: 2 },    // chipA.L2 (unused by input)
+          { boxId: "IC1", pinNumber: 2 }, // chipA.L2 (unused by input)
           { netId: "NetBeta" },
         ],
       },
@@ -316,8 +490,20 @@ test("areNetlistsCompatible: complex compatible case", () => {
 test("areNetlistsCompatible: input has a 3-port connection, template satisfies it", () => {
   const input: InputNetlist = {
     boxes: [
-      { boxId: "B1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "B2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "B1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "B2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "N1" }],
     connections: [
@@ -332,8 +518,20 @@ test("areNetlistsCompatible: input has a 3-port connection, template satisfies i
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "TB1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "TB2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "TB1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "TB2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "TN1" }, { netId: "TN2" /* extra net */ }],
     connections: [
@@ -353,12 +551,25 @@ test("areNetlistsCompatible: input has a 3-port connection, template satisfies i
 test("areNetlistsCompatible: input 3-port connection, template has only 2-port connections that cover parts of it", () => {
   const input: InputNetlist = {
     boxes: [
-      { boxId: "B1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "B2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "B1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "B2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "N1" }],
     connections: [
-      { // B1.1 - B2.1 - N1
+      {
+        // B1.1 - B2.1 - N1
         connectedPorts: [
           { boxId: "B1", pinNumber: 1 },
           { boxId: "B2", pinNumber: 1 },
@@ -369,22 +580,30 @@ test("areNetlistsCompatible: input 3-port connection, template has only 2-port c
   }
   const template: InputNetlist = {
     boxes: [
-      { boxId: "TB1", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
-      { boxId: "TB2", leftPinCount: 1, rightPinCount: 0, topPinCount: 0, bottomPinCount: 0, },
+      {
+        boxId: "TB1",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "TB2",
+        leftPinCount: 1,
+        rightPinCount: 0,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
     ],
     nets: [{ netId: "TN1" }],
     connections: [
-      { // TB1.1 - TN1
-        connectedPorts: [
-          { boxId: "TB1", pinNumber: 1 },
-          { netId: "TN1" },
-        ],
+      {
+        // TB1.1 - TN1
+        connectedPorts: [{ boxId: "TB1", pinNumber: 1 }, { netId: "TN1" }],
       },
-      { // TB2.1 - TN1
-        connectedPorts: [
-          { boxId: "TB2", pinNumber: 1 },
-          { netId: "TN1" },
-        ],
+      {
+        // TB2.1 - TN1
+        connectedPorts: [{ boxId: "TB2", pinNumber: 1 }, { netId: "TN1" }],
       },
       // No single template connection contains all three of {B1.1, B2.1, N1} (after normalization)
     ],

@@ -69,7 +69,9 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
     "
   `)
 
-  expect(solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.appliedOperations).toMatchInlineSnapshot(`
+  expect(
+    solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.appliedOperations,
+  ).toMatchInlineSnapshot(`
     [
       {
         "chipId": "U1",
