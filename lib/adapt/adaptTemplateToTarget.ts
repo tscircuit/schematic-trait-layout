@@ -17,6 +17,9 @@ import { computeEditOperationsToFixPinSubsetNetlist } from "./computeEditOperati
  *
  * We record all the operations so that we can "playback" the changes to the
  * template.
+ *
+ * TODO perform box matching (see getMatchedBoxes) to correctly adapt the right boxes
+ * to eachother, don't use chipId/boxId to do the matching
  */
 export function adaptTemplateToTarget(params: {
   template: CircuitBuilder
@@ -84,7 +87,11 @@ export function adaptTemplateToTarget(params: {
 
   // STEP TWO: Go through each pin and make sure it has the right shape by
   // comparing the target pin subset to the current pin subset.
+  // Only process chips that exist in the target (skip chips that will be removed)
   for (const chip of template.chips) {
+    const targetBox = targetBoxes.find((b) => b.boxId === chip.chipId)
+    if (!targetBox) continue // Skip chips that don't exist in target
+
     for (let pinNumber = 1; pinNumber <= chip.totalPinCount; pinNumber++) {
       const currentNetlistForPin = template.getNetlist()
       const operationsForPin = computeEditOperationsToFixPinSubsetNetlist({
@@ -99,6 +106,21 @@ export function adaptTemplateToTarget(params: {
         appliedOperations.push(op)
       }
     }
+  }
+
+  // STEP THREE: Remove chips that exist in template but not in target
+  const targetChipIds = new Set(targetBoxes.map((box) => box.boxId))
+  const chipsToRemove = template.chips.filter(
+    (chip) => !targetChipIds.has(chip.chipId),
+  )
+
+  for (const chip of chipsToRemove) {
+    const op: EditOperation = {
+      type: "remove_chip",
+      chipId: chip.chipId,
+    }
+    applyEditOperation(template, op)
+    appliedOperations.push(op)
   }
 
   return {

@@ -2,7 +2,7 @@ import { test, expect } from "bun:test"
 import { CircuitBuilder } from "lib/builder"
 import { adaptTemplateToTarget } from "lib/adapt/adaptTemplateToTarget"
 
-test("adaptTemplateToTarget3 demonstrates issue with extra chips not being removed", () => {
+test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", () => {
   /* target circuit (single chip) ------------------------------------- */
   const target = new CircuitBuilder()
   const tU1 = target.chip().leftpins(2).rightpins(2)
@@ -64,8 +64,7 @@ test("adaptTemplateToTarget3 demonstrates issue with extra chips not being remov
       },
       {
         "chipId": "U2",
-        "pinNumber": 1,
-        "type": "clear_pin",
+        "type": "remove_chip",
       },
     ]
   `)
@@ -73,15 +72,15 @@ test("adaptTemplateToTarget3 demonstrates issue with extra chips not being remov
   /* verify adaptation result ----------------------------------------- */
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
-      U1        U2
-     ┌───┐     ┌───┐
-     ┤1 4├───C ┤1 2├
-    A┤2 3├B    └───┘
+      U1
+     ┌───┐
+     ┤1 4├───C
+    A┤2 3├B
      └───┘
     "
   `)
 
-  // ISSUE: Currently template still has 2 chips, should be 1
-  expect(template.chips.length).toBe(2) // Should eventually be 1
-  expect(appliedOperations.some(op => op.type === "remove_chip")).toBe(false) // Should eventually be true
+  // SUCCESS: Template now has 1 chip as expected
+  expect(template.chips.length).toBe(1) // U2 was successfully removed
+  expect(appliedOperations.some(op => op.type === "remove_chip")).toBe(true) // remove_chip operation was applied
 })

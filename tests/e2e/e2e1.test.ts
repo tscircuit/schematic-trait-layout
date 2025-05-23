@@ -61,11 +61,11 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
     `\n${solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-      U1        U2
-     ┌───┐     ┌───┐
-     ┤1 4├───  ┤1 2├
-     ┤2 3├     └───┘
-    A└C──┘
+     U1
+    ┌───┐
+    ┤1 4├───
+    ┤2 3├
+    └───┘
     "
   `)
 
@@ -90,8 +90,7 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
       },
       {
         "chipId": "U2",
-        "pinNumber": 1,
-        "type": "clear_pin",
+        "type": "remove_chip",
       },
     ]
   `)
