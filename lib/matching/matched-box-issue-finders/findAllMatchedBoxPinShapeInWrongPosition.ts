@@ -2,6 +2,8 @@ import type { NormalizedNetlist } from "lib/scoring/types"
 import type { MatchedBoxPinShapeInWrongPosition } from "../types"
 import { convertNormalizedNetlistToInputNetlist } from "lib/netlist/convertNormalizedNetlistToInputNetlist"
 import { getPinShapeSignature } from "lib/adapt/getPinShapeSignature"
+import type { Side } from "lib/input-types"
+import { getPinSideIndex } from "lib/builder/getPinSideIndex"
 
 export function findAllMatchedBoxPinShapeInWrongPosition(params: {
   candidateNetlist: NormalizedNetlist
@@ -16,8 +18,12 @@ export function findAllMatchedBoxPinShapeInWrongPosition(params: {
     params.targetNetlist,
   )
 
-  const candidatePinShapes: string[] = []
-  const targetPinShapes: string[] = []
+  const candidatePinShapes: {
+    signature: string
+    side: Side
+    indexOnSide: number
+    pinNumber: number
+  }[] = []
 
   const candidateBox = candidateInputNetlist.boxes[params.candidateBoxIndex]!
   const targetBox = targetInputNetlist.boxes[params.targetBoxIndex]!
@@ -34,13 +40,12 @@ export function findAllMatchedBoxPinShapeInWrongPosition(params: {
         chipId: candidateBox.boxId,
         pinNumber: i + 1,
       }),
+      ...getPinSideIndex(i + 1, candidateBox),
       pinNumber: i + 1,
     })
   }
 
-  const unusedCandidatePinShapes = [...candidatePinShapes]
-
-  const issues: MatchedBoxMissingPinShape[] = []
+  const issues: MatchedBoxPinShapeInWrongPosition[] = []
 
   const targetPinCount =
     targetBox.leftPinCount +
@@ -51,23 +56,36 @@ export function findAllMatchedBoxPinShapeInWrongPosition(params: {
     const targetPinShapeSignature = getPinShapeSignature({
       netlist: targetInputNetlist,
       chipId: targetBox.boxId,
-      pinNumber: i,
+      pinNumber: i + 1,
     })
+    const { side: targetPinShapeSide, indexOnSide: targetPinShapeIndexOnSide } =
+      getPinSideIndex(i + 1, targetBox)
 
-    if (unusedCandidatePinShapes.includes(targetPinShapeSignature)) {
-      unusedCandidatePinShapes.splice(
-        unusedCandidatePinShapes.indexOf(targetPinShapeSignature),
-        1,
+    const allCandidatePinShapesWithSameSignatureOnSide =
+      candidatePinShapes.filter(
+        (pinShape) =>
+          pinShape.signature === targetPinShapeSignature &&
+          pinShape.side === targetPinShapeSide,
       )
-      continue
+
+    if (allCandidatePinShapesWithSameSignatureOnSide.length === 0) break
+
+    let bestHopsToCorrectPosition = Infinity
+    for (const candidatePinShape of allCandidatePinShapesWithSameSignatureOnSide) {
+      const hopsToCorrectPosition = Math.abs(
+        candidatePinShape.indexOnSide - targetPinShapeIndexOnSide,
+      )
+      if (hopsToCorrectPosition < bestHopsToCorrectPosition) {
+        bestHopsToCorrectPosition = hopsToCorrectPosition
+      }
     }
 
     issues.push({
-      type: "matched_box_missing_pin_shape",
+      type: "matched_box_pin_shape_in_wrong_position",
       candidateBoxIndex: params.candidateBoxIndex,
       targetBoxIndex: params.targetBoxIndex,
-      targetPinNumber: i,
-      targetPinShapeSignature,
+      targetPinNumber: i + 1,
+      hopsToCorrectPosition: bestHopsToCorrectPosition,
     })
   }
 
