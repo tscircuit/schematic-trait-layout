@@ -8,9 +8,11 @@ export function applyAddLabelToPin(
 ): void {
   const { chipId, pinNumber } = op
   const chip = C.chips.find((ch) => ch.chipId === chipId)
-  if (chip) {
+  if (chip && pinNumber >= 1 && pinNumber <= chip.totalPinCount) {
     const pin = chip.pin(pinNumber)
-    const unitVec = getUnitVecFromSide(pin.side)
-    pin.line(unitVec.dx, unitVec.dy).label()
+    if (pin && typeof pin.line === "function") {
+      const unitVec = getUnitVecFromSide(pin.side)
+      pin.line(unitVec.dx, unitVec.dy).label()
+    }
   }
 }
