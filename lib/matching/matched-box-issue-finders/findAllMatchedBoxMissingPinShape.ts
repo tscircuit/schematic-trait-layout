@@ -7,6 +7,11 @@ export function findAllMatchedBoxMissingPinShape(params: {
   candidateBoxIndex: number
   targetBoxIndex: number
 }): NoBoxMatchingPinCounts[] {
+  // const candidatePinShapes = getPinShapeSignature({
+  //   netlist: candidateNetlist,
+  //   chipId: candidateNetlist.boxes[candidateBoxIndex].chipId,
+  //   pinNumber: candidateNetlist.boxes[candidateBoxIndex].pinNumber,
+  // })
   // TODO
   return []
 }
