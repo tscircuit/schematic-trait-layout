@@ -1,0 +1,22 @@
+{
+  "name": "trait-layout-website",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run server.tsx",
+    "build": "bun build --target=browser --outdir=dist --entry-naming='[dir]/[name].[hash].[ext]' ./src/index.tsx --splitting",
+    "serve": "bun run dist/server.js"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@tscircuit/eval": "latest",
+    "@tscircuit/circuit-json-util": "^0.0.48",
+    "@tscircuit/create-snippet-url": "^0.0.4",
+    "circuit-to-svg": "^0.0.128"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1"
+  }
+}
