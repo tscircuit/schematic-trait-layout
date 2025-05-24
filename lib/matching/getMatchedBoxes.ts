@@ -2,6 +2,7 @@ import type { NormalizedNetlist } from "lib/scoring/types"
 import type { MatchingIssue } from "./types"
 import { computeSimilarityDistanceFromIssues } from "./computeSimilarityDistanceFromIssues"
 import { getIssuesForMatchedBoxes } from "./getIssuesForMatchedBoxes"
+import { findAllMissingConnectionBetweenBoxes } from "./matched-box-issue-finders/findAllMissingConnectionBetweenBoxes"
 
 export interface MatchedBox {
   targetBoxIndex: number
@@ -46,6 +47,17 @@ export function getMatchedBoxes(params: {
         candidateBoxIndex,
         targetBoxIndex,
       })
+
+      // Check for missing connections between this candidate box and already matched boxes
+      const connectionIssues = findAllMissingConnectionBetweenBoxes({
+        candidateNetlist,
+        targetNetlist,
+        candidateBoxIndex,
+        targetBoxIndex,
+        matchedBoxes,
+      })
+
+      issues.push(...connectionIssues)
 
       pairingResult.set(
         { targetBoxIndex, candidateBoxIndex },

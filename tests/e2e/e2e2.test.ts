@@ -56,7 +56,6 @@ test("e2e2", () => {
     `\n${solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-             J─R2B
        U1
       ┌───┐
     R3┤1 8├─I────
@@ -65,5 +64,27 @@ test("e2e2", () => {
       ┤4 5├
       └───┘
     "
+  `)
+
+  expect(
+    solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.getReadableNetlist(),
+  ).toMatchInlineSnapshot(`
+    "Boxes:
+
+
+                      ┌────────────────┐
+            R3.2 ──  1│                │8  ── I         
+               G ──  2│       U1       │7  ── H         
+                     3│                │6               
+                     4│                │5               
+                      └────────────────┘
+
+
+                      ┌────────────────┐
+                     1│       R3       │2  ── U1.1      
+                      └────────────────┘
+
+    Complex Connections (more than 2 points):
+      (none)"
   `)
 })

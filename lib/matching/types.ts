@@ -51,11 +51,21 @@ export interface MatchedBoxPinShapeInWrongPosition {
   hopsToCorrectPosition: number
 }
 
+export interface MissingConnectionBetweenBoxes {
+  type: "missing_connection_between_boxes"
+  candidateBoxIndex: number
+  targetBoxIndex: number
+  targetPinNumber: number
+  expectedConnectionWithTargetBoxIndex: number
+  expectedConnectionWithTargetBoxPinNumber: number
+}
+
 export type MatchingIssue =
   | NoBoxMatchingPinCounts
   | MatchedBoxMissingPinShape
   | MatchedBoxSideHasWrongPinCount
   | MatchedBoxPinShapeInWrongPosition
   | MatchedBoxMissingPinShapeOnSide
+  | MissingConnectionBetweenBoxes
 
 export type { MatchedBox } from "lib/matching/getMatchedBoxes"
