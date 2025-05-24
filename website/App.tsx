@@ -9,6 +9,8 @@ import {
   getBase64PoundSnippetString,
   getUncompressedSnippetString,
 } from "@tscircuit/create-snippet-url"
+import { SchematicLayoutPipelineSolver } from "lib/solvers/SchematicLayoutPipelineSolver"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
 
 const defaultCode = `import { sel } from "tscircuit"
 
@@ -96,26 +98,27 @@ export default function App() {
       // Apply layout pipeline
       const inputNetlist = convertCircuitJsonToInputNetlist(circuitJson)
 
-      // Create a simple circuit builder for layout (similar to test)
-      const C = new CircuitBuilder()
-      C.defaultChipWidth = 2
-      C.defaultPinSpacing = 0.2
+      const solver = new SchematicLayoutPipelineSolver({
+        inputNetlist: inputNetlist,
+      })
+      await solver.solve()
 
-      // Basic layout - this could be enhanced later
-      const U1 = C.chip().leftpins(2).rightpins(2)
-      U1.pin(1).line(-1, 0).passive().line(-1, 0).line(0, -1).label()
-      U1.pin(3).line(1, 0).label()
+      const outputTemplate =
+        solver.adaptPhaseSolver!.outputAdaptedTemplates[0]?.template!
 
       const newCircuitJson = applyCircuitLayoutToCircuitJson(
         circuitJson,
         inputNetlist,
-        C,
+        outputTemplate,
       )
 
       // Generate layout SVG
-      const layoutSvgString = convertCircuitJsonToSchematicSvg(newCircuitJson, {
-        grid: { cellSize: 1, labelCells: true },
-      })
+      const layoutSvgString = convertCircuitJsonToSchematicSvg(
+        newCircuitJson as any,
+        {
+          grid: { cellSize: 1, labelCells: true },
+        },
+      )
       setLayoutSvg(layoutSvgString)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error occurred")

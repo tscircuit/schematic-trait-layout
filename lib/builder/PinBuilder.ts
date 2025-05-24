@@ -16,8 +16,6 @@ export class PinBuilder {
   x = 0
   y = 0
 
-  nextLineDeltaCorrection: { x: number; y: number } | null = null
-
   lastConnected: PortReference | null = null
   lastCreatedLine: Line | null = null
   lastDx = 0
@@ -34,17 +32,13 @@ export class PinBuilder {
 
   line(dx: number, dy: number): this {
     const start = { x: this.x, y: this.y, ref: this.ref }
-    const deltaCorrection = this.nextLineDeltaCorrection ?? { x: 0, y: 0 }
-    this.x += dx * this.circuit.defaultLineDistanceMultiple + deltaCorrection.x
-    this.y += dy * this.circuit.defaultLineDistanceMultiple + deltaCorrection.y
-    if (this.nextLineDeltaCorrection) {
-      this.nextLineDeltaCorrection = null
-    }
+    this.x += dx
+    this.y += dy
     const end = { x: this.x, y: this.y, ref: this.ref }
     const line = { start, end }
     this.circuit.lines.push(line)
-    this.lastDx = dx * this.circuit.defaultLineDistanceMultiple
-    this.lastDy = dy * this.circuit.defaultLineDistanceMultiple
+    this.lastDx = dx
+    this.lastDy = dy
     this.lastCreatedLine = line
     return this
   }
@@ -62,19 +56,27 @@ export class PinBuilder {
   }
 
   passive(): PinBuilder {
-    const incomingRefOriginal = this.ref
-
     const entryDirection = this.lastDx === 0 ? "vertical" : "horizontal"
 
     const passive = this.circuit.passive() // Create new passive chip
-
-    passive.at(this.x, this.y)
 
     if (entryDirection === "horizontal") {
       passive.leftpins(1).rightpins(1)
     } else {
       passive.bottompins(1).toppins(1)
     }
+
+    // Position passive center by projecting half the passive dimension in the line direction
+    const halfWidth = passive.getWidth() / 2
+    const halfHeight = passive.getHeight() / 2
+    // Project by the dimension aligned with the movement direction
+    const centerX =
+      this.x +
+      Math.sign(this.lastDx) * (Math.abs(this.lastDx) > 0 ? halfWidth : 0)
+    const centerY =
+      this.y +
+      Math.sign(this.lastDy) * (Math.abs(this.lastDy) > 0 ? halfHeight : 0)
+    passive.at(centerX, centerY)
 
     const entrySide =
       this.lastDx > 0
@@ -94,18 +96,7 @@ export class PinBuilder {
         ? passive.pin(2)
         : passive.pin(1)
 
-    this.lastCreatedLine!.end.ref = entryPin.ref
-
-    // Push the end position of the lastCreatedLine back 1 unit
-    this.lastCreatedLine!.end.x -= Math.sign(this.lastDx) / 2
-    this.lastCreatedLine!.end.y -= Math.sign(this.lastDy) / 2
-
-    exitPin.x += Math.sign(this.lastDx) / 2
-    exitPin.y += Math.sign(this.lastDy) / 2
-    exitPin.nextLineDeltaCorrection = {
-      x: -Math.sign(this.lastDx) / 2,
-      y: -Math.sign(this.lastDy) / 2,
-    }
+    this.lastCreatedLine!.end.ref = exitPin.ref
 
     return exitPin
   }

@@ -3,8 +3,6 @@ import { PinBuilder } from "./PinBuilder"
 import type { CircuitBuilder } from "./CircuitBuilder"
 import { getPinSideIndex } from "./getPinSideIndex"
 
-const SIDES_CCW = ["left", "bottom", "right", "top"] as const
-
 interface MakePinParams {
   side: Side
   indexOnSide: number
@@ -143,7 +141,12 @@ export class ChipBuilder {
 
   getWidth(): number {
     if (this.isPassive) {
-      return 1
+      // Horizontal passive (left-right pins) uses defaultPassiveWidth
+      // Vertical passive (top-bottom pins) uses defaultPassiveHeight
+      const isHorizontal = this.leftPinCount > 0 || this.rightPinCount > 0
+      return isHorizontal
+        ? this.circuit.defaultPassiveWidth
+        : this.circuit.defaultPassiveHeight
     }
     // Temporary, eventually need to handle top and bottom pin counts
     return this.circuit.defaultChipWidth
@@ -151,7 +154,12 @@ export class ChipBuilder {
 
   getHeight(): number {
     if (this.isPassive) {
-      return 1
+      // Horizontal passive (left-right pins) uses defaultPassiveHeight
+      // Vertical passive (top-bottom pins) uses defaultPassiveWidth
+      const isHorizontal = this.leftPinCount > 0 || this.rightPinCount > 0
+      return isHorizontal
+        ? this.circuit.defaultPassiveHeight
+        : this.circuit.defaultPassiveWidth
     }
     return (
       Math.max(this.leftPinCount, this.rightPinCount) *
@@ -167,12 +175,6 @@ export class ChipBuilder {
         y: this.y,
       }
     }
-    console.table({
-      x: this.x,
-      y: this.y,
-      width: this.getWidth(),
-      height: this.getHeight(),
-    })
     return {
       x: this.x + this.getWidth() / 2,
       y: this.y + this.getHeight() / 2,
@@ -189,15 +191,15 @@ export class ChipBuilder {
   }
 
   setPinPositions(): void {
-    if (this.isPassive) {
-      const pb1 = this._getPin(1)
-      const pb2 = this._getPin(2)
-      pb1.x = this.x
-      pb1.y = this.y
-      pb2.x = this.x
-      pb2.y = this.y
-      return
-    }
+    // if (this.isPassive) {
+    //   const pb1 = this._getPin(1)
+    //   const pb2 = this._getPin(2)
+    //   pb1.x = this.x
+    //   pb1.y = this.y
+    //   pb2.x = this.x
+    //   pb2.y = this.y
+    //   return
+    // }
 
     for (let pn = 1; pn <= this.totalPinCount; pn++) {
       const pb = this._getPin(pn)
@@ -237,9 +239,12 @@ export class ChipBuilder {
     )
 
     if (this.isPassive) {
-      const dx = (this.leftPinCount > 0 ? 0.5 : 0) * (pinNumber === 1 ? 1 : -1)
+      const dx =
+        (this.leftPinCount > 0 ? this.getWidth() / 2 : 0) *
+        (pinNumber === 1 ? 1 : -1)
       const dy =
-        (this.bottomPinCount > 0 ? 0.5 : 0) * (pinNumber === 2 ? 1 : -1)
+        (this.bottomPinCount > 0 ? this.getHeight() / 2 : 0) *
+        (pinNumber === 2 ? 1 : -1)
       return { x: this.x + dx, y: this.y + dy }
     }
 

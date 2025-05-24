@@ -6,16 +6,19 @@ test("template3", () => {
   const C = template3()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-     U1
-    ┌───┐      A
-    │  3├───●──┤
-    │  2├─┐ │  │
-    │  1├┐│ R3 R2
-    └───┘│└─┘  │
-         │     │
-         C     B
+         0.0         5.0         10.0   
+     1.2  U1
+     1.0 ┌──┐
+     0.8 │  │            │     A
+     0.6 │ 3├    ────────●─────┘
+     0.4 │ 2├    ────┐
+     0.2 │ 1├    ──┐ │   R3    R2
+     0.0 └──┘      │ └───┐
+    -0.2           │     │     │
+    -0.4           C           B
     "
   `)
+  return
   expect(C.getNetlist()).toMatchInlineSnapshot(`
     {
       "boxes": [

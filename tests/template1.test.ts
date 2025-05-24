@@ -12,13 +12,36 @@ test("template1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-             U1
-            ┌───┐
-    ├───────┤1 4├───D
-    │    ┌──┤2 3├───C
-    R2   │  └───┘
-    │    B
-    A
+               -5.0         0.0         5.0      
+     1.0                  U1
+     0.8                 ┌──┐
+     0.6                 │  │
+     0.4 ┌───────────────┤1 4├   ────────D
+     0.2 │         ┌─────┤2 3├   ────────C
+     0.0 │         │     └──┘
+    -0.2 │         │
+    -0.4 │         │
+    -0.6 │         │
+    -0.8 │         │
+    -1.0 │         │
+    -1.2 │         │
+    -1.4 │         │
+    -1.6 │         │
+    -1.8           B
+    -2.0 R2
+    -2.2
+    -2.4
+    -2.6 │
+    -2.8 │
+    -3.0 │
+    -3.2 │
+    -3.4 │
+    -3.6 │
+    -3.8 │
+    -4.0 │
+    -4.2 │
+    -4.4 │
+    -4.6 A
     "
   `)
   expect(C.getReadableNetlist()).toMatchInlineSnapshot(`
@@ -26,12 +49,12 @@ test("template1", () => {
 
 
                       ┌────────────────┐
-            R2.2 ──  1│       U1       │4  ── D         
+             ... ──  1│       U1       │4  ── D         
                B ──  2│                │3  ── C         
                       └────────────────┘
 
 
-                             U1.1      
+                                       
                               │        
                               2        
                       ┌────────────────┐
@@ -39,10 +62,13 @@ test("template1", () => {
                       └────────────────┘
                               1        
                               │        
-                              A        
+                             ...       
 
     Complex Connections (more than 2 points):
-      (none)"
+      - Connection 1:
+        - Box Pin: R2, Pin 1
+        - Net: A
+        - Box Pin: U1, Pin 1"
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`
     {
@@ -71,6 +97,10 @@ test("template1", () => {
             },
             {
               "netId": "A",
+            },
+            {
+              "boxId": "U1",
+              "pinNumber": 1,
             },
           ],
         },
@@ -107,18 +137,6 @@ test("template1", () => {
             },
           ],
         },
-        {
-          "connectedPorts": [
-            {
-              "boxId": "U1",
-              "pinNumber": 1,
-            },
-            {
-              "boxId": "R2",
-              "pinNumber": 2,
-            },
-          ],
-        },
       ],
       "nets": [
         {
@@ -140,17 +158,18 @@ test("template1", () => {
   expect(getNetlistAsReadableTree(C.getNetlist())).toMatchInlineSnapshot(`
     "U1 (Box #0)
       pin1
-        R2.pin2 (Box #1)
+        R2.pin1 (Box #2)
+        A (Net #1)
       pin2
         B (Net #3)
       pin3
         C (Net #4)
       pin4
         D (Net #5)
-    R2 (Box #1)
+    R2 (Box #2)
       pin1
-        A (Net #2)
-      pin2
-        U1.pin1 (Box #0)"
+        A (Net #1)
+        U1.pin1 (Box #0)
+      pin2"
   `)
 })
