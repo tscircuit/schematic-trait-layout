@@ -43,13 +43,9 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
     [
       {
         "chipId": "U1",
+        "labelNetId": "A",
         "pinNumber": 1,
-        "type": "add_passive_to_pin",
-      },
-      {
-        "chipId": "R2",
-        "pinNumber": 1,
-        "type": "add_label_to_pin",
+        "type": "add_passive_with_label_to_pin",
       },
     ]
   `)
@@ -57,11 +53,11 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
   /* verify adaptation result ----------------------------------------- */
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
-        U1
-       ┌───┐
-    AR2┤1 4├
-       ┤2 3├
-       └───┘
+       U1
+      ┌───┐
+    A2┤1 4├
+      ┤2 3├
+      └───┘
     "
   `)
 })
