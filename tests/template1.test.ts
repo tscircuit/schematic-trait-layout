@@ -12,13 +12,15 @@ test("template1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-             U1
-            ┌───┐
-    ├───────┤1 4├───D
-    │    ┌──┤2 3├───C
-    R2   │  └───┘
-    │    B
-    A
+               -5.0         0.0         5.0      
+     1.0                  U1
+     0.8                 ┌──┐
+     0.6 │               │  │
+     0.4 └───────────────┤1 4├   ────────D
+     0.2           ┌─────┤2 3├   ────────C
+     0.0 R2        │     └──┘
+    -0.2           B
+    -0.4 A
     "
   `)
   expect(C.getReadableNetlist()).toMatchInlineSnapshot(`

@@ -255,6 +255,12 @@ export class ChipBuilder {
       pinX = this.x + indexFromLeft! * spacing
       pinY = this.y + (side === "bottom" ? 0 : this.getHeight())
     }
+    console.log({
+      pinX,
+      pinY,
+      width: this.getWidth(),
+      height: this.getHeight(),
+    })
     return { x: pinX, y: pinY }
   }
 

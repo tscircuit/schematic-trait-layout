@@ -22,8 +22,11 @@ export class CircuitBuilder {
   connectionPoints: ConnectionPoint[] = []
 
   public defaultChipWidth = 4
-  public defaultPinSpacing = 1
-  public defaultLineDistanceMultiple = 1
+  public defaultPinSpacing = 0.2
+  public defaultXStep = 1
+  public defaultYStep = 0.2
+  public defaultPassiveWidth = 1
+  public defaultPassiveHeight = 0.2
 
   private autoLabelCounter = 1
 
@@ -55,10 +58,10 @@ export class CircuitBuilder {
           const pb = new PinBuilder(c, first + i)
           // Copy coordinates from original pin if it exists
           const originalPin = originalPins[i]
-          if (originalPin && typeof originalPin.x === 'number') {
+          if (originalPin && typeof originalPin.x === "number") {
             pb.x = originalPin.x
           }
-          if (originalPin && typeof originalPin.y === 'number') {
+          if (originalPin && typeof originalPin.y === "number") {
             pb.y = originalPin.y
           }
           return pb
@@ -66,16 +69,20 @@ export class CircuitBuilder {
 
       /* order must match original builder semantics                    */
       c.leftPins = mkPins(c.leftPinCount, 1, chip.leftPins)
-      c.bottomPins = mkPins(c.bottomPinCount, c.leftPinCount + 1, chip.bottomPins)
+      c.bottomPins = mkPins(
+        c.bottomPinCount,
+        c.leftPinCount + 1,
+        chip.bottomPins,
+      )
       c.rightPins = mkPins(
         c.rightPinCount,
         c.leftPinCount + c.bottomPinCount + 1,
-        chip.rightPins
+        chip.rightPins,
       )
       c.topPins = mkPins(
         c.topPinCount,
         c.leftPinCount + c.bottomPinCount + c.rightPinCount + 1,
-        chip.topPins
+        chip.topPins,
       )
 
       clone.chips.push(c)
@@ -104,7 +111,12 @@ export class CircuitBuilder {
   }
 
   toString(): string {
-    return getGridFromCircuit(this).toString()
+    return getGridFromCircuit(this, {
+      chipLabels: true,
+      showAxisLabels: true,
+      gridScaleX: 2,
+      gridScaleY: 5,
+    }).toString()
   }
 
   getNetlist(): InputNetlist {

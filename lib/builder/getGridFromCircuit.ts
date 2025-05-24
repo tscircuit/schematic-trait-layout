@@ -23,9 +23,10 @@ export const getGridFromCircuit = (
   // 1. Draw every chip
   for (const chip of circuit.chips) {
     if (chip.isPassive) {
-      g.putOverlay(chip.x, chip.y, chip.chipId[0]!)
-      // TODO if the x+1,y is already occupied, then don't write to it
-      g.putOverlay(chip.x + 1, chip.y, chip.chipId[1]!)
+      // For passive components, place characters adjacent without grid spacing
+      for (let i = 0; i < chip.chipId.length && i < 2; i++) {
+        g.putOverlay((chip.x * opts.gridScaleX! + i) / opts.gridScaleX!, chip.y, chip.chipId[i]!)
+      }
       continue
     }
     // Use actual chip dimensions
@@ -52,7 +53,7 @@ export const getGridFromCircuit = (
       }
 
       for (let i = 0; i < displayLabel.length; i++) {
-        g.putOverlay(labelActualX + i, labelY, displayLabel[i]!)
+        g.putOverlay((labelActualX + i) / opts.gridScaleX!, labelY / opts.gridScaleY!, displayLabel[i]!)
       }
     }
 
@@ -157,7 +158,12 @@ export const getGridFromCircuit = (
 
       g.addEdge(x, y_start_coord, y_start_coord < y_end_coord ? "up" : "down")
       g.addEdge(x, y_end_coord, y_start_coord < y_end_coord ? "down" : "up")
-      for (let y = y_min + 1; y < y_max; ++y) {
+      
+      // Fill in intermediate points using grid-scaled increments
+      const gridY_min = Math.round(y_min * opts.gridScaleY!)
+      const gridY_max = Math.round(y_max * opts.gridScaleY!)
+      for (let gridY = gridY_min + 1; gridY < gridY_max; gridY++) {
+        const y = gridY / opts.gridScaleY!
         g.addEdge(x, y, "up")
         g.addEdge(x, y, "down")
       }
@@ -177,7 +183,12 @@ export const getGridFromCircuit = (
         x_start_coord < x_end_coord ? "right" : "left",
       )
       g.addEdge(x_end_coord, y, x_start_coord < x_end_coord ? "left" : "right")
-      for (let x = x_min + 1; x < x_max; ++x) {
+      
+      // Fill in intermediate points using grid-scaled increments
+      const gridX_min = Math.round(x_min * opts.gridScaleX!)
+      const gridX_max = Math.round(x_max * opts.gridScaleX!)
+      for (let gridX = gridX_min + 1; gridX < gridX_max; gridX++) {
+        const x = gridX / opts.gridScaleX!
         g.addEdge(x, y, "left")
         g.addEdge(x, y, "right")
       }

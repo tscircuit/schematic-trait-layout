@@ -35,16 +35,16 @@ export class PinBuilder {
   line(dx: number, dy: number): this {
     const start = { x: this.x, y: this.y, ref: this.ref }
     const deltaCorrection = this.nextLineDeltaCorrection ?? { x: 0, y: 0 }
-    this.x += dx * this.circuit.defaultLineDistanceMultiple + deltaCorrection.x
-    this.y += dy * this.circuit.defaultLineDistanceMultiple + deltaCorrection.y
+    this.x += dx * this.circuit.defaultXStep + deltaCorrection.x
+    this.y += dy * this.circuit.defaultYStep + deltaCorrection.y
     if (this.nextLineDeltaCorrection) {
       this.nextLineDeltaCorrection = null
     }
     const end = { x: this.x, y: this.y, ref: this.ref }
     const line = { start, end }
     this.circuit.lines.push(line)
-    this.lastDx = dx * this.circuit.defaultLineDistanceMultiple
-    this.lastDy = dy * this.circuit.defaultLineDistanceMultiple
+    this.lastDx = dx * this.circuit.defaultXStep
+    this.lastDy = dy * this.circuit.defaultYStep
     this.lastCreatedLine = line
     return this
   }
