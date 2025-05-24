@@ -1,26 +1,27 @@
 import { test, expect } from "bun:test"
 import { SchematicLayoutPipelineSolver } from "../../lib/solvers/SchematicLayoutPipelineSolver"
 import { circuit } from "../../lib/builder"
+import { getReadableNetlist } from "../../lib/netlist/getReadableNetlist"
 
 test("e2e2", () => {
   // Create a circuit using CircuitBuilder similar to template1.ts
   const C = circuit()
 
-  // Add a chip with 2 left pins and 2 right pins (similar to README example)
+  // Add a chip with 4 left pins and 4 right pins 
   const U1 = C.chip().leftpins(4).rightpins(4)
   U1.pin(1).line(-5, 0).passive().line(-2, 0).label("X")
   U1.pin(2).line(-3, 0).label("Y")
-  U1.pin(5).line(4, 0).label("W")
-  U1.pin(6).line(4, 0).label("Z")
+  U1.pin(7).line(4, 0).label()
+  U1.pin(8).line(4, 0).label()
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
             U1
            ┌───┐
-    X─R2───┤1 8├
-        Y──┤2 7├
-           ┤3 6├───Z
-           ┤4 5├───W
+    X─R2───┤1 8├───B
+        Y──┤2 7├───A
+           ┤3 6├
+           ┤4 5├
            └───┘
     "
   `)
@@ -31,6 +32,7 @@ test("e2e2", () => {
   })
 
   solver.solve()
+
 
   expect(
     `\n${solver.matchPhaseSolver?.outputMatchedTemplates[0]?.template.toString()}\n`,
@@ -55,16 +57,14 @@ test("e2e2", () => {
     `\n${solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-               R2B
+             X─R2B
        U1
       ┌───┐
-    R3┤1 8├──────
-    G─┤2 7├───
-      ┤3 6├┐
-      ┤4 5├●
-      └───┘│
-           │
-           F
+    R3┤1 8├─B────
+    Y─┤2 7├─A─
+      ┤3 6├
+      ┤4 5├
+      └───┘
     "
   `)
 })

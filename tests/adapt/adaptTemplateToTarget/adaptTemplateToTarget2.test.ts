@@ -43,6 +43,7 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
     [
       {
         "chipId": "U1",
+        "netName": "A",
         "pinNumber": 1,
         "type": "add_label_to_pin",
       },
@@ -58,7 +59,7 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
     "
        U1
       ┌───┐
-    B─┤1 4├
+    A─┤1 4├
       ┤2 3├
       └───┘
     "

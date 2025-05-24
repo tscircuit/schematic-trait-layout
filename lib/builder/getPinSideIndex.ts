@@ -76,6 +76,6 @@ export const getPinSideIndex = (
   }
 
   throw new Error(
-    `Pin number out of bounds: ${pinNumber} with dimensions ${JSON.stringify(chipDimensions)}`,
+    `Pin number out of bounds: ${pinNumber} with dimensions left=${chipDimensions.leftPinCount}, right=${chipDimensions.rightPinCount}, top=${chipDimensions.topPinCount}, bottom=${chipDimensions.bottomPinCount}`,
   )
 }

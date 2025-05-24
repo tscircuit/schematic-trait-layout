@@ -1,6 +1,7 @@
 import type { InputNetlist, Box, Net, Connection } from "../input-types"
 import { getReadableNetlist } from "../netlist/getReadableNetlist"
 import { ChipBuilder } from "./ChipBuilder"
+import { PinBuilder } from "./PinBuilder"
 import type {
   Line,
   NetLabel,
@@ -48,22 +49,33 @@ export class CircuitBuilder {
       c.bottomPinCount = chip.bottomPinCount
       c.pinPositionsAreSet = chip.pinPositionsAreSet
 
-      // Create lightweight pin stubs – grid rendering needs only pinNumber
-      const mkPins = (count: number, first: number) =>
-        Array.from({ length: count }, (_, i) => ({
-          pinNumber: first + i,
-        })) as any
+      // Create proper PinBuilder objects for adaptation to work correctly
+      const mkPins = (count: number, first: number, originalPins: any[]) =>
+        Array.from({ length: count }, (_, i) => {
+          const pb = new PinBuilder(c, first + i)
+          // Copy coordinates from original pin if it exists
+          const originalPin = originalPins[i]
+          if (originalPin && typeof originalPin.x === 'number') {
+            pb.x = originalPin.x
+          }
+          if (originalPin && typeof originalPin.y === 'number') {
+            pb.y = originalPin.y
+          }
+          return pb
+        })
 
       /* order must match original builder semantics                    */
-      c.leftPins = mkPins(c.leftPinCount, 1)
-      c.bottomPins = mkPins(c.bottomPinCount, c.leftPinCount + 1)
+      c.leftPins = mkPins(c.leftPinCount, 1, chip.leftPins)
+      c.bottomPins = mkPins(c.bottomPinCount, c.leftPinCount + 1, chip.bottomPins)
       c.rightPins = mkPins(
         c.rightPinCount,
         c.leftPinCount + c.bottomPinCount + 1,
+        chip.rightPins
       )
       c.topPins = mkPins(
         c.topPinCount,
         c.leftPinCount + c.bottomPinCount + c.rightPinCount + 1,
+        chip.topPins
       )
 
       clone.chips.push(c)

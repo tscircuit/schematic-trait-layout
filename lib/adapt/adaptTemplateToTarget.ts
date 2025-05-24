@@ -57,15 +57,7 @@ export function adaptTemplateToTarget(params: {
     // Skip passive components - their connections should be handled semantically
     if (chip.isPassive) continue
 
-    const countsNow = {
-      left: chip.leftPinCount,
-      bottom: chip.bottomPinCount,
-      right: chip.rightPinCount,
-      top: chip.topPinCount,
-    } as const
-
     for (const side of SIDES_CCW) {
-      const currentSideCount = countsNow[side]
       const targetSideCount = targetBox[
         `${side}PinCount` as keyof typeof targetBox
       ] as number
