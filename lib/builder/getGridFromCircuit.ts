@@ -5,11 +5,21 @@ export const getGridFromCircuit = (
   circuit: CircuitBuilder,
   opts: {
     chipLabels?: boolean
+    showAxisLabels?: boolean
+    gridScaleX?: number
+    gridScaleY?: number
   } = {},
 ): Grid => {
   opts.chipLabels ??= true
+  opts.showAxisLabels ??= false
+  opts.gridScaleX ??= 1
+  opts.gridScaleY ??= 1
 
-  const g = new Grid()
+  const g = new Grid({
+    showAxisLabels: opts.showAxisLabels,
+    gridScaleX: opts.gridScaleX,
+    gridScaleY: opts.gridScaleY,
+  })
   // 1. Draw every chip
   for (const chip of circuit.chips) {
     if (chip.isPassive) {
