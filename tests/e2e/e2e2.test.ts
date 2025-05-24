@@ -55,16 +55,16 @@ test("e2e2", () => {
     `\n${solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
+               R2B
        U1
       ┌───┐
-    R3│  8├    R2B
-      │  7├
-      │  6├
-      │  5├──────
-      │  4├───
-      │  3├
-      ┤1 2├●
-      └───┘
+    R3┤1 8├──────
+    G─┤2 7├───
+      ┤3 6├┐
+      ┤4 5├●
+      └───┘│
+           │
+           F
     "
   `)
 })
