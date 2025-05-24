@@ -8,6 +8,8 @@ An automatic layout system for schematics that uses the **PMARS** pattern:
 - **Refine** the layout to fix overlapping or clutter caused by adaptation
 - **Stitch** the laid-out partitions together
 
+[Test Online](https://pmars-layout.vercel.app) · [tscircuit](https://github.com/tscircuit/tscircuit)
+
 ## Motivation
 
 Creating a schematic layout algorithm is difficult. Schematics can't easily

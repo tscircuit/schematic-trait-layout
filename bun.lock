@@ -9,6 +9,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
+        "@tscircuit/circuit-json-util": "^0.0.48",
         "@types/bun": "latest",
         "@types/debug": "^4.1.12",
         "bun-match-svg": "^0.0.11",
@@ -63,7 +64,7 @@
 
     "@tscircuit/checks": ["@tscircuit/checks@0.0.46", "", { "dependencies": { "@tscircuit/math-utils": "^0.0.18", "circuit-json-to-connectivity-map": "^0.0.22", "circuit-to-svg": "^0.0.115" }, "peerDependencies": { "circuit-json": "*", "typescript": "^5.5.3" } }, "sha512-rCLqmng/bQ4/AtMLy3w8lM1eRDbKWkjIROEsj/S+j8gRrP+qLejtvyxbEv5nKOeSWOB/wPPV1UnlW0yMzglrJA=="],
 
-    "@tscircuit/circuit-json-util": ["@tscircuit/circuit-json-util@0.0.47", "", { "dependencies": { "parsel-js": "^1.1.2" }, "peerDependencies": { "circuit-json": "*", "transformation-matrix": "*", "zod": "*" } }, "sha512-IUEPGJT5WcDo7Eudtgqs8Ia+zzBWtFIuuLtUguYMBHnnt037CKBStpaGGGDCLzRq2Bmsf4ynxMN3Sb0JWGsz4w=="],
+    "@tscircuit/circuit-json-util": ["@tscircuit/circuit-json-util@0.0.48", "", { "dependencies": { "parsel-js": "^1.1.2" }, "peerDependencies": { "circuit-json": "*", "transformation-matrix": "*", "zod": "*" } }, "sha512-mV9B+u37GaeVOsO8MnUo4tLVigBAZaQ/MhZHiDZgl4mVsSoVtSXLjb8YJAGkHUkZgwUgEY4AY1OVicRNmQNQaA=="],
 
     "@tscircuit/cli": ["@tscircuit/cli@0.1.107", "", { "peerDependencies": { "typescript": "^5.0.0" }, "bin": { "tsci": "dist/main.js" } }, "sha512-wlIVhN2nxezeyTzeqofNFjLMP3quytcyhYyl2nbPoXwRPdbH8KTmxrqFMP5VfC7wnyMgmOuPrvzWXnfKVlSa7A=="],
 
@@ -552,6 +553,8 @@
     "strip-ansi-cjs/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
 
     "styled-components/tslib": ["tslib@2.6.2", "", {}, "sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q=="],
+
+    "tscircuit/@tscircuit/circuit-json-util": ["@tscircuit/circuit-json-util@0.0.47", "", { "dependencies": { "parsel-js": "^1.1.2" }, "peerDependencies": { "circuit-json": "*", "transformation-matrix": "*", "zod": "*" } }, "sha512-IUEPGJT5WcDo7Eudtgqs8Ia+zzBWtFIuuLtUguYMBHnnt037CKBStpaGGGDCLzRq2Bmsf4ynxMN3Sb0JWGsz4w=="],
 
     "tscircuit/schematic-symbols": ["schematic-symbols@0.0.132", "", { "peerDependencies": { "typescript": "^5.5.4" } }, "sha512-EPIS40JEhhN0+FbsmBcmiBtxrjKAc2uG94fUppl/iYv1So99gwk92tmCBORELpewd9aLr1mQZkFHmpKifxXyhA=="],
 
