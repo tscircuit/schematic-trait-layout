@@ -3,6 +3,7 @@ import type { EditOperation } from "../EditOperation"
 import { applyAddLabelToPin } from "./applyAddLabelToPin"
 import { applyClearPin } from "./applyClearPin"
 import { applyAddPassiveToPin } from "./applyAddPassiveToPin"
+import { applyAddPassiveWithLabelToPin } from "./applyAddPassiveWithLabelToPin"
 import { applyRemoveChip } from "./applyRemoveChip"
 import { applyRemovePinFromSide } from "./applyRemovePinFromSide"
 import { applyAddPinToSide } from "./applyAddPinToSide"
@@ -18,6 +19,9 @@ export function applyEditOperation(C: CircuitBuilder, op: EditOperation): void {
       break
     case "add_passive_to_pin":
       applyAddPassiveToPin(C, op)
+      break
+    case "add_passive_with_label_to_pin":
+      applyAddPassiveWithLabelToPin(C, op)
       break
     case "clear_pin":
       applyClearPin(C, op)
