@@ -23,8 +23,6 @@ export class CircuitBuilder {
 
   public defaultChipWidth = 4
   public defaultPinSpacing = 0.2
-  public defaultXStep = 1
-  public defaultYStep = 0.2
   public defaultPassiveWidth = 1
   public defaultPassiveHeight = 0.2
 
