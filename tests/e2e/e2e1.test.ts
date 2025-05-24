@@ -8,18 +8,10 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
 
   // Add a chip with 2 left pins and 2 right pins (similar to README example)
   const U1 = C.chip().leftpins(2).rightpins(2)
-
-  // Add a resistor connected to pin 1
-  U1.pin(1).line(-8, 0).passive().label("R1")
-
-  // Connect pin 2 to a labeled net
-  U1.pin(2).line(-3, 0).label("INPUT")
-
-  // Connect pin 3 to output
-  U1.pin(3).line(4, 0).label("OUTPUT")
-
-  // Connect pin 4 to VCC
-  U1.pin(4).line(4, 0).label("VCC")
+  U1.pin(1).line(-5, 0).passive().line(-2, 0).label("X")
+  U1.pin(2).line(-3, 0).label("Y")
+  U1.pin(3).line(4, 0).label("Z")
+  U1.pin(4).line(4, 0).label("W")
 
   // Get the netlist from the circuit
   const inputNetlist = C.getNetlist()
@@ -37,11 +29,11 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-             U1
-            ┌───┐
-    R2──────┤1 4├───V
-         I──┤2 3├───O
-            └───┘
+            U1
+           ┌───┐
+    X─R2───┤1 4├───W
+        Y──┤2 3├───Z
+           └───┘
     "
   `)
 
