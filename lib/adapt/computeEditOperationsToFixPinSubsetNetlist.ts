@@ -55,9 +55,7 @@ export const computeEditOperationsToFixPinSubsetNetlist = (params: {
     subset.connections.some(
       (c) =>
         pinAppearsInConnection(c, pinBoxId, 1) &&
-        c.connectedPorts.some(
-          (p) => "boxId" in p && p.boxId.startsWith("passive"),
-        ),
+        c.connectedPorts.some((p) => "boxId" in p && /^R\d+$/.test(p.boxId)),
     )
 
   /* ------------------------------------------------------------------ *

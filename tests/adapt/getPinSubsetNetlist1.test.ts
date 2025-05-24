@@ -11,7 +11,7 @@ test("getPinSubsetNetlist1", () => {
 
   U1.pin(1).line(-2, 0).label()
   U1.pin(2).line(-2, 0).passive().line(-2, 0).label()
-  U1.pin(3).line(2, 0).mark("m1").line(2, 0).passive().line(2, 0).label()
+  U1.pin(3).line(2, 0).mark("m1").line(2, 0).passive().line(4, 0).label()
   U1.fromMark("m1").line(0, -2).label()
   U1.pin(4).line(6, 0).line(0, -1).intersect()
 
@@ -20,7 +20,7 @@ test("getPinSubsetNetlist1", () => {
          U1
         ┌───┐
       A─┤1 4├─────┐
-    B─R2┤2 3├─┬─R3●C
+    B─R2┤2 3├─┬─R3●─C
         └───┘ │
               D
     "

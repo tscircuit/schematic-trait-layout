@@ -2,13 +2,14 @@ import { circuit } from "lib/builder"
 
 /**
  * ```
- * ┌───┐      L
+ *  U1
+ * ┌───┐      A
  * │  3├───●──┤
  * │  2├─┐ │  │
- * │  1├┐│ P  P
+ * │  1├┐│ R3 R2
  * └───┘│└─┘  │
  *      │     │
- *      L     L
+ *      C     B
  * ```
  */
 export default () => {
@@ -23,7 +24,7 @@ export default () => {
     .line(2, 0)
     .line(0, 1)
     .passive()
-    .line(0, 1)
+    .line(0, 2)
     .intersect()
   U1.pin(1).line(1, 0).line(0, -3).label()
 

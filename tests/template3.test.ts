@@ -55,6 +55,10 @@ test("template3", () => {
               "boxId": "R2",
               "pinNumber": 2,
             },
+            {
+              "boxId": "R3",
+              "pinNumber": 2,
+            },
           ],
         },
         {
@@ -127,7 +131,7 @@ test("template3", () => {
                               B        
 
 
-                                       
+                             ...       
                               │        
                               2        
                       ┌────────────────┐
@@ -141,6 +145,7 @@ test("template3", () => {
       - Connection 1:
         - Box Pin: U1, Pin 3
         - Net: A
-        - Box Pin: R2, Pin 2"
+        - Box Pin: R2, Pin 2
+        - Box Pin: R3, Pin 2"
   `)
 })

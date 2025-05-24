@@ -16,10 +16,12 @@ export class PinBuilder {
   x = 0
   y = 0
 
-  private lastConnected: PortReference | null = null
-  private lastCreatedLine: Line | null = null
-  private lastDx = 0
-  private lastDy = 0
+  nextLineDeltaCorrection: { x: number; y: number } | null = null
+
+  lastConnected: PortReference | null = null
+  lastCreatedLine: Line | null = null
+  lastDx = 0
+  lastDy = 0
 
   constructor(
     private readonly chip: any, // TODO: Replace with proper ChipBuilder type
@@ -32,8 +34,12 @@ export class PinBuilder {
 
   line(dx: number, dy: number): this {
     const start = { x: this.x, y: this.y, ref: this.ref }
-    this.x += dx * this.circuit.defaultLineDistanceMultiple
-    this.y += dy * this.circuit.defaultLineDistanceMultiple
+    const deltaCorrection = this.nextLineDeltaCorrection ?? { x: 0, y: 0 }
+    this.x += dx * this.circuit.defaultLineDistanceMultiple + deltaCorrection.x
+    this.y += dy * this.circuit.defaultLineDistanceMultiple + deltaCorrection.y
+    if (this.nextLineDeltaCorrection) {
+      this.nextLineDeltaCorrection = null
+    }
     const end = { x: this.x, y: this.y, ref: this.ref }
     const line = { start, end }
     this.circuit.lines.push(line)
@@ -96,6 +102,10 @@ export class PinBuilder {
 
     exitPin.x += Math.sign(this.lastDx) / 2
     exitPin.y += Math.sign(this.lastDy) / 2
+    exitPin.nextLineDeltaCorrection = {
+      x: -Math.sign(this.lastDx) / 2,
+      y: -Math.sign(this.lastDy) / 2,
+    }
 
     return exitPin
   }

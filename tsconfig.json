@@ -9,7 +9,9 @@
     "allowJs": true,
 
     "paths": {
-      "lib/*": ["./lib/*"]
+      "lib/*": ["./lib/*"],
+      "templates/*": ["./templates/*"],
+      "tests/*": ["./tests/*"]
     },
 
     // Bundler mode

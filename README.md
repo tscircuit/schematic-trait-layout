@@ -27,6 +27,55 @@ Because the algorithm is extended by adding new templates, it is simple to
 extend to algorithm to handle new scenarios as users need them or as edge cases
 are found.
 
+## Usage
+
+You should create an `InputNetlist` to describe your schematic input. You can
+then call `getLayoutForNetlist` to get `CircuitBuilder` instance with the
+layout applied.
+
+```tsx
+import { SchematicLayoutPipelineSolver } from "@tscircuit/pmars-layout"
+
+const solver = new SchematicLayoutPipelineSolver({
+  inputNetlist: {
+    boxes: [
+      {
+        boxId: "U1",
+        leftPinCount: 2,
+        rightPinCount: 2,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+      {
+        boxId: "R1",
+        leftPinCount: 1,
+        rightPinCount: 1,
+        topPinCount: 0,
+        bottomPinCount: 0,
+      },
+    ],
+    connections: [
+      {
+        connectedPorts: [
+          { boxId: "U1", pinNumber: 1 },
+          { boxId: "R1", pinNumber: 1 },
+        ],
+      },
+      {
+        connectedPorts: [{ boxId: "U1", pinNumber: 4 }, { netId: "VCC" }],
+      },
+    ],
+    nets: [{ netId: "VCC" }, { netId: "GND" }],
+  },
+})
+
+solver.solve()
+
+console.log(solver.toAsciiString())
+
+// You can access the position of each box via circuitBuilder.chips
+```
+
 ## Great Reference Schematics
 
 - https://cdn.sparkfun.com/assets/7/7/2/1/9/SparkFun_STM32_Thing_Plus.pdf

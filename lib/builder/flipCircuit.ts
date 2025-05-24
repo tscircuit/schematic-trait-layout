@@ -30,7 +30,7 @@ export const flipXCircuit = (circuit: CircuitBuilder): CircuitBuilder => {
     const oldLeftPins = chip.leftPins
     const oldRightPins = chip.rightPins
 
-    chip.leftPins  = oldRightPins.slice()          // keep order bottom→top
+    chip.leftPins = oldRightPins.slice() // keep order bottom→top
     chip.rightPins = oldLeftPins.slice().reverse() // convert to bottom→top
     // Swap counts
     const tmpCount = chip.leftPinCount

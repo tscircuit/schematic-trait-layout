@@ -2,13 +2,13 @@ import { circuit } from "lib/builder"
 
 /**
  * ```
- *         L
+ *  U1     A
  * ┌───┐   │
  * │  3├───┤
- * │  2├─L │
- * │  1├┐  P
+ * │  2├─C │
+ * │  1├┐  R2
  * └───┘│  │
- *      L  L
+ *      D  B
  * ```
  */
 export default () => {

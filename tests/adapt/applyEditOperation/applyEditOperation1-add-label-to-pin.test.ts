@@ -24,10 +24,10 @@ test("applyEditOperation1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-      U1
-     ┌───┐
-    A┤1 2├
-     └───┘
+       U1
+      ┌───┐
+    A─┤1 2├
+      └───┘
     "
   `)
 
@@ -39,10 +39,10 @@ test("applyEditOperation1", () => {
 
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-      U1
-     ┌───┐
-    A┤1 2├B
-     └───┘
+       U1
+      ┌───┐
+    A─┤1 2├─B
+      └───┘
     "
   `)
 })

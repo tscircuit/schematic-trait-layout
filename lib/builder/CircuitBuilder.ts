@@ -1,6 +1,5 @@
 import type { InputNetlist, Box, Net, Connection } from "../input-types"
 import { getReadableNetlist } from "../netlist/getReadableNetlist"
-import { bifurcateXCircuit } from "./bifurcateXCircuit"
 import { ChipBuilder } from "./ChipBuilder"
 import type {
   Line,

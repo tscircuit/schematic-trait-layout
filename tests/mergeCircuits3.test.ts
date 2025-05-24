@@ -14,8 +14,8 @@ test("mergeCircuits3 – merge after flipX reproduces mis-merge bug", () => {
 
   /* ── Merge right-half (circuit1) with left-half (circuit2) ─────── */
   const merged = mergeCircuits({
-    circuit1: right,               // provides RIGHT pins, will be base
-    circuit2: left,                // provides LEFT  pins
+    circuit1: right, // provides RIGHT pins, will be base
+    circuit2: left, // provides LEFT  pins
     circuit1ChipId: right.chips[0]!.chipId,
     circuit2ChipId: left.chips[0]!.chipId,
   })

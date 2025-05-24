@@ -3,11 +3,12 @@ import type { MatchingIssue } from "./types"
 import { findAllMatchedPinOutOfPlace } from "./matched-box-issue-finders/findAllMatchedPinOutOfPlace"
 import { findAllMatchedBoxMissingPinShape } from "./matched-box-issue-finders/findAllMatchedBoxMissingPinShape"
 import { findAllSideHasWrongPinCount } from "./matched-box-issue-finders/findAllSideHasWrongPinCount"
+import { findAllMatchedBoxPinShapeInWrongPosition } from "./matched-box-issue-finders/findAllMatchedBoxPinShapeInWrongPosition"
 
 const MATCHED_BOX_ISSUE_FINDERS = [
   findAllSideHasWrongPinCount,
-  findAllMatchedPinOutOfPlace,
   findAllMatchedBoxMissingPinShape,
+  // findAllMatchedBoxPinShapeInWrongPosition,
 ] as const
 
 export function getIssuesForMatchedBoxes(params: {

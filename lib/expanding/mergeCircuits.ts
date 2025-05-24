@@ -226,8 +226,18 @@ export const mergeCircuits = ({
 
   for (const l of circuit2.lines) {
     const copy: Line = {
-      start: { ...l.start, x: l.start.x + dx, y: l.start.y + dy, ref: translateRef(l.start.ref) },
-      end:   { ...l.end,   x: l.end.x   + dx, y: l.end.y   + dy, ref: translateRef(l.end.ref)   },
+      start: {
+        ...l.start,
+        x: l.start.x + dx,
+        y: l.start.y + dy,
+        ref: translateRef(l.start.ref),
+      },
+      end: {
+        ...l.end,
+        x: l.end.x + dx,
+        y: l.end.y + dy,
+        ref: translateRef(l.end.ref),
+      },
     }
     merged.lines.push(copy)
   }
