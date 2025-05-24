@@ -6,6 +6,7 @@ import { applyAddPassiveToPin } from "./applyAddPassiveToPin"
 import { applyRemoveChip } from "./applyRemoveChip"
 import { applyRemovePinFromSide } from "./applyRemovePinFromSide"
 import { applyAddPinToSide } from "./applyAddPinToSide"
+import { applyChangePassiveOrientation } from "./applyChangePassiveOrientation"
 
 /**
  * Mutates the circuit builder, applying the edit operation
@@ -29,6 +30,9 @@ export function applyEditOperation(C: CircuitBuilder, op: EditOperation): void {
       break
     case "remove_chip":
       applyRemoveChip(C, op)
+      break
+    case "change_passive_orientation":
+      applyChangePassiveOrientation(C, op)
       break
   }
 }

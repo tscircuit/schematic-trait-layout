@@ -37,6 +37,13 @@ export interface RemoveChipOp {
   chipId: string
 }
 
+export interface ChangePassiveOrientationOp {
+  type: "change_passive_orientation"
+  chipId: string
+  fromOrientation: "horizontal" | "vertical"
+  toOrientation: "horizontal" | "vertical"
+}
+
 export type EditOperation =
   | AddLabelToPinOp
   | AddPassiveToPinOp
@@ -44,3 +51,4 @@ export type EditOperation =
   | RemoveChipOp
   | AddPinToSideOp
   | RemovePinFromSideOp
+  | ChangePassiveOrientationOp

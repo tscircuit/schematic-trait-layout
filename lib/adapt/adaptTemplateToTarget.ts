@@ -7,6 +7,7 @@ import type {
   EditOperation,
 } from "./EditOperation"
 import { computeEditOperationsToFixPinSubsetNetlist } from "./computeEditOperationsToFixPinSubsetNetlist"
+import { transformTargetForPassiveCompatibility } from "./transformTargetForPassiveCompatibility"
 
 /**
  * Mutates template until it has the same normalized netlist as the target.
@@ -27,9 +28,14 @@ export function adaptTemplateToTarget(params: {
 }): {
   appliedOperations: EditOperation[]
 } {
-  const { template, target } = params
+  const { template, target: originalTarget } = params
   const appliedOperations: EditOperation[] = []
 
+  // Transform the target to be compatible with template passive structures
+  const target = transformTargetForPassiveCompatibility(
+    template,
+    originalTarget,
+  )
   const targetBoxes = target.boxes
 
   // Remove chips that exist in template but not in target
@@ -51,6 +57,9 @@ export function adaptTemplateToTarget(params: {
   for (const chip of template.chips) {
     const targetBox = targetBoxes.find((b) => b.boxId === chip.chipId)
     if (!targetBox) continue // (chip removed – will be handled later)
+
+    // Skip passive components - their connections should be handled semantically
+    if (chip.isPassive) continue
 
     const countsNow = {
       left: chip.leftPinCount,
