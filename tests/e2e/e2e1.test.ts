@@ -63,12 +63,13 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
     `\n${solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString()}\n`,
   ).toMatchInlineSnapshot(`
     "
-               U1
-              ┌───┐
-      ────────┤1 4├───D
-      │    ┌──┤2 3├───C
-    E─R2   │  └───┘
-      A    B
+             U1
+            ┌───┐
+    ├───────┤1 4├───D
+    │    ┌──┤2 3├───C
+    R2   │  └───┘
+    │    B
+    A
     "
   `)
 
@@ -79,18 +80,18 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
 
 
                       ┌────────────────┐
-                     1│       U1       │4  ── D         
+            R2.2 ──  1│       U1       │4  ── D         
                B ──  2│                │3  ── C         
                       └────────────────┘
 
 
-                                       
+                             U1.1      
                               │        
-                              3        
-                      ┌────────────────┐
-               E ──  1│       R2       │                
-                      └────────────────┘
                               2        
+                      ┌────────────────┐
+                      │       R2       │                
+                      └────────────────┘
+                              1        
                               │        
                               A        
 
@@ -100,36 +101,17 @@ test("SchematicLayoutPipelineSolver can process a CircuitBuilder netlist", () =>
 
   expect(
     solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.appliedOperations,
+  ).toMatchInlineSnapshot(`[]`)
+
+  expect(
+    solver.adaptPhaseSolver?.outputAdaptedTemplates[0]?.template.toString(),
   ).toMatchInlineSnapshot(`
-    [
-      {
-        "betweenPinNumbers": [
-          0,
-          1,
-        ],
-        "chipId": "R2",
-        "side": "left",
-        "type": "add_pin_to_side",
-      },
-      {
-        "betweenPinNumbers": [
-          2,
-          3,
-        ],
-        "chipId": "R2",
-        "side": "right",
-        "type": "add_pin_to_side",
-      },
-      {
-        "chipId": "R2",
-        "pinNumber": 1,
-        "type": "add_label_to_pin",
-      },
-      {
-        "chipId": "R2",
-        "pinNumber": 3,
-        "type": "clear_pin",
-      },
-    ]
+    "         U1
+            ┌───┐
+    ├───────┤1 4├───D
+    │    ┌──┤2 3├───C
+    R2   │  └───┘
+    │    B
+    A"
   `)
 })
