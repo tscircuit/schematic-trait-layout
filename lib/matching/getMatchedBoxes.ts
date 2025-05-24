@@ -47,6 +47,9 @@ export function getMatchedBoxes(params: {
         targetBoxIndex,
       })
 
+      // TODO go through the matched boxes, if the candidate box is supposed to
+      // share a net with one of the matched boxes but doesn't, that's an issue!
+
       pairingResult.set(
         { targetBoxIndex, candidateBoxIndex },
         {
