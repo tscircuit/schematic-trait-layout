@@ -1,11 +1,7 @@
 import { SIDES_CCW, type CircuitBuilder } from "lib/builder"
 import type { InputNetlist } from "lib/input-types"
 import { applyEditOperation } from "./applyEditOperation"
-import type {
-  AddPinsToSideOp,
-  AddPinToSideOp,
-  EditOperation,
-} from "./EditOperation"
+import type { AddPinToSideOp, EditOperation } from "./EditOperation"
 import { computeEditOperationsToFixPinSubsetNetlist } from "./computeEditOperationsToFixPinSubsetNetlist"
 import { transformTargetForPassiveCompatibility } from "./transformTargetForPassiveCompatibility"
 
@@ -61,24 +57,15 @@ export function adaptTemplateToTarget(params: {
     // Skip passive components - their connections should be handled semantically
     if (chip.isPassive) continue
 
-    const countsNow = {
-      left: chip.leftPinCount,
-      bottom: chip.bottomPinCount,
-      right: chip.rightPinCount,
-      top: chip.topPinCount,
-    } as const
-
     for (const side of SIDES_CCW) {
-      const currentSideCount = countsNow[side]
       const targetSideCount = targetBox[
         `${side}PinCount` as keyof typeof targetBox
       ] as number
 
-      if (currentSideCount < targetSideCount) {
-        // TODO: This currently adds one pin at a time. A future optimization
-        // could be to add all missing pins for a side in one operation if
-        // an AddPinsToSideOp (plural) is available.
-
+      while (
+        (chip[`${side}PinCount` as keyof typeof chip] as number) <
+        targetSideCount
+      ) {
         let afterPin: number
         if (side === "left") {
           // Add to the start (top-most) of the left side.
@@ -105,7 +92,21 @@ export function adaptTemplateToTarget(params: {
         applyEditOperation(template, op)
         appliedOperations.push(op)
       }
-      // (removal will be implemented later)
+
+      // Remove excess pins
+      while (
+        (chip[`${side}PinCount` as keyof typeof chip] as number) >
+        targetSideCount
+      ) {
+        const op: EditOperation = {
+          type: "remove_pin_from_side",
+          chipId: chip.chipId,
+          side,
+          pinNumber: chip.totalPinCount, // Remove the highest numbered pin
+        }
+        applyEditOperation(template, op)
+        appliedOperations.push(op)
+      }
     }
   }
 

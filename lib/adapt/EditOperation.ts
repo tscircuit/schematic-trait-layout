@@ -4,6 +4,7 @@ export interface AddLabelToPinOp {
   type: "add_label_to_pin"
   pinNumber: number
   chipId: string
+  netName?: string
 }
 
 export interface AddPinToSideOp {
