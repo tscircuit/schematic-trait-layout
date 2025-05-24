@@ -32,7 +32,22 @@ export function adaptTemplateToTarget(params: {
 
   const targetBoxes = target.boxes
 
-  // STEP ONE: make every box have the right number of pins per side
+  // Remove chips that exist in template but not in target
+  const targetChipIds = new Set(targetBoxes.map((box) => box.boxId))
+  const chipsToRemove = template.chips.filter(
+    (chip) => !targetChipIds.has(chip.chipId),
+  )
+
+  for (const chip of chipsToRemove) {
+    const op: EditOperation = {
+      type: "remove_chip",
+      chipId: chip.chipId,
+    }
+    applyEditOperation(template, op)
+    appliedOperations.push(op)
+  }
+
+  // Make every box have the right number of pins per side
   for (const chip of template.chips) {
     const targetBox = targetBoxes.find((b) => b.boxId === chip.chipId)
     if (!targetBox) continue // (chip removed – will be handled later)
@@ -85,7 +100,7 @@ export function adaptTemplateToTarget(params: {
     }
   }
 
-  // STEP TWO: Go through each pin and make sure it has the right shape by
+  // Go through each pin and make sure it has the right shape by
   // comparing the target pin subset to the current pin subset.
   // Only process chips that exist in the target (skip chips that will be removed)
   for (const chip of template.chips) {
@@ -106,21 +121,6 @@ export function adaptTemplateToTarget(params: {
         appliedOperations.push(op)
       }
     }
-  }
-
-  // STEP THREE: Remove chips that exist in template but not in target
-  const targetChipIds = new Set(targetBoxes.map((box) => box.boxId))
-  const chipsToRemove = template.chips.filter(
-    (chip) => !targetChipIds.has(chip.chipId),
-  )
-
-  for (const chip of chipsToRemove) {
-    const op: EditOperation = {
-      type: "remove_chip",
-      chipId: chip.chipId,
-    }
-    applyEditOperation(template, op)
-    appliedOperations.push(op)
   }
 
   return {

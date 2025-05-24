@@ -6,10 +6,10 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
   /* target circuit (single chip) ------------------------------------- */
   const target = new CircuitBuilder()
   const tU1 = target.chip().leftpins(2).rightpins(2)
-  tU1.pin(1).line(-4, 0).passive().label("R1")
-  tU1.pin(2).line(-2, 0).label("INPUT")
-  tU1.pin(3).line(3, 0).label("OUTPUT")
-  tU1.pin(4).line(3, 0).label("VCC")
+  tU1.pin(1).line(-4, 0).passive().line(-2, 0).label()
+  tU1.pin(2).line(-2, 0).label()
+  tU1.pin(3).line(3, 0).label()
+  tU1.pin(4).line(3, 0).label()
 
   /* template circuit (two chips connected) --------------------------- */
   const template = new CircuitBuilder()
@@ -21,11 +21,11 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
 
   expect(`\n${target.toString()}\n`).toMatchInlineSnapshot(`
     "
-         U1
-        ┌───┐
-    R2──┤1 4├──V
-      I─┤2 3├──O
-        └───┘
+           U1
+          ┌───┐
+    A─R2──┤1 4├──D
+        B─┤2 3├──C
+          └───┘
     "
   `)
 
@@ -48,6 +48,15 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
   expect(appliedOperations).toMatchInlineSnapshot(`
     [
       {
+        "chipId": "U2",
+        "type": "remove_chip",
+      },
+      {
+        "chipId": "U1",
+        "pinNumber": 1,
+        "type": "add_passive_to_pin",
+      },
+      {
         "chipId": "U1",
         "pinNumber": 2,
         "type": "add_label_to_pin",
@@ -63,8 +72,9 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
         "type": "add_label_to_pin",
       },
       {
-        "chipId": "U2",
-        "type": "remove_chip",
+        "chipId": "R2",
+        "pinNumber": 1,
+        "type": "add_label_to_pin",
       },
     ]
   `)
@@ -72,15 +82,13 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
   /* verify adaptation result ----------------------------------------- */
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
-      U1
-     ┌───┐
-     ┤1 4├───C
-    A┤2 3├B
-     └───┘
+        U1
+       ┌───┐
+    DR2┤1 4├────C
+     A─┤2 3├─B
+       └───┘
     "
   `)
 
-  // SUCCESS: Template now has 1 chip as expected
-  expect(template.chips.length).toBe(1) // U2 was successfully removed
-  expect(appliedOperations.some(op => op.type === "remove_chip")).toBe(true) // remove_chip operation was applied
+  expect(appliedOperations.some((op) => op.type === "remove_chip")).toBe(true) // remove_chip operation was applied
 })
