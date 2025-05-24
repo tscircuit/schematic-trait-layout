@@ -56,11 +56,11 @@ test("adaptTemplateToTarget2 adds missing labels and removes extra labels", () =
 
   expect(`\n${template.toString()}\n`).toMatchInlineSnapshot(`
     "
-      U1
-     ┌───┐
-    B┤1 4├
-     ┤2 3├
-     └───┘
+       U1
+      ┌───┐
+    B─┤1 4├
+      ┤2 3├
+      └───┘
     "
   `)
 })
