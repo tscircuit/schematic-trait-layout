@@ -28,12 +28,15 @@ export const getGridFromCircuit = (
       g.putOverlay(chip.x + 1, chip.y, chip.chipId[1]!)
       continue
     }
-    // width = 5, height = max(leftPins.length, rightPins.length, 1) + 2
-    const height = Math.max(chip.leftPinCount, chip.rightPinCount, 1) + 2
+    // Use actual chip dimensions
+    const chipWidth = chip.getWidth()
+    const chipHeight = chip.getHeight()
+    // Convert chip height to grid rows - scale the height and add borders
+    const height = Math.round(chipHeight * opts.gridScaleY!) + 2
 
     if (opts.chipLabels && chip.topPinCount === 0) {
       const labelY = chip.y + height // One row above the chip's top border
-      const chipBodyWidth = 5 // Chip body is 5 characters wide
+      const chipBodyWidth = chipWidth // Use actual chip width
       const labelText = chip.chipId
 
       let displayLabel = labelText
@@ -53,66 +56,82 @@ export const getGridFromCircuit = (
       }
     }
 
+    // Convert chip position to grid coordinates
+    const chipGridX = Math.round(chip.x * opts.gridScaleX!)
+    const chipGridY = Math.round(chip.y * opts.gridScaleY!)
+    
     for (let r = 0; r < height; ++r) {
       // r is visual row index from bottom (0) to top (height-1)
-      // Pins are now rendered inside mid1, so leftChar and rightChar are not used here.
       let mid0 = " "
       let mid1 = " "
       let mid2 = " "
 
       const isBottomBorder = r === 0
       const isTopBorder = r === height - 1
-      const isPinRow = !isBottomBorder && !isTopBorder
 
       if (isBottomBorder) {
         mid0 = "└"
-        mid1 = "───" // TODO: Add bottom pins display if any
+        mid1 = "─".repeat(chipWidth - 2) // TODO: Add bottom pins display if any
         mid2 = "┘"
       } else if (isTopBorder) {
         mid0 = "┌"
-        mid1 = "───" // TODO: Add top pins display if any
+        mid1 = "─".repeat(chipWidth - 2) // TODO: Add top pins display if any
         mid2 = "┐"
       } else {
-        // Pin rows
-        const pinSlotDisplayIndex = r - 1
-        // const numPinSlots = height - 2 // Not strictly needed here anymore
+        // Pin rows - check if any pins are at this grid row
+        const currentGridY = chipGridY + r
+        let leftPinData: any = undefined
+        let rightPinData: any = undefined
 
-        const leftPinData =
-          pinSlotDisplayIndex < chip.leftPinCount
-            ? chip.leftPins[chip.leftPinCount - 1 - pinSlotDisplayIndex]
-            : undefined
-        const rightPinData =
-          pinSlotDisplayIndex < chip.rightPinCount
-            ? chip.rightPins[pinSlotDisplayIndex]
-            : undefined
+        // Check left pins
+        for (const pin of chip.leftPins) {
+          const pinLoc = chip.getPinLocation(pin.pinNumber)
+          const pinGridY = Math.round(pinLoc.y * opts.gridScaleY!)
+          if (pinGridY === currentGridY) {
+            leftPinData = pin
+            break
+          }
+        }
+
+        // Check right pins
+        for (const pin of chip.rightPins) {
+          const pinLoc = chip.getPinLocation(pin.pinNumber)
+          const pinGridY = Math.round(pinLoc.y * opts.gridScaleY!)
+          if (pinGridY === currentGridY) {
+            rightPinData = pin
+            break
+          }
+        }
 
         mid0 = leftPinData ? "┤" : "│"
-        // mid1 will be populated with pin numbers or spaces
         mid2 = rightPinData ? "├" : "│"
 
         const lpStr = leftPinData ? String(leftPinData.pinNumber) : null
         const rpStr = rightPinData ? String(rightPinData.pinNumber) : null
+        const midWidth = chipWidth - 2
 
         if (lpStr && rpStr) {
-          // Assumes single-digit pins to fit "X Y" format in 3 chars
-          mid1 = `${lpStr} ${rpStr}`
+          // Place left pin at start, right pin at end, spaces in between
+          const spacesNeeded = midWidth - lpStr.length - rpStr.length
+          mid1 = lpStr + " ".repeat(Math.max(1, spacesNeeded)) + rpStr
         } else if (lpStr) {
-          mid1 = `${lpStr}  `
+          mid1 = lpStr + " ".repeat(midWidth - lpStr.length)
         } else if (rpStr) {
-          mid1 = `  ${rpStr}`
+          mid1 = " ".repeat(midWidth - rpStr.length) + rpStr
         } else {
-          mid1 = "   "
+          mid1 = " ".repeat(midWidth)
         }
       }
-      // Compose row string for the 5-character wide chip body
+      // Compose row string for the variable-width chip body
       const rowStr =
         mid0 +
-        (mid1.length === 3 ? mid1 : mid1.padEnd(3, " ")) + // Ensure mid1 is 3 chars
+        (mid1.length === chipWidth - 2 ? mid1 : mid1.padEnd(chipWidth - 2, " ")) + // Ensure mid1 is correct width
         mid2
-      // Place each character of the 5-char wide chip body
+      // Place each character of the variable-width chip body - use grid coordinates
       for (let col = 0; col < rowStr.length; ++col) {
-        // rowStr.length is 5
-        g.putOverlay(chip.x + col, chip.y + r, rowStr[col])
+        const gridX = (chipGridX + col) / opts.gridScaleX!
+        const gridY = (chipGridY + r) / opts.gridScaleY!
+        g.putOverlay(gridX, gridY, rowStr[col]!)
       }
     }
   }
@@ -120,7 +139,7 @@ export const getGridFromCircuit = (
   for (const label of circuit.netLabels) {
     if (label.labelId.length > 0) {
       // Render only the first character of the label as an abbreviation.
-      const abbreviatedChar = label.labelId[0]
+      const abbreviatedChar = label.labelId[0]!
       g.putOverlay(label.x, label.y, abbreviatedChar)
     }
   }
