@@ -7,6 +7,7 @@
     "generate-comments": "bun run scripts/generate-template-comments.ts",
     "format": "biome format --write .",
     "format:check": "biome format --check .",
+    "vercel-build": "bun run website:build",
     "website:dev": "cd website && bun install && bun run dev",
     "website:build": "cd website && bun install && bun run build.ts",
     "website:serve": "cd website && bun run server.tsx"
