@@ -6,14 +6,15 @@ test("template3", () => {
   const C = template3()
   expect(`\n${C.toString()}\n`).toMatchInlineSnapshot(`
     "
-     U1
-    ┌───┐      A
-    │  3├───●──┤
-    │  2├─┐ │  │
-    │  1├┐│ R3 R2
-    └───┘│└─┘  │
-         │     │
-         C     B
+       0    5    10    15    20    25    30    35    40 
+     5  U1
+     4 ┌───┐                                   A
+     3 │  3├────────────────────●──────────────┤
+     2 │  2├──────────┐         │              │
+     1 │  1├─────┐    │         R3             R2
+     0 └───┘     │    └─────────┘              │
+    -1           │                             │
+    -2           C                             B
     "
   `)
   expect(C.getNetlist()).toMatchInlineSnapshot(`

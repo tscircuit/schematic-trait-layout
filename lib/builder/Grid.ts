@@ -83,8 +83,29 @@ export class Grid {
     }
 
     const rows: string[] = []
+    
+    // Add X-axis labels (every 5 units, single row)
+    let xAxisRow = "   " // Space for Y-axis labels + margin
+    for (let x = minX; x <= maxX; x++) {
+      if (x % 5 === 0) {
+        const xStr = x.toString()
+        xAxisRow += xStr
+        // Add spaces to align the next number (assuming 5-unit spacing)
+        for (let i = 1; i < 5 && x + i <= maxX; i++) {
+          xAxisRow += " "
+        }
+        // Skip the next 4 positions since we've already handled them
+        x += 4
+      } else {
+        xAxisRow += " "
+      }
+    }
+    rows.push(xAxisRow)
+    
     for (let y = maxY; y >= minY; y--) {
-      let row = ""
+      // Add Y-axis label on the left (right-aligned, 2 characters) + margin
+      const yLabel = y.toString().padStart(2, " ")
+      let row = `${yLabel} `
       for (let x = minX; x <= maxX; x++) {
         const key = `${x},${y}`
         const over = this.overlay.get(key)
