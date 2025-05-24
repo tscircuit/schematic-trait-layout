@@ -42,16 +42,15 @@ test("getMatchedBoxes3 - always match the largest target box first (even if it m
     targetNetlist: normTarget,
   })
 
+  // LARGEST boxes always are match first from the target! This is correct!
   expect(
     getMatchedBoxString({
       matchedBoxes,
       candidateTransform,
       targetTransform,
     }),
-  ).toMatchInlineSnapshot(`
-    "
-    cand       target
-    C1       → T2
-    "
-  `)
+  ).toEqual(`
+cand       target
+C1       → T2
+`)
 })
