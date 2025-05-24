@@ -18,10 +18,10 @@ export class PinBuilder {
 
   nextLineDeltaCorrection: { x: number; y: number } | null = null
 
-  private lastConnected: PortReference | null = null
-  private lastCreatedLine: Line | null = null
-  private lastDx = 0
-  private lastDy = 0
+  lastConnected: PortReference | null = null
+  lastCreatedLine: Line | null = null
+  lastDx = 0
+  lastDy = 0
 
   constructor(
     private readonly chip: any, // TODO: Replace with proper ChipBuilder type

@@ -12,7 +12,7 @@ export function applyAddLabelToPin(
     const pin = chip.pin(pinNumber)
     if (pin && typeof pin.line === "function") {
       const unitVec = getUnitVecFromSide(pin.side)
-      pin.line(unitVec.dx, unitVec.dy).label()
+      pin.line(unitVec.dx * 2, unitVec.dy * 2).label()
     }
   }
 }
