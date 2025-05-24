@@ -13,6 +13,7 @@ export function transformTargetForPassiveCompatibility(
   // Create a copy of the target netlist to avoid mutating the original
   const transformedTarget: InputNetlist = {
     boxes: target.boxes.map((box) => ({ ...box })),
+    nets: target.nets?.map((net) => ({ ...net })) || [],
     connections: target.connections.map((conn) => ({
       ...conn,
       connectedPorts: [...conn.connectedPorts],

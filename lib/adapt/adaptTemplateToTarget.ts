@@ -4,6 +4,8 @@ import { applyEditOperation } from "./applyEditOperation"
 import type { AddPinToSideOp, EditOperation } from "./EditOperation"
 import { computeEditOperationsToFixPinSubsetNetlist } from "./computeEditOperationsToFixPinSubsetNetlist"
 import { transformTargetForPassiveCompatibility } from "./transformTargetForPassiveCompatibility"
+import { normalizeNetlist } from "lib/scoring/normalizeNetlist"
+import { getMatchedBoxes } from "lib/matching/getMatchedBoxes"
 
 /**
  * Mutates template until it has the same normalized netlist as the target.
@@ -131,6 +133,45 @@ export function adaptTemplateToTarget(params: {
         appliedOperations.push(op)
       }
     }
+  }
+
+  // Remove unmatched components using box matching
+  const currentNetlist = template.getNetlist()
+  const normalizedTemplateResult = normalizeNetlist(currentNetlist)
+  const normalizedTargetResult = normalizeNetlist(target)
+  const normalizedTemplate = normalizedTemplateResult.normalizedNetlist
+  const normalizedTarget = normalizedTargetResult.normalizedNetlist
+  
+  const matchedBoxes = getMatchedBoxes({
+    candidateNetlist: normalizedTemplate,
+    targetNetlist: normalizedTarget,
+  })
+  
+  // Get the set of matched template box indices
+  const matchedTemplateBoxIndices = new Set(
+    matchedBoxes.map(match => match.candidateBoxIndex)
+  )
+  
+  // Map box indices back to original box IDs using the normalization transform
+  const matchedTemplateBoxIds = new Set<string>()
+  for (const [boxId, boxIndex] of Object.entries(normalizedTemplateResult.transform.boxIdToBoxIndex)) {
+    if (matchedTemplateBoxIndices.has(boxIndex)) {
+      matchedTemplateBoxIds.add(boxId)
+    }
+  }
+  
+  // Remove any chips that weren't matched
+  const unmatchedChips = currentNetlist.boxes.filter(
+    box => !matchedTemplateBoxIds.has(box.boxId)
+  )
+  
+  for (const chip of unmatchedChips) {
+    const op: EditOperation = {
+      type: "remove_chip",
+      chipId: chip.boxId,
+    }
+    applyEditOperation(template, op)
+    appliedOperations.push(op)
   }
 
   return {
