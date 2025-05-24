@@ -41,7 +41,6 @@ test("computeEditOperationsToFixPinSubsetNetlist1", () => {
     [
       {
         "chipId": "U1",
-        "netName": "A",
         "pinNumber": 1,
         "type": "add_label_to_pin",
       },

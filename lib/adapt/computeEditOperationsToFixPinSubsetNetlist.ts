@@ -90,16 +90,10 @@ export const computeEditOperationsToFixPinSubsetNetlist = (params: {
 
   // 3. Add label if target has a label but current does not
   if (hasLabelConnection(targetSubset) && !hasLabelConnection(currentSubset)) {
-    // Extract the target net name from the subset
-    const targetNetName = targetSubset.connections.find(conn => 
-      conn.connectedPorts.some(port => "netId" in port)
-    )?.connectedPorts.find(port => "netId" in port)?.netId
-
     operations.push({
       type: "add_label_to_pin",
       chipId,
       pinNumber,
-      netName: targetNetName,
     })
   }
 

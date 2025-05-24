@@ -48,7 +48,6 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
       },
       {
         "chipId": "R2",
-        "netName": "A",
         "pinNumber": 1,
         "type": "add_label_to_pin",
       },

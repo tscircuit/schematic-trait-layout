@@ -58,25 +58,21 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
       },
       {
         "chipId": "U1",
-        "netName": "B",
         "pinNumber": 2,
         "type": "add_label_to_pin",
       },
       {
         "chipId": "U1",
-        "netName": "C",
         "pinNumber": 3,
         "type": "add_label_to_pin",
       },
       {
         "chipId": "U1",
-        "netName": "D",
         "pinNumber": 4,
         "type": "add_label_to_pin",
       },
       {
         "chipId": "R2",
-        "netName": "A",
         "pinNumber": 1,
         "type": "add_label_to_pin",
       },
@@ -88,8 +84,8 @@ test("adaptTemplateToTarget3 removes extra chip when target has fewer chips", ()
     "
         U1
        ┌───┐
-    AR2┤1 4├────D
-     B─┤2 3├─C
+    DR2┤1 4├────C
+     A─┤2 3├─B
        └───┘
     "
   `)
