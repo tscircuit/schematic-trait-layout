@@ -27,6 +27,13 @@ export interface AddPassiveToPinOp {
   chipId: string
 }
 
+export interface AddPassiveWithLabelToPinOp {
+  type: "add_passive_with_label_to_pin"
+  pinNumber: number
+  chipId: string
+  labelNetId: string
+}
+
 export interface ClearPinOp {
   type: "clear_pin"
   pinNumber: number
@@ -48,6 +55,7 @@ export interface ChangePassiveOrientationOp {
 export type EditOperation =
   | AddLabelToPinOp
   | AddPassiveToPinOp
+  | AddPassiveWithLabelToPinOp
   | ClearPinOp
   | RemoveChipOp
   | AddPinToSideOp

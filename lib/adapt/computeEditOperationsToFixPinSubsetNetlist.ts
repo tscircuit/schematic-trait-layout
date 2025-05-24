@@ -80,12 +80,55 @@ export const computeEditOperationsToFixPinSubsetNetlist = (params: {
     hasPassiveConnection(targetSubset) &&
     !hasPassiveConnection(currentSubset)
   ) {
-    operations.push({
-      type: "add_passive_to_pin",
-      chipId,
-      pinNumber,
-    })
-    return operations
+    // Check if the passive in the target has a label
+    const targetPassiveConnection = targetSubset.connections.find(
+      (c) =>
+        pinAppearsInConnection(c, pinBoxId, 1) &&
+        c.connectedPorts.some((p) => "boxId" in p && /^R\d+$/.test(p.boxId)),
+    )
+    
+    let passiveLabelNetId: string | null = null
+    
+    if (targetPassiveConnection) {
+      const targetPassivePort = targetPassiveConnection.connectedPorts.find(
+        (p) => "boxId" in p && /^R\d+$/.test(p.boxId)
+      )
+      
+      if (targetPassivePort && "boxId" in targetPassivePort) {
+        // Look in the full target netlist for a label on this passive
+        const passiveLabelConnection = targetNetlist.connections.find(
+          (c) =>
+            c.connectedPorts.some(
+              (p) => "boxId" in p && p.boxId === targetPassivePort.boxId && p.pinNumber === 1
+            ) &&
+            c.connectedPorts.some((p) => "netId" in p)
+        )
+        
+        if (passiveLabelConnection) {
+          const labelPort = passiveLabelConnection.connectedPorts.find((p) => "netId" in p)
+          if (labelPort && "netId" in labelPort) {
+            passiveLabelNetId = labelPort.netId
+          }
+        }
+      }
+    }
+    
+    if (passiveLabelNetId) {
+      // Add passive with label in one operation
+      operations.push({
+        type: "add_passive_with_label_to_pin",
+        chipId,
+        pinNumber,
+        labelNetId: passiveLabelNetId,
+      })
+    } else {
+      // Add just the passive
+      operations.push({
+        type: "add_passive_to_pin",
+        chipId,
+        pinNumber,
+      })
+    }
   }
 
   // 3. Add label if target has a label but current does not
