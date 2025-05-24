@@ -331,7 +331,7 @@ export default function App() {
                   }}
                 >
                   <div
-                    style={{ width: "100%", maxWidth: "800px" }}
+                    style={{ width: "100%" }}
                     // eslint-disable-next-line react/no-danger
                     dangerouslySetInnerHTML={{
                       __html: originalSvg.replace(
